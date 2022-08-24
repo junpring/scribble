@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>이메일 인증</title>
+<!--    <script th:if="${userEmailVerifyCodeVo.getResult() == T(dev.junpring.scribble.enums.member.user.UserEmailVerifyResult).EXPIRED}">-->
+<!--        alert('해당 인증 링크는 이미 사용되었거나 만료되었습니다.');-->
+<!--        window.close();-->
+<!--    </script>-->
+    <script th:if="${userEmailVerifyCodeVo.getResult().name().equals('EXPIRED')}">
+        alert('해당 인증 링크는 이미 사용되었거나 만료되었습니다.');
+        window.close();
+    </script>
+    <script th:if="${userEmailVerifyCodeVo.getResult().name().equals('FAILURE')}">
+        alert('잘못된 접근입니다.');
+        window.close();
+    </script>
+    <script th:if="${userEmailVerifyCodeVo.getResult().name().equals('SUCCESS')}">
+        alert('이메일 인증이 완료되었습니다. 로그인해주세요.');
+        window.location.href = '/user/login';
+    </script>
+</head>
+</html>

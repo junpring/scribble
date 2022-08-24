@@ -1,0 +1,99 @@
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SCRIBBLE</title>
+    <link rel="stylesheet" th:href="@{/resources/stylesheets/header.css}">
+    <link rel="stylesheet" th:href="@{/resources/stylesheets/footer.css}">
+    <link rel="stylesheet" th:href="@{/resources/stylesheets/common.css}">
+    <link rel="stylesheet" th:href="@{/resources/stylesheets/index.main.css}">
+    <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
+    <script th:src="@{/resources/scripts/backToTop.js}" defer>
+    </script>
+</head>
+<body>
+<th:block th:replace="~{fragments/header.html :: header}"></th:block>
+
+<!--/*@thymesVar id="get" type="dev.junpring.scribble.entities.board.BoardIdEntity"*/-->
+
+<section class="section">
+    <div class="table">
+        <div class="top-posts">
+            <i class="icon fa-solid fa-fire-flame-curved"></i>
+            <a class="best" th:href="@{/board/best}" th:text="${boardIdVos.get(0).getName()}"></a>
+            <a th:href="@{/board/best}" class="view-more">더보기</a>
+        </div>
+
+        <div class="row">
+            <a href="#" class="cell col1">카테고리</a>
+            <a href="#" class="cell col2">내용</a>
+            <a href="#" class="cell col3">
+                <img class="icon" src="../resources/images/like-purple.png" alt="공감">
+                <span class="link count">100</span>
+            </a>
+            <a href="#" class="cell col4">
+                <img class="icon" src="../resources/images/comment-purple.png" alt="댓글">
+                <span class="comment count">220</span>
+            </a>
+            <a href="#" class="cell col5">
+                <img class="icon" src="../resources/images/view-purple.png" alt="조회수">
+                <span class="view count">220</span>
+            </a>
+        </div>
+        <div class="board-line"></div>
+    </div>
+
+    <!-- small table -->
+    <div class="table-wrap" th:if="${boardId.getIndex() != 1}" th:each="boardId : ${boardIdVos}">
+        <div class="small-table free">
+            <div class="top-posts">
+                <i th:if="*{boardId.getId().equals('stock')}" class="icon fa-solid fa-chart-simple"></i>
+                <i th:if="*{boardId.getId().equals('realestate')}" class="icon fa-solid fa-house"></i>
+                <i th:if="*{boardId.getId().equals('free')}" class="icon fa-solid fa-comment-dots"></i>
+                <i th:if="*{boardId.getId().equals('exercise')}" class="icon fa-solid fa-dumbbell"></i>
+                <i th:if="*{boardId.getId().equals('bitcoin')}" class="icon fa-brands fa-bitcoin"></i>
+                <i th:if="*{boardId.getId().equals('car')}" class="icon fa-solid fa-car"></i>
+                <i th:if="*{boardId.getId().equals('love')}" class="icon fa-solid fa-heart"></i>
+                <i th:if="*{boardId.getId().equals('shopping')}" class="icon fa-solid fa-basket-shopping"></i>
+                <i th:if="*{boardId.getId().equals('corona')}" class="icon fa-solid fa-virus"></i>
+                <i th:if="*{boardId.getId().equals('sports')}" class="icon fa-solid fa-baseball-bat-ball"></i>
+                <i th:if="*{boardId.getId().equals('pet')}" class="icon fa-solid fa-dog"></i>
+                <i th:if="*{boardId.getId().equals('humor')}" class="icon fa-solid fa-face-grin-squint-tears"></i>
+                <i th:if="*{boardId.getId().equals('travel')}" class="icon fa-solid fa-plane"></i>
+                <i th:if="*{boardId.getId().equals('parenting')}" class="icon fa-solid fa-baby-carriage"></i>
+                <i th:if="*{boardId.getId().equals('fashion')}" class="icon fa-solid fa-shirt"></i>
+                <i th:if="*{boardId.getId().equals('game')}" class="icon fa-solid fa-gamepad"></i>
+                <i th:if="*{boardId.getId().equals('tv')}" class="icon fa-solid fa-tv"></i>
+                <i th:if="*{boardId.getId().equals('scribble-market')}" class="icon fa-solid fa-store"></i>
+                <i th:if="*{boardId.getId().equals('promotion')}" class="icon fa-solid fa-bullhorn"></i>
+                <i th:if="*{boardId.getId().equals('gallery')}" class="icon fa-solid fa-image"></i>
+                <i th:if="*{boardId.getId().equals('notice')}" class="icon fa-solid fa-circle-exclamation"></i>
+
+                <a th:href="@{'/board/' + *{boardId.getId()}}" th:text="*{boardId.getName()}"
+                   class="article-title">게시판</a>
+                <a th:href="@{'/board/' + *{boardId.getId()}}" class="view-more">더보기</a>
+            </div>
+
+            <div class="row" th:each="article : ${articles.get(boardId.getId())}">
+                <a th:href="@{'/board/view?index=' + *{article.getArticleIndex()}}" th:text="*{article.getTitle()}" class="cell col2">제목</a>
+                <a href="#" class="cell col3">
+                    <img class="icon" src="../resources/images/like-purple.png" alt="공감">
+                    <span class="link count" th:text="*{article.getLike()}"></span>
+                </a>
+                <a th:href="@{'/board/view?index=' + *{article.getArticleIndex()}}" class="cell col4">
+                    <img class="icon" src="../resources/images/comment-purple.png" alt="댓글">
+                    <span class="comment count" th:text="*{article.getCommentCount()}"></span>
+                </a>
+                <a th:href="@{'/board/view?index=' + *{article.getArticleIndex()}}" class="cell col5">
+                    <img class="icon" src="../resources/images/view-purple.png" alt="조회수">
+                    <span class="view count" th:text="*{article.getView()}">22</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<th:block th:replace="~{fragments/footer.html :: footer}"></th:block>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--/*@thymesVar id="registerVo" type="dev.junpring.scribble.vos.member.user.UserRegisterVo"*/-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>회원가입</title>
+    <link th:href="@{/resources/stylesheets/common.css}" rel="stylesheet">
+    <link th:href="@{/user/resources/stylesheets/rgister.css}" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
+    <script defer th:src="@{/user/resources/scripts/register.js}"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+</head>
+<body>
+
+<form id="register-form" class="register-form" method="post">
+    <a class="logo-container" th:href="@{/}">
+        <!--        <img alt="Coupang" class="logo" th:src="@{/resources/images/logo.png}">-->
+        SCRIBBLE
+    </a>
+    <span class="user-info">회원 정보를 입력해주세요.</span>
+
+    <label class="input-container">
+        <span hidden>이메일</span>
+        <input autofocus class="input" maxlength="50" name="email" placeholder="아이디(이메일)" type="email">
+    </label>
+    <span class="warning email"></span>
+
+    <label class="input-container">
+        <span hidden>비밀번호</span>
+        <input class="input" maxlength="50" name="password" placeholder="비밀번호" type="password">
+    </label>
+    <span class="warning password"></span>
+
+    </label>
+    <label class="input-container">
+        <span hidden>비밀번호 확인</span>
+        <input class="input" maxlength="50" name="passwordCheck" placeholder="비밀번호 확인" type="password">
+    </label>
+    <span class="warning password-check"></span>
+
+    </label>
+    <label class="input-container">
+        <span hidden>이름</span>
+        <input class="input" maxlength="11" name="nickname" placeholder="닉네임" type="text">
+    </label>
+    <span class="warning nickname"></span>
+
+    </label>
+    <label class="input-container">
+        <span hidden>휴대폰 번호</span>
+        <input class="input" maxlength="11" name="contact" placeholder="휴대폰 번호" type="text">
+    </label>
+    <span class="warning contact"></span>
+
+    <label class="input-container">
+        <span hidden>우편번호</span>
+        <input class="input" maxlength="100" name="addressPostal" placeholder="우편번호" type="text" readonly>
+        <input type="button" value="주소 찾기" class="address-search-button">
+    </label>
+
+    <label class="input-container">
+        <span hidden>기본주소</span>
+        <input class="input" maxlength="100" name="addressPrimary" placeholder="기본주소" type="text" readonly>
+    </label>
+    <label class="input-container">
+        <span hidden>상세주소</span>
+        <input class="input" maxlength="100" name="addressSecondary" placeholder="상세주소" type="text">
+    </label>
+
+<!--    <span class="user-verified">인증번호를 입력해주세요.</span>-->
+<!--    <label class="input-container">-->
+<!--        <span hidden>인증번호</span>-->
+<!--        <input class="input" maxlength="100" name="emailVerified" placeholder="인증번호" type="text">-->
+<!--        <input type="button" value="인증" class="email-verified-button">-->
+<!--    </label>-->
+
+
+    <input class="button register" type="submit" value="회원가입">
+
+    <label class="autosign-container">
+        <input class="checkbox" name="autosign" type="checkbox">
+        <span class="checker">
+            <i class="icon fa-solid fa-check"></i>
+        </span>
+        <span class="text">모두 동의합니다.</span>
+    </label>
+
+    <label class="autosign-container">
+        <input class="checkbox" name="autosign" type="checkbox">
+        <span class="checker">
+            <i class="icon fa-solid fa-check"></i>
+        </span>
+        <span class="text">[필수] SCRIBBLE 이용약관에 동의합니다.</span>
+    </label>
+
+    <label class="autosign-container">
+        <input class="checkbox" name="autosign" type="checkbox">
+        <span class="checker">
+            <i class="icon fa-solid fa-check"></i>
+        </span>
+        <span class="text">[필수] 개인정보 수집 및 이용에 동의합니다.</span>
+    </label>
+
+
+    <div class="line"></div>
+
+    <span class="have-id">이미 계정이 있으신가요? <a th:href="@{/user/login}">로그인</a></span>
+
+    <span class="copyright">&copy;SCRIBBLE Corp. All rights reserved.</span>
+</form>
+<div id="address-search" class="address-search">
+    <div class="container"></div>
+</div>
+</body>
+</html>

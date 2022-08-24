@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--/*@thymesVar id="userEntity" type="dev.junpring.scribble.entities.member.UserEntity"*/-->
+<header class="header" th:fragment="header">
+    <!-- navigation -->
+    <nav id="nav" class="nav">
+        <ul class="nav-bar">
+            <a th:href="@{/}" class="logo">
+                <li>SCRIBBLE</li>
+            </a>
+            <a th:href="@{/}">
+                <li>홈</li>
+            </a>
+            <a th:href="@{/board/gallery}">
+                <li>갤러리</li>
+            </a>
+            <a th:href="@{/board/notice}">
+                <li>공지사항</li>
+            </a>
+        </ul>
+
+        <div class="search">
+            <form class="search-form" th:action="@{/search}" method="get">
+                <label class="select-container">
+                    <span hidden>검색 기준</span>
+                    <select class="search-select" name="criteria">
+                        <option value="all" selected>전체</option>
+                        <option value="all">오늘의 이슈</option>
+                        <option value="all">토픽 베스트</option>
+                        <option value="all">주식·투자</option>
+                        <option value="all">암호화폐</option>
+                        <option value="all">부동산</option>
+                        <option value="all">자동차</option>
+                        <option value="all">헬스·다이어트</option>
+                    </select>
+                </label>
+                <label class="keyword-input-container">
+                    <span hidden>검색어</span>
+                    <input class="keyword-input" maxlength="50" name="keyword" placeholder="내용을 검색해보세요." type="text">
+                </label>
+
+                <button class="search-button">
+                    <i class="icon fa-solid fa-magnifying-glass"></i>
+                </button>
+            </form>
+        </div>
+
+
+        <div class="nav-button">
+            <a class="write" th:href="@{/board/add}">글쓰기
+                <i class="icon fa-solid fa-pen"></i></a>
+            <a class="login" th:href="@{/user/login}" th:if="${userEntity == null}">로그인</a>
+            <a class="register" th:href="@{/user/register}" th:if="${userEntity == null}">회원가입</a>
+
+            <a class="nickname" th:if="${userEntity != null}">
+                <b th:text="${userEntity.getNickname() +' 님'}"></b>
+            </a>
+            <a class="logout" th:if="${userEntity != null}" th:href="@{/user/logout}">
+                <b>로그아웃</b>
+            </a>
+        </div>
+    </nav>
+
+</header>
+</body>
+</html>

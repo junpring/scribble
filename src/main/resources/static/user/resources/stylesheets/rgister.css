@@ -1,0 +1,209 @@
+body {
+    background-color: rgb(254, 254, 254);
+    padding: 4.5rem;
+}
+
+body > .register-form {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+body > .register-form > .logo-container {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 3rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/*body > .register-form > .logo-container > .logo {*/
+/*    height: 2.5rem;*/
+/*    user-select: none;*/
+/*}*/
+
+body > .register-form > .user-info {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 0 0 0.625rem 0.325rem;
+}
+
+body > .register-form > .user-verified {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 1.5rem 0 0.625rem 0.325rem;
+}
+
+body > .register-form > .input-container {
+    align-items: stretch;
+    border: 0.0625rem solid rgb(203, 203, 203);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-bottom: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+body > .register-form > .input-container:focus-within {
+    border: 0.0625rem solid var(--color-purple--);
+}
+
+/*body > .register-form > .input-container > .icon {*/
+/*    width: 3rem;*/
+
+/*    align-items: center;*/
+/*    background-color: rgb(249, 249, 249);*/
+/*    border-right: 0.0625rem solid rgb(203, 203, 203);*/
+/*    color: rgb(203, 203, 203);*/
+/*    font-size: 1.125rem;*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: center;*/
+/*}*/
+
+body > .register-form > .input-container > .input {
+    width: 20rem;
+    padding: 0 1rem;
+    height: 2.3rem;
+}
+
+body > .register-form > .input-container > .address-search-button {
+    position: absolute;
+    color: var(--color-purple--);
+    margin: 0.58rem 1rem 1rem 16rem;
+    cursor: pointer;
+}
+body > .register-form > .input-container > .email-verified-button {
+    position: absolute;
+    color: var(--color-purple--);
+    margin: 0.58rem 1rem 1rem 17.5rem;
+    cursor: pointer;
+}
+
+
+body > .register-form > .warning {
+    color: red;
+    position: relative;
+    top: -0.355rem;
+    left: 0.3rem;
+    font-size: 0.825rem;
+}
+
+body > .register-form > .button {
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    padding: 0.70rem 0;
+    text-align: center;
+    user-select: none;
+}
+
+body > .register-form > .button.register {
+    background-color: var(--color-purple--);
+    color: rgb(255, 255, 255);
+    opacity: 90%;
+}
+
+body > .register-form > .button.register:hover {
+    opacity: 120%;
+}
+
+body > .register-form > .button.register:active {
+    opacity: 120%;
+}
+
+
+body > .register-form > .autosign-container {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+}
+
+body > .register-form > .autosign-container > .checkbox {
+    display: none;
+}
+
+body > .register-form > .autosign-container > .checker {
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 0.0625rem solid rgb(203, 203, 203);
+    position: relative;
+}
+
+body > .register-form > .autosign-container > .checker > .icon {
+    top: calc(50% + 0.25rem);
+    left: 50%;
+    color: var(--color-purple--);
+    font-size: 0.8rem;
+    opacity: 0;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition-duration: 250ms;
+    transition-property: top, opacity;
+    transition-timing-function: ease;
+}
+
+body > .register-form > .autosign-container > .checkbox:checked + .checker > .icon {
+    top: 50%;
+    opacity: 1;
+}
+
+body > .register-form > .autosign-container > .text {
+    margin-left: 0.5rem;
+    position: relative;
+    white-space: nowrap;
+}
+
+
+body > .register-form > .line {
+    border-top: 0.0625rem solid rgb(209, 209, 209);
+    margin-top: 0.85rem;
+}
+
+body > .register-form > .have-id {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+body > .register-form > .have-id > a {
+    color: var(--color-purple--);
+    font-weight: 400;
+    text-decoration: underline;
+}
+
+body > .register-form > .copyright {
+    font-size: 0.8rem;
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+body > .address-search {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 35%);
+    position: fixed;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1;
+}
+
+body > .address-search.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+body > .address-search > .container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30rem;
+    height: 35rem;
+    transform: translate(-50%, -50%);
+}
