@@ -115,30 +115,28 @@
                     </a>
                 </span>
             </div>
-        </div>
-        <!-- wrap-reply -->
-        <div class="wrap-reply">
-            <div class="wrap-comment comment_area" th:each="comment : ${commentListVo.getComments()}">
+
+            <!-- wrap-reply -->
+            <div class="wrap-reply">
                 <p class="nickname">대댓글</p>
                 <p class="cmt-txt" th:text="*{comment.getContent()}"></p>
                 <div class="wrap-info">
-                <span class="date">
-                    <p class="write-at" th:text="*{#dates.format(comment.getWrittenAt(), 'yy.MM.dd HH:mm')}">작성한 시간</p>
-                </span>
-                    <span class="ico">
-                    <a href="#" class="cell col4">
-                        <img class="icon" src="/resources/images/comment-purple.png" alt="댓글">
-                        <span th:text="${commentListVo.getComments().size()}" class="comment count"></span>
-                    </a>
-                    <a href="#" class="cell col5">
-                        <img class="icon" src="/resources/images/view-purple.png" alt="조회수">
-                        <span th:text="${articleVo.getView()}" class="view count"></span>
-                    </a>
-                </span>
+                    <span class="date">
+                        <p class="write-at" th:text="*{#dates.format(comment.getWrittenAt(), 'yy.MM.dd HH:mm')}">작성한 시간</p>
+                    </span>
+                        <span class="ico">
+                        <a href="#" class="cell col4">
+                            <img class="icon" src="/resources/images/comment-purple.png" alt="댓글">
+                            <span th:text="${commentListVo.getComments().size()}" class="comment count"></span>
+                        </a>
+                        <a href="#" class="cell col5">
+                            <img class="icon" src="/resources/images/view-purple.png" alt="조회수">
+                            <span th:text="${articleVo.getView()}" class="view count"></span>
+                        </a>
+                    </span>
                 </div>
             </div>
         </div>
-
     </div>
 
 </section>
