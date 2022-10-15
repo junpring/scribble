@@ -1,0 +1,158 @@
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--/*@thymesVar id="getContent" type="dev.junpring.scribble.entities.board.ArticleEntity"*/-->
+<!--/*@thymesVar id="userEntity" type="dev.junpring.scribble.entities.member.UserEntity"*/-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/resources/stylesheets/header.css}">
+    <link rel="stylesheet" th:href="@{/resources/stylesheets/common.css}">
+    <link rel="stylesheet" th:href="@{/board/resources/stylesheets/article.css}">
+    <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
+    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_FOUND')}">
+        alert('해당 갤러리는 존재하지 않습니다.');
+        window.history.back();
+    </script>
+    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_ALLOWED')}">
+        alert('NOT_ALLOWED! 권한이 없습니다.');
+        window.history.back();
+    </script>
+    <title th:text="${boardIdVo.getName()}"></title>
+</head>
+
+<body>
+<th:block th:replace="~{fragments/header.html :: header}"></th:block>
+<section class="section">
+    <div class="board-type">
+        <i th:if="${boardIdVo.getCode().equals('best')}" class="icon fa-solid fa-fire-flame-curved"></i>
+        <i th:if="*{boardIdVo.getCode().equals('stock')}" class="icon fa-solid fa-chart-simple"></i>
+        <i th:if="*{boardIdVo.getCode().equals('realestate')}" class="icon fa-solid fa-house"></i>
+        <i th:if="*{boardIdVo.getCode().equals('free')}" class="icon fa-solid fa-comment-dots"></i>
+        <i th:if="*{boardIdVo.getCode().equals('exercise')}" class="icon fa-solid fa-dumbbell"></i>
+        <i th:if="*{boardIdVo.getCode().equals('bitcoin')}" class="icon fa-brands fa-bitcoin"></i>
+        <i th:if="*{boardIdVo.getCode().equals('car')}" class="icon fa-solid fa-car"></i>
+        <i th:if="*{boardIdVo.getCode().equals('love')}" class="icon fa-solid fa-heart"></i>
+        <i th:if="*{boardIdVo.getCode().equals('shopping')}" class="icon fa-solid fa-basket-shopping"></i>
+        <i th:if="*{boardIdVo.getCode().equals('corona')}" class="icon fa-solid fa-virus"></i>
+        <i th:if="*{boardIdVo.getCode().equals('sports')}" class="icon fa-solid fa-baseball-bat-ball"></i>
+        <i th:if="*{boardIdVo.getCode().equals('pet')}" class="icon fa-solid fa-dog"></i>
+        <i th:if="*{boardIdVo.getCode().equals('humor')}" class="icon fa-solid fa-face-grin-squint-tears"></i>
+        <i th:if="*{boardIdVo.getCode().equals('travel')}" class="icon fa-solid fa-plane"></i>
+        <i th:if="*{boardIdVo.getCode().equals('parenting')}" class="icon fa-solid fa-baby-carriage"></i>
+        <i th:if="*{boardIdVo.getCode().equals('fashion')}" class="icon fa-solid fa-shirt"></i>
+        <i th:if="*{boardIdVo.getCode().equals('game')}" class="icon fa-solid fa-gamepad"></i>
+        <i th:if="*{boardIdVo.getCode().equals('tv')}" class="icon fa-solid fa-tv"></i>
+        <i th:if="*{boardIdVo.getCode().equals('scribble-market')}" class="icon fa-solid fa-store"></i>
+        <i th:if="*{boardIdVo.getCode().equals('promotion')}" class="icon fa-solid fa-bullhorn"></i>
+        <i th:if="*{boardIdVo.getCode().equals('gallery')}" class="icon fa-solid fa-image"></i>
+        <i th:if="*{boardIdVo.getCode().equals('notice')}" class="icon fa-solid fa-circle-exclamation"></i>
+        <a class="board-name"
+           th:href="@{/board/list/{code}(code=${boardIdVo.getCode()})}"
+           th:text="${boardIdVo.getName()}"></a>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>글쓴이</th>
+            <th>작성일</th>
+            <th>추천</th>
+            <th>댓글</th>
+            <th>조회</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr class="article" th:each="article : ${articlesResponse.list}">
+            <td th:text="*{article.getId()}"></td>
+            <td class="title">
+                <a th:href="@{/board/detail (id=*{article.getId()})}"
+                   th:text="*{article.getTitle()}"></a>
+            </td>
+<!--            <td th:text="*{article.getUserNickname()}"></td>-->
+            <td class="write-at" th:text="*{#dates.format(article.getWrittenAt(), 'yy.MM.dd HH:mm')}"></td>
+            <td>
+                <a th:href="@{/}" class="cell col1">
+                    <img class="icon" th:src="@{/resources/images/like-purple.png}" alt="공감">
+                    <span th:text="*{article.getLike()}" class="count"></span>
+                </a>
+            </td>
+            <td>
+                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col2">
+                    <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글수">
+                    <span th:text="*{article.getReplyCount()}" class="count"></span>
+                </a>
+            </td>
+            <td>
+                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col3">
+                    <img class="icon" th:src="@{/resources/images/view-purple.png}" alt="조회수">
+                    <span th:text="*{article.getView()}" class="count"></span>
+                </a>
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+    <div style="font-size: 1rem; text-align: center" th:if="${articlesResponse.list.size() == 0}">:( 표시할
+        게시글이 없습니다.
+    </div>
+    <style>
+        .ul {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ul > li {
+            margin: 0.5rem;
+        }
+
+        /*.a {*/
+        /*    color: red;*/
+        /*}*/
+    </style>
+    <ul class="ul">
+        <li>
+            <a th:if="${params.paginationVo.existPrevPage}"
+               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.minPage}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+                <span>&laquo;</span>
+            </a>
+        </li>
+        <li>
+            <a th:if="${params.paginationVo.existPrevPage}"
+               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.startPage - 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+                <span>&lsaquo;</span>
+            </a>
+        </li>
+
+        <li class="a"
+            th:each="page : ${#numbers.sequence(articlesResponse.paginationVo.startPage, articlesResponse.paginationVo.endPage)}">
+
+            <a th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${page}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}"
+               th:text="${page}"
+               th:if="${page != params.page}"
+               th:style="${articlesResponse.list.size()} == 0 ? 'display:none': ''"></a>
+
+            <a th:text="${'[' + page + ']'}"
+               th:if="${page == params.page}"></a>
+        </li>
+
+        <li>
+            <a th:if="${params.paginationVo.existNextPage}"
+               th:href="@{/board/list/{code}(code=${boardIdVo.code}, page=${params.paginationVo.endPage + 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+                <span>&rsaquo;</span>
+            </a>
+        </li>
+        <li>
+            <a th:if="${params.paginationVo.existNextPage}"
+               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.totalPageCount}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+                <span>&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</section>
+</body>
+</html>

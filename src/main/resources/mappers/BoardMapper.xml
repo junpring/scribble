@@ -2,26 +2,47 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="dev.junpring.scribble.mappers.IBoardMapper">
+    <!-- 게시글 검색 -->
+    <sql id="search">
+        <!-- 검색 키워드가 있을 때 -->
+        <if test="keyword != null and keyword != ''">
+            <choose>
+                <!-- 검색 유형이 있을 때 -->
+                <when test="searchType != null and searchType != ''">
+                    <choose>
+                        <when test="'title'.equals( searchType )">
+                            AND `title` LIKE CONCAT('%', #{keyword}, '%')
+                        </when>
+                        <when test="'content'.equals( searchType )">
+                            AND `content` LIKE CONCAT('%', #{keyword}, '%')
+                        </when>
+                    </choose>
+                </when>
+                <!-- 전체 검색일 때 때 -->
+                <otherwise>
+                    AND (
+                    `title` LIKE CONCAT('%', #{keyword}, '%')
+                    OR `content` LIKE CONCAT('%', #{keyword}, '%'))
+                </otherwise>
+            </choose>
+        </if>
+    </sql>
+
+
     <delete id="deleteArticleList">
         DELETE
         FROM `scribble_board`.`articles`
-        WHERE `index` = #{index}
+        WHERE id = #{id}
         LIMIT 1
     </delete>
-    <insert id="insertComment"
-            parameterType="dev.junpring.scribble.entities.board.CommentEntity">
-        INSERT INTO `scribble_board`.`comment` (`user_index`, `user_email`, `article_index`, `content`)
-        VALUES (#{userIndex}, #{userEmail}, #{articleIndex}, #{content})
-    </insert>
 
     <insert id="insertArticleList"
             useGeneratedKeys="true"
-            keyColumn="index"
-            keyProperty="index"
+            keyColumn="id"
+            keyProperty="id"
             parameterType="dev.junpring.scribble.entities.board.ArticleEntity">
-        INSERT INTO `scribble_board`.`articles`(`board_id`, `user_email`, `user_nickname`, `title`,
-                                                `content`, `view`)
-        VALUES (#{boardId}, #{userEmail}, #{userNickname}, #{title}, #{content}, #{view})
+        INSERT INTO `scribble_board`.`articles`(`board_code`, `user_id`, `title`, `content`, `view`)
+        VALUES (#{boardCode}, #{userId}, #{title}, #{content}, #{view})
     </insert>
 
     <insert id="insertImage"
@@ -30,20 +51,6 @@
         VALUES (#{id}, #{createAt}, #{fileName}, #{fileType}, #{data})
     </insert>
 
-    <select id="selectComment"
-            resultType="dev.junpring.scribble.dtos.CommentListDTO">
-        SELECT `comment`.`index` AS `index`,
-               `user`.`nickname` AS `nickname`,
-               `user_index`      AS `userIndex`,
-               `user_email`      AS `userEmail`,
-               `article_index`   AS `articleIndex`,
-               `written_at`      AS `writtenAt`,
-               `updated_at`      AS `updatedAt`,
-               `content`         AS `content`
-        FROM `scribble_board`.`comment`
-                 LEFT JOIN `scribble_member`.`user` AS `user` ON `comment`.`user_index` = `user`.`index`
-        WHERE `article_index` = #{articleIndex}
-    </select>
 
     <select id="selectImage"
             resultType="dev.junpring.scribble.entities.board.ImageEntity">
@@ -56,90 +63,106 @@
         WHERE `id` = #{id}
         LIMIT 1
     </select>
-    <select id="selectArticleView"
-            resultType="dev.junpring.scribble.vos.board.article.ArticleListVo">
-        SELECT `board`.`index`    AS `boardIndex`,
-               `articles`.`index` AS `index`,
-               `board`.`name`     AS `name`,
-               `board_id`         AS `boardId`,
-               `user_email`       AS `userEmail`,
-               `user_nickname`    AS `userNickname`,
-               `title`            AS `title`,
-               `content`          AS `content`,
-               `like`             AS `like`,
-               `comment_count`    AS `commentCount`,
-               `view`             AS `view`,
-               `written_at`       AS `writtenAt`
-        FROM `scribble_board`.`articles`
-                 LEFT JOIN `scribble_board`.`boards` AS `board` ON `articles`.`board_id` = `board`.`id`
-        WHERE `articles`.`index` = #{index}
-        LIMIT 2
+
+    <select id="selectForPrintArticle"
+            resultType="dev.junpring.scribble.entities.board.ArticleEntity"
+            resultMap="article">
+        SELECT `A`.`id`          AS `id`,
+               `A`.`title`       AS `title`,
+               `A`.`content`     AS `content`,
+               `A`.`board_code`  AS `boardCode`,
+               `A`.`user_id`     AS `userId`,
+               `A`.`like`        AS `like`,
+               `A`.`reply_count` AS `replyCount`,
+               `A`.`view`        AS `view`,
+               `A`.`written_at`  AS `writtenAt`,
+               `B`.`name`        AS `extra__boardCodeName`,
+               `U`.`nickname`    AS `extra__userWriter`
+        FROM `scribble_board`.`articles` AS `A`
+                 LEFT JOIN `scribble_board`.`boards` AS `B`
+                           ON `A`.`board_code` = b.`code`
+                 LEFT JOIN `scribble_member`.`user` AS `U`
+                           ON `A`.`user_id` = `U`.`id`
+        WHERE `A`.`id` = #{id}
     </select>
 
-    <select id="selectArticleList"
+    <!--    IFNULL(SUM(`AL`.`point`), 0) AS `extra__like`-->
+
+    <select id="selectArticlesCount"
+            parameterType="dev.junpring.scribble.dtos.SearchDto"
+            resultType="_int">
+        SELECT COUNT(*)
+        FROM `scribble_board`.`articles` AS `A`
+        INNER JOIN `scribble_board`.`boards` AS `B`
+        ON `A`.`board_code` = `B`.`code`
+        WHERE B.id = #{boardCode}
+        <include refid="search"/>
+    </select>
+    <select id="selectArticlesForBoardList"
             resultType="dev.junpring.scribble.entities.board.ArticleEntity">
-        SELECT `index`         AS `index`,
-               `board_id`      AS `boardId`,
-               `user_email`    AS `userEmail`,
-               `user_nickname` AS `userNickname`,
-               `title`         AS `title`,
-               `content`       AS `content`,
-               `like`          AS `like`,
-               `comment_count` AS `commentCount`,
-               `view`          AS `view`,
-               `written_at`    AS `writtenAt`
-        FROM `scribble_board`.`articles`
-        WHERE `board_id` = #{id}
-        ORDER BY `index` DESC
-        LIMIT 20
+        SELECT `A`.`id` AS `id`,
+        `A`.`board_code` AS `boardCode`,
+        `A`.`user_id` AS `userId`,
+        `A`.`title` AS `title`,
+        `A`.`content` AS `content`,
+        `A`.`like` AS `like`,
+        `A`.`reply_count` AS `replyCount`,
+        `A`.`view` AS `view`,
+        `A`.`written_at` AS `writtenAt`
+        FROM `scribble_board`.`articles` AS `A`
+        INNER JOIN `scribble_board`.`boards` AS `B`
+        ON `A`.`board_code` = `B`.`code`
+        WHERE `board_code` = #{boardCode}
+        <include refid="search"/>
+        ORDER BY id DESC
+        LIMIT #{paginationVo.limitStart}, #{recordSize}
     </select>
 
     <select id="selectRootArticleList"
-            parameterType="dev.junpring.scribble.entities.board.BoardIdEntity"
+            parameterType="dev.junpring.scribble.entities.board.BoardEntity"
             resultType="dev.junpring.scribble.vos.board.article.ArticleListVo">
-        SELECT `board`.`index`    AS `index`,
-               `board_id`         AS `boardId`,
-               `articles`.`index` AS `articleIndex`,
-               `user_email`       AS `userEmail`,
-               `user_nickname`    AS `userNickname`,
-               `title`            AS `title`,
-               `content`          AS `content`,
-               `like`             AS `like`,
-               `comment_count`    AS `commentCount`,
-               `view`             AS `view`,
-               `written_at`       AS `writtenAt`
+        SELECT `board`.`id`    AS `id`,
+               `code`          AS `boardCode`,
+               `articles`.`id` AS `articleId`,
+               `user_id`       AS `userId`,
+               `title`         AS `title`,
+               `content`       AS `content`,
+               `like`          AS `like`,
+               `reply_count`   AS `replyCount`,
+               `view`          AS `view`,
+               `written_at`    AS `writtenAt`
         FROM `scribble_board`.`articles`
-                 LEFT JOIN `scribble_board`.`boards` AS `board` ON `articles`.`board_id` = `board`.`id`
-        WHERE `board`.`index` = #{index}
-        ORDER BY articles.`index` DESC
+                 LEFT JOIN `scribble_board`.`boards` AS `board` ON `articles`.`board_code` = `board`.`code`
+        WHERE `board`.id = #{id}
+        ORDER BY `articles`.`id` DESC
         LIMIT 5
     </select>
 
-    <select id="selectBoardById"
-            parameterType="dev.junpring.scribble.entities.board.BoardIdEntity"
-            resultType="dev.junpring.scribble.entities.board.BoardIdEntity">
-        SELECT `index`         AS `index`,
-               `id`            AS `id`,
-               `name`          AS `name`,
-               `list_level`    AS `listLevel`,
-               `read_level`    AS `readLevel`,
-               `write_level`   AS `writeLevel`,
-               `comment_level` AS `commentLevel`
+    <select id="selectBoardByCode"
+            parameterType="dev.junpring.scribble.entities.board.BoardEntity"
+            resultType="dev.junpring.scribble.entities.board.BoardEntity">
+        SELECT `id`          AS `id`,
+               `code`        AS `code`,
+               `name`        AS `name`,
+               `list_level`  AS `listLevel`,
+               `read_level`  AS `readLevel`,
+               `write_level` AS `writeLevel`,
+               reply_level   AS `commentLevel`
         FROM `scribble_board`.`boards`
-        WHERE `id` = #{id}
+        WHERE `code` = #{code}
         LIMIT 1
     </select>
 
-    <select id="selectBoardId"
-            parameterType="dev.junpring.scribble.entities.board.BoardIdEntity"
-            resultType="dev.junpring.scribble.entities.board.BoardIdEntity">
-        SELECT `index`         AS `index`,
-               `id`            AS `id`,
-               `name`          AS `name`,
-               `list_level`    AS `listLevel`,
-               `read_level`    AS `readLevel`,
-               `write_level`   AS `writeLevel`,
-               `comment_level` AS `commentLevel`
+    <select id="selectBoardCode"
+            parameterType="dev.junpring.scribble.entities.board.BoardEntity"
+            resultType="dev.junpring.scribble.entities.board.BoardEntity">
+        SELECT `id`          AS `id`,
+               `code`        AS `code`,
+               `name`        AS `name`,
+               `list_level`  AS `listLevel`,
+               `read_level`  AS `readLevel`,
+               `write_level` AS `writeLevel`,
+               reply_level   AS `commentLevel`
         FROM `scribble_board`.`boards`
     </select>
 
@@ -148,22 +171,104 @@
         UPDATE `scribble_board`.`articles`
         SET `title`   = #{title},
             `content` = #{content}
-        WHERE `index` = #{index}
-          AND `user_email` = #{userEmail}
+        WHERE `id` = #{id}
+          AND `user_id` = #{userId}
         LIMIT 1
     </update>
 
-    <update id="updateViewCount"
-            parameterType="dev.junpring.scribble.entities.board.ArticleEntity">
+    <update id="updateViewCount">
         UPDATE `scribble_board`.`articles`
         SET `view` = `view` + 1
-        WHERE `index` = #{index}
+        WHERE id = #{id}
     </update>
 
-    <update id="updateCommentCount"
-            parameterType="dev.junpring.scribble.entities.board.ArticleEntity">
-        UPDATE `scribble_board`.`articles`
-        SET `comment_count` = (SELECT COUNT(0) FROM `scribble_board`.`comment` WHERE `article_index` = #{index})
-        WHERE `index` = #{index};
+    <delete id="deleteCommentList">
+        DELETE
+        FROM `scribble_board`.`reply`
+        WHERE id = #{id}
+        LIMIT 1
+    </delete>
+
+    <insert id="writeArticleReply"
+            useGeneratedKeys="true"
+            keyColumn="id"
+            keyProperty="id"
+            parameterType="dev.junpring.scribble.dtos.ArticleReplyDTO">
+        INSERT INTO `scribble_board`.`reply`
+        SET `id`         = #{id},
+            `content`    = #{content},
+            `user_id`    = #{userId},
+            `article_id` = #{articleId}
+    </insert>
+
+    <select id="getForPrintArticleRepliesFrom" resultMap="articleReply">
+        SELECT `AR`.`id`         AS `id`,
+               `AR`.`written_at` AS `writtenAt`,
+               `AR`.`content`    AS `content`,
+               `AR`.`user_id`    AS `userId`,
+               `U`.`nickname`    AS `extra__userWriter`,
+               `U`.`email`       AS `extra__userEmail`
+        FROM `scribble_board`.`reply` AS `AR`
+                 INNER JOIN `scribble_member`.`user` AS `U`
+                            ON `AR`.`user_id` = `U`.`id`
+        WHERE `AR`.`article_id` = #{articleId}
+        ORDER BY `AR`.`id` DESC
+    </select>
+
+    <select id="selectArticleReply" resultMap="articleReply">
+        SELECT `AR`.`id`         AS `id`,
+               `AR`.`written_at` AS `writtenAt`,
+               `AR`.`content`    AS `content`,
+               `AR`.`user_id`    AS `userId`
+        FROM `scribble_board`.`reply` AS `AR`
+        WHERE `AR`.`id` = #{id}
+    </select>
+
+    <update id="updateArticleReply"
+            parameterType="dev.junpring.scribble.dtos.ArticleReplyDTO">
+        UPDATE scribble_board.reply
+        <set>
+            <if test="content != null">content = #{content}</if>
+        </set>
+        WHERE id = #{id}
     </update>
+
+    <delete id="deleteArticleReply">
+        DELETE
+        FROM `scribble_board`.`reply`
+        WHERE id = #{id}
+        LIMIT 1
+    </delete>
+
+
+    <resultMap type="dev.junpring.scribble.entities.board.ArticleEntity"
+               id="article">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="boardCode" column="boardCode"/>
+        <result property="userId" column="userId"/>
+        <result property="like" column="like"/>
+        <result property="replyCount" column="replyCount"/>
+        <result property="view" column="view"/>
+        <result property="writtenAt" column="writtenAt"/>
+        <result property="view" column="view"/>
+        <association property="extra" javaType="map">
+            <result property="boardCodeName" column="extra__boardCodeName"/>
+            <result property="userWriter" column="extra__userWriter"/>
+        </association>
+    </resultMap>
+
+    <resultMap type="dev.junpring.scribble.dtos.ArticleReplyDTO"
+               id="articleReply">
+        <result property="id" column="id"/>
+        <result property="writtenAt" column="writtenAt"/>
+        <result property="content" column="content"/>
+        <result property="userId" column="userId"/>
+        <result property="articleId" column="articleId"/>
+        <association property="extra" javaType="map">
+            <result property="userWriter" column="extra__userWriter"/>
+            <result property="userEmail" column="extra__userEmail"/>
+        </association>
+    </resultMap>
 </mapper>

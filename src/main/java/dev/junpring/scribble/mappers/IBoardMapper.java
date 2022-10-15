@@ -1,44 +1,48 @@
 package dev.junpring.scribble.mappers;
 
-import dev.junpring.scribble.dtos.CommentListDTO;
-import dev.junpring.scribble.entities.board.ArticleEntity;
-import dev.junpring.scribble.entities.board.BoardIdEntity;
-import dev.junpring.scribble.entities.board.CommentEntity;
-import dev.junpring.scribble.entities.board.ImageEntity;
+import dev.junpring.scribble.dtos.ArticleReplyDTO;
+import dev.junpring.scribble.dtos.SearchDto;
+import dev.junpring.scribble.entities.board.*;
 import dev.junpring.scribble.vos.board.article.ArticleListVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface IBoardMapper {
     int deleteArticleList(ArticleEntity articleEntity);
-
-    int insertComment(CommentEntity commentEntity);
-
     int insertArticleList(ArticleEntity articleEntity);
-
     int insertImage(ImageEntity imageEntity);
-
-
-    List<CommentListDTO> selectComment(@Param(value = "articleIndex") int articleIndex);
 
     ImageEntity selectImage(@Param(value = "id") String id);
 
-    ArticleListVo selectArticleView(@Param(value = "index") int index);
+    ArticleEntity selectForPrintArticle(@Param(value = "id") int id);
 
-    List<ArticleListVo> selectArticleList(@Param(value = "id") String id);
+//    List<ArticleListVo> selectArticlesForBoardList(@Param(value = "id") String id);
+    int selectArticlesCount(SearchDto params);
+    List<ArticleEntity> selectArticlesForBoardList(SearchDto params);
 
-    List<ArticleListVo> selectRootArticleList(BoardIdEntity _);
+    List<ArticleListVo> selectRootArticleList(BoardEntity _);
 
-    BoardIdEntity selectBoardById(BoardIdEntity boardIdEntity);
+    BoardEntity selectBoardByCode(BoardEntity boardIdEntity);
 
-    List<BoardIdEntity> selectBoardId();
+    List<BoardEntity> selectBoardCode();
 
     int updateArticle(ArticleEntity articleEntity);
 
-    int updateViewCount(ArticleEntity articleEntity);
+    int updateViewCount(@Param(value = "id") int id);
 
-    int updateCommentCount(ArticleEntity articleEntity);
+
+    List<ArticleReplyDTO> getForPrintArticleRepliesFrom(
+            @Param(value = "articleId") int articleId);
+
+    int writeArticleReply(ArticleReplyDTO articleReplyDTO);
+
+    ArticleReplyDTO selectArticleReply(@Param(value = "id") int id);
+
+    int updateArticleReply(ArticleReplyDTO articleReplyDTO);
+
+    int deleteArticleReply(ArticleReplyDTO articleReplyDto);
 }

@@ -1,19 +1,16 @@
 package dev.junpring.scribble.controllers;
 
-import dev.junpring.scribble.entities.board.ArticleEntity;
-import dev.junpring.scribble.entities.board.ImageEntity;
+import dev.junpring.scribble.dtos.ArticleListDto;
+import dev.junpring.scribble.dtos.ArticleReplyDTO;
+import dev.junpring.scribble.dtos.SearchDto;
+import dev.junpring.scribble.entities.board.*;
 import dev.junpring.scribble.entities.member.UserEntity;
-import dev.junpring.scribble.enums.board.ArticleAddResult;
-import dev.junpring.scribble.enums.board.CommentAddResult;
-import dev.junpring.scribble.enums.member.user.LoginResult;
+import dev.junpring.scribble.enums.board.ArticleWriteResult;
 import dev.junpring.scribble.utills.CryptoUtil;
-import dev.junpring.scribble.vos.board.article.ArticleAddVo;
+import dev.junpring.scribble.vos.board.article.ArticleWriteVo;
 import dev.junpring.scribble.vos.board.article.ArticleListVo;
 import dev.junpring.scribble.vos.board.BoardIdVo;
 import dev.junpring.scribble.services.BoardService;
-import dev.junpring.scribble.vos.board.comment.CommentAddVo;
-import dev.junpring.scribble.vos.board.comment.CommentListVo;
-import dev.junpring.scribble.vos.member.user.UserLoginVo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -30,8 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Controller("dev.junpring.scribble.controllers.BoardController")
 @RequestMapping(value = "/board")
@@ -43,156 +40,112 @@ public class BoardController {
         this.boardServices = boardServices;
     }
 
-    @RequestMapping(value = "/{boardId}", method = RequestMethod.GET)
-    public ModelAndView getBoard(
-            @PathVariable(name = "boardId", required = false) String boardId,
+    @RequestMapping(value = "/list/{boardCode}", method = RequestMethod.GET)
+    public String getBoard(
+            @PathVariable(name = "boardCode", required = false) String boardCode,
+            @ModelAttribute("params") final SearchDto params,
             BoardIdVo boardIdVo,
-            ModelAndView modelAndView
-
+            Model model
     ) {
         boardIdVo.setResult(null);
-        boardIdVo.setId(boardId);
+        boardIdVo.setCode(boardCode);
         this.boardServices.boardIdList(boardIdVo);
-        List<ArticleListVo> articleVos = this.boardServices.articleList(boardIdVo);
-
-        modelAndView.addObject("boardIdVo", boardIdVo);
-        modelAndView.addObject("articleVos", articleVos);
-        modelAndView.setViewName("board/article");
-
-        System.out.println("--------------result + id + name---------------");
-        System.out.println("get result : " + boardIdVo.getResult());
-        System.out.println("get boardId : " + boardIdVo.getId());
-        System.out.println("get boardName : " + boardIdVo.getName());
-        return modelAndView;
+        PagingResponse<ArticleEntity> articlesResponse = this.boardServices.getArticlesForBoardList(params);
+        model.addAttribute("boardIdVo", boardIdVo);
+        model.addAttribute("articlesResponse", articlesResponse);
+        return "board/list";
     }
 
-    @RequestMapping(value = "delete", method = RequestMethod.GET)
-    public ModelAndView PostDelete(
-            @RequestParam(value = "pid", required = true) int articleIndex,
-            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            HttpServletResponse response,
-            ArticleEntity articleEntity,
-            ModelAndView modelAndView
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    public String getSearch(
     ) {
-        if (userEntity == null) {
-            response.setStatus(404);
-            return null;
-        }
-        articleEntity.setIndex(articleIndex);
-        this.boardServices.removeArticle(articleEntity);
 
-        modelAndView.setViewName("redirect:/");
-        return modelAndView;
+        return "board/search";
+    }
+
+
+    @RequestMapping(value = "delete", method = RequestMethod.GET)
+    public String getDelete(
+            @RequestParam(value = "id", required = true) int id,
+            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
+            ArticleListVo articleListVo,
+            Model model
+    ) {
+        int userId = userEntity.getId();
+        articleListVo.setId(id);
+        this.boardServices.getForPrintArticle(articleListVo, userId);
+        if ((articleListVo.getResultCode()).startsWith("F-")) {
+            model.addAttribute("alertMsg", articleListVo.getMsg());
+            model.addAttribute("historyBack", true);
+            return "common/redirect";
+        }
+        this.boardServices.removeArticle(articleListVo);
+        model.addAttribute("locationReplace", "/");
+        return "common/redirect";
     }
 
     @RequestMapping(value = "modify", method = RequestMethod.GET)
-    public ModelAndView getModify(
+    public String getModify(
+            @RequestParam(value = "id", required = true) int id,
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            @RequestParam(value = "pid", required = true) int articleIndex,
-            UserLoginVo loginVo,
-            ModelAndView modelAndView
+            ArticleListVo articleListVo,
+            Model model
     ) {
+        int userId = userEntity.getId();
+        articleListVo.setId(id);
+        articleListVo.setUserId(userId);
+        this.boardServices.getForPrintArticle(articleListVo, userId);
 
-        ArticleListVo articleVo = new ArticleListVo();
-        articleVo.setIndex(articleIndex);
-        articleVo.setUserEmail(userEntity.getEmail());
-        this.boardServices.getArticle(articleVo);
-
-        if (userEntity == null || userEntity.getLevel() == 10 || !userEntity.getEmail().equals(articleVo.getUserEmail())) {
-            loginVo.setResult(LoginResult.NOT_FOUND);
-        } else {
-            loginVo.setResult(LoginResult.SUCCESS);
+        if ((articleListVo.getResultCode()).startsWith("F-")) {
+            model.addAttribute("alertMsg", articleListVo.getMsg());
+            model.addAttribute("historyBack", true);
+            return "common/redirect";
         }
-
-
-        modelAndView.addObject("loginVo", loginVo);
-        modelAndView.addObject("articleVo", articleVo);
-        modelAndView.setViewName("board/modify");
-        return modelAndView;
+        model.addAttribute("articleListVo", articleListVo);
+        return "board/modify";
     }
 
     @RequestMapping(value = "modify", method = RequestMethod.POST)
     public ModelAndView postModify(
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            @RequestParam(value = "pid", required = true) int articleIndex,
-            UserLoginVo loginVo,
+            @RequestParam(value = "id", required = true) int id,
             ArticleListVo articleListVo,
             ModelAndView modelAndView
     ) {
-        articleListVo.setIndex(articleIndex);
-        articleListVo.setUserEmail(userEntity.getEmail());
-
-        if (userEntity == null || userEntity.getLevel() == 10) {
-            loginVo.setResult(LoginResult.NOT_FOUND);
-        } else {
-            loginVo.setResult(LoginResult.SUCCESS);
-        }
+        articleListVo.setId(id);
+        articleListVo.setUserId(userEntity.getId());
         this.boardServices.modifyArticle(articleListVo);
-        System.out.println("modify result: " + articleListVo.getResult());
-        System.out.println("title: " + articleListVo.getTitle());
-
         modelAndView.addObject("articleVo", articleListVo);
-        modelAndView.setViewName("redirect:/board/view?index=" + articleIndex);
+        modelAndView.setViewName("redirect:/board/detail?id=" + id);
         return modelAndView;
     }
 
-    @RequestMapping(value = "/{boardId}/add", method = RequestMethod.GET)
-    public ModelAndView getIdAdd(
-            @PathVariable(name = "boardId", required = true) String boardId,
-            BoardIdVo boardIdVo,
+    @RequestMapping(value = "write", method = RequestMethod.GET)
+    public ModelAndView getWrite(
             ModelAndView modelAndView
     ) {
-        boardIdVo.setId(boardId);
-        this.boardServices.boardIdList(boardIdVo);
-
-        modelAndView.addObject("boardIdVo", boardIdVo);
-        modelAndView.setViewName("board/boardIdAdd");
+        modelAndView.setViewName("board/write");
         return modelAndView;
     }
 
-    @RequestMapping(value = "/{boardId}/add", method = RequestMethod.POST)
-    public ModelAndView postIdAdd(
+    @RequestMapping(value = "write", method = RequestMethod.POST)
+    public String postWrite(
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            ArticleAddVo addVo,
-            ModelAndView modelAndView
+            ArticleWriteVo articleWriteVo,
+            Model model
     ) {
-        addVo.setUserEmail(userEntity.getEmail());
-        addVo.setUserNickname(userEntity.getNickname());
+        articleWriteVo.setResult(null);
+        articleWriteVo.setUserId(userEntity.getId());
 
-        this.boardServices.addArticle(addVo);
-        if (addVo.getResult() == ArticleAddResult.SUCCESS) {
-            modelAndView.setViewName("redirect:/board/view?index=" + addVo.getIndex());
+        this.boardServices.writeArticle(articleWriteVo);
+        if (articleWriteVo.getResult() == ArticleWriteResult.SUCCESS) {
+            articleWriteVo.setMsg(String.format("%d번 게시글이 생성되었습니다.", articleWriteVo.getId()));
+            model.addAttribute("alertMsg", articleWriteVo.getMsg());
+            model.addAttribute("locationReplace", "./detail?id=" + articleWriteVo.getId());
+            model.addAttribute("articleWriteVo", articleWriteVo);
+            return "common/redirect";
         }
-        return modelAndView;
-    }
-
-    @RequestMapping(value = "add", method = RequestMethod.GET)
-    public ModelAndView getAdd(
-            ModelAndView modelAndView
-    ) {
-        modelAndView.setViewName("board/add");
-        return modelAndView;
-    }
-
-    @RequestMapping(value = "add", method = RequestMethod.POST)
-    public ModelAndView postAdd(
-            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            ArticleAddVo addVo,
-            ModelAndView modelAndView
-    ) {
-        addVo.setResult(null);
-        addVo.setUserEmail(userEntity.getEmail());
-        addVo.setUserNickname(userEntity.getNickname());
-
-        this.boardServices.addArticle(addVo);
-        if (addVo.getResult() == ArticleAddResult.SUCCESS) {
-            modelAndView.setViewName("redirect:/board/view?index=" + addVo.getIndex());
-
-        } else {
-            modelAndView.addObject("addVo", addVo);
-            modelAndView.setViewName("/board/add");
-        }
-        return modelAndView;
+        return "common/redirect";
     }
 
     @RequestMapping(value = "download-image", method = RequestMethod.GET)
@@ -247,70 +200,118 @@ public class BoardController {
         return responseJson.toString(); // Json 리턴, 업로드 성공했다는 응답을 돌려주기위함.
     }
 
-    @RequestMapping(value = "view", method = RequestMethod.GET)
-    public ModelAndView getView(
-            @RequestParam(name = "index", required = false) int index,
-            ArticleListVo articleVo,
-            CommentListVo commentListVo,
+    @RequestMapping(value = "detail", method = RequestMethod.GET)
+    public String getDetail(
+            @RequestParam(value = "id", required = false) int id,
+            ArticleListDto articleListDto,
+            Model model,
             HttpServletRequest request,
-            HttpServletResponse response,
-            ModelAndView modelAndView
+            HttpServletResponse response
+
     ) {
-        articleVo.setIndex(index);
-        this.boardServices.getArticle(articleVo);
-        this.boardServices.articleCommentCount(articleVo);
+        articleListDto.setId(id);
+        this.boardServices.articleViewCount(articleListDto.getId());
+        this.boardServices.getArticle(articleListDto);
+        System.out.println(articleListDto.getView());
+
 //      쿠키 value 해싱 해야됨.
         Cookie[] cookies = request.getCookies();
+//
+//        if (cookies != null) { // 쿠키가 있으면
+//            for (Cookie cookie : cookies) {
+////                System.out.println("----------------------------");
+////                System.out.println("cookie.getName " + cookie.getName());
+////                System.out.println("cookie.getValue " + cookie.getValue());
+//                if (!cookie.getValue().contains(request.getParameter("id")) && cookie.getName().equals("visit_cookie")) {
+//                    cookie.setValue(cookie.getValue() + "_" + request.getParameter("id"));
+//                    cookie.setMaxAge(60 * 60 * 2);  /* 쿠키 시간 */
+//                    response.addCookie(cookie);
+//                    this.boardServices.articleViewCount(articleListDto);
+//                }
+//            }
+//        } else {
+//            Cookie newCookie = new Cookie("visit_cookie", request.getParameter("id"));
+//            newCookie.setMaxAge(60 * 60 * 2);
+//            response.addCookie(newCookie);
+//            this.boardServices.articleViewCount(articleListDto);
+//        }
 
-        if (cookies != null) { // 쿠키가 있으면
-            for (Cookie cookie : cookies) {
-//                System.out.println("----------------------------");
-//                System.out.println("cookie.getName " + cookie.getName());
-//                System.out.println("cookie.getValue " + cookie.getValue());
-                if (!cookie.getValue().contains(request.getParameter("index")) && cookie.getName().equals("visit_cookie")) {
-                    cookie.setValue(cookie.getValue() + "_" + request.getParameter("index"));
-                    cookie.setMaxAge(60 * 60 * 2);  /* 쿠키 시간 */
-                    response.addCookie(cookie);
-                    this.boardServices.articleViewCount(articleVo);
-                }
-            }
-        } else {
-            Cookie newCookie = new Cookie("visit_cookie", request.getParameter("index"));
-            newCookie.setMaxAge(60 * 60 * 2);
-            response.addCookie(newCookie);
-            this.boardServices.articleViewCount(articleVo);
-        }
-
-        commentListVo.setArticleIndex(articleVo.getIndex());
-        commentListVo.setResult(null);
-        this.boardServices.commentList(commentListVo);
-        modelAndView.addObject("commentListVo", commentListVo);
-        modelAndView.addObject("articleVo", articleVo);
-        modelAndView.setViewName("board/view");
-        return modelAndView;
+        List<ArticleReplyDTO> articleReplyDtos = boardServices.getForPrintArticleReplies(articleListDto.getId());
+        model.addAttribute("articleReplyDtos", articleReplyDtos);
+        model.addAttribute("articleListDto", articleListDto);
+        return "board/detail";
     }
 
-    @RequestMapping(value = "comment-add", method = RequestMethod.POST)
+    @RequestMapping(value = "getForPrintArticleRepliesRs", method = RequestMethod.GET)
     @ResponseBody
-    public String postComment(
-            @RequestAttribute(name = "userEntity", required = false) UserEntity userEntity,
-            CommentAddVo commentAddVo
+    public List<ArticleReplyDTO> getForPrintArticleRepliesRs(
+            @RequestParam(value = "id", required = true) int id,
+            ArticleReplyDTO articleReplyDTO
     ) {
-        commentAddVo.setResult(null);
-        if (userEntity == null) {
-            commentAddVo.setResult(CommentAddResult.USER_NOT_FOUND);
-            JSONObject responseJson = new JSONObject();
-            responseJson.put("comment-result", commentAddVo.getResult().name());
-            return responseJson.toString();
-        }
-        commentAddVo.setUserIndex(userEntity.getIndex());
-        commentAddVo.setUserEmail(userEntity.getEmail());
-        this.boardServices.addComment(commentAddVo);
+        List<ArticleReplyDTO> articleReplies = this.boardServices.getForPrintArticleReplies(id);
 
-        System.out.println(commentAddVo.getResult());
+        articleReplyDTO.setMsg(String.format("총 %d개의 댓글이 있습니다.", articleReplies.size()));
+        articleReplyDTO.setResultCode("S-1");
 
-        JSONObject responseJson = new JSONObject();
-        responseJson.put("comment-result", commentAddVo.getResult().name());
-        return responseJson.toString();
+        return articleReplies;
     }
+
+    @RequestMapping(value = "postWriteReply", method = RequestMethod.POST)
+    @ResponseBody
+    public ArticleReplyDTO postWriteReply(
+            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
+            ArticleReplyDTO articleReplyDTO
+    ) {
+        int userId = userEntity.getId();
+        articleReplyDTO.setUserId(userId);
+        this.boardServices.writeReply(articleReplyDTO);
+        return articleReplyDTO;
+    }
+
+    @RequestMapping(value = "postModifyReply", method = RequestMethod.POST)
+    @ResponseBody
+    public ArticleReplyDTO postModifyReply(
+            @RequestParam(value = "id") int id,
+            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
+            ArticleReplyDTO articleReplyDto
+    ) {
+        int userId = userEntity.getId();
+
+        ArticleReplyDTO articleModifyReplyAvailableRs = this.boardServices.getArticleModifyReplyAvailable(id, userId);
+
+        if ((articleModifyReplyAvailableRs.getResultCode()).startsWith("F-")) {
+            return articleModifyReplyAvailableRs;
+        }
+        this.boardServices.modifyArticleReply(articleReplyDto);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return articleReplyDto;
+    }
+
+    @RequestMapping(value = "postDeleteReply", method = RequestMethod.POST)
+    @ResponseBody
+    public ArticleReplyDTO postDeleteReply(
+            int id,
+            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
+            ArticleReplyDTO articleReplyDto
+    ) {
+        int userId = userEntity.getId();
+
+        ArticleReplyDTO articleDeleteReplyAvailableRs = this.boardServices.getArticleDeleteReplyAvailableRs(id, userId);
+
+        if ((articleDeleteReplyAvailableRs.getResultCode()).startsWith("F-")) {
+            return articleDeleteReplyAvailableRs;
+        }
+        this.boardServices.deleteArticleReply(articleReplyDto);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return articleReplyDto;
+    }
+
 }

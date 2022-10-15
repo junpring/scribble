@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<!--/*@thymesVar id="get" type="dev.junpring.scribble.entities.board.BoardIdEntity"*/-->
+<!--/*@thymesVar id="get" type="dev.junpring.scribble.entities.board.BoardEntity"*/-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -8,35 +8,37 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>게시글 수정</title>
     <link rel="stylesheet" th:href="@{/resources/stylesheets/common.css}">
-    <link rel="stylesheet" th:href="@{/board/resources/stylesheets/add.css}">
+    <link rel="stylesheet" th:href="@{/board/resources/stylesheets/write.css}">
     <link rel="stylesheet" as="style" crossorigin
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard-dynamic-subset.css"/>
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/resources/libraries/ckeditor/ckeditor.js}"></script>
     <script defer th:src="@{/board/resources/scripts/modify.js}"></script>
 
-    <script th:if="${loginVo.getResult().name().equals('NOT_FOUND')}">
-        alert("로그인 후 글 수정을 할 수 있습니다. \n로그인 페이지로 이동합니다.");
-        location.href = '/user/login'
-    </script>
-    <script th:if="${loginVo.getResult().name().equals('NOT_FOUND')}">
-        alert("허용되지않은 접근입니다.");
-        history.back();
-    </script>
+<!--    <script th:if="${loginVo.getResult().name().equals('NOT_FOUND')}">-->
+<!--        alert("로그인 후 글 수정을 할 수 있습니다. \n로그인 페이지로 이동합니다.");-->
+<!--        location.href = '/user/login'-->
+<!--    </script>-->
+<!--    <script th:if="${loginVo.getResult().name().equals('NOT_FOUND')}">-->
+<!--        alert("허용되지않은 접근입니다.");-->
+<!--        history.back();-->
+<!--    </script>-->
 </head>
 <body>
 <th:block th:replace="~{fragments/header.html :: header}"></th:block>
 <form id="main" class="main" method="post">
     <label class="label">
-        <span class="hint">제목 </span>
-        <input th:value="${articleVo.getTitle()}" autofocus class="input" maxlength="40" name="title" placeholder="글 제목을 입력해주세요." type="text">
-        <select hidden name="boardId">
-            <option th:text="${articleVo.getName()}" th:value="${articleVo.getBoardId()}" selected></option>
-        </select>
-        <div class="category" th:text="${articleVo.getName()}"></div>
+        <div class="category" th:text="${articleListVo.extra.boardCodeName}"></div>
+<!--        <select hidden class="category" name="boardCode">-->
+<!--            <option th:text="${articleListVo.extra.boardCodeName}"-->
+<!--                    th:value="${articleListVo.getBoardCode()}" selected>-->
+<!--            </option>-->
+<!--        </select>-->
+        <input class="input" th:value="${articleListVo.getTitle()}" autofocus  maxlength="40" name="title" placeholder="글 제목을 입력해주세요." type="text">
+
     </label>
     <label class="label">
-        <textarea class="editor" name="content" id="editor" th:text="${articleVo.getContent()}" spellcheck="false"></textarea>
+        <textarea class="editor" name="content" id="editor" th:text="${articleListVo.getContent()}" spellcheck="false"></textarea>
     </label>
     <div class="buttons">
         <input id="cancel-button" class="button white" type="button" value="돌아가기">

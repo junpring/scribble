@@ -15,8 +15,11 @@ ClassicEditor
 
 const mainForm = window.document.getElementById('main');
 const titleInput = mainForm['title'];
-const categorySelect = mainForm['boardId'];
+const categorySelect = mainForm['boardCode'];
 const cancelButton = window.document.getElementById('cancel-button');
+const contentInput = mainForm['content'];
+
+
 
 cancelButton.onclick = () => {
     if (confirm('정말로 취소할까요? 작성하신 정보가 모두 유실됩니다.')) {
@@ -25,25 +28,29 @@ cancelButton.onclick = () => {
 }
 
 mainForm.onsubmit = (e) => {
-    if (!titleInput.value) {
-        e.preventDefault();
-        alert("글 제목을 입력해주세요.");
-        titleInput.focus();
-        return;
-    }
     if (categorySelect.options[categorySelect.selectedIndex].value === 'none') {
         e.preventDefault();
         alert("게시판 종류를 선택해주세요.");
         categorySelect.focus();
         return;
     }
-    if (confirm("정말로 게시글을 작성하시겠습니까?")){
-        alert('작성이 완료되었습니다.');
-    }else {
+    if (!titleInput.value) {
         e.preventDefault();
+        alert("글 제목을 입력해주세요.");
+        titleInput.focus();
+        return;
+    }
+    if (!contentInput.value) {
+        e.preventDefault();
+        alert("글 내용을 입력해주세요.");
+        contentInput.focus();
+        return;
+    }
+    if (confirm("정말로 게시글을 작성하시겠습니까?")) {
+    }else {
+        return false;
     }
 };
-
 
 
 

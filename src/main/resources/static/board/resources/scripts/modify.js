@@ -13,7 +13,7 @@ ClassicEditor
 
         });
     });
-config.disableNativeSpellChecker = false;
+// config.disableNativeSpellChecker = false;
 
 
 

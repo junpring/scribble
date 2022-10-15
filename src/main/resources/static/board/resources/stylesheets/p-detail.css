@@ -1,0 +1,203 @@
+body > .detail-wrap{
+    width: 60rem;
+    margin-top: 2rem;
+}
+body > .detail-wrap .detail-img{
+    position: relative;
+    width: 60rem;
+    /*width: 42rem;*/
+    margin: 0 auto;
+    height: 600px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+body > .detail-wrap > .detail-img > img {
+    width: 100%;
+    cursor: pointer;
+}
+body > .detail-wrap > .detail-profile {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 1.8rem;
+    border-bottom: 1px solid #dbdbdb;
+    padding-bottom: 1.8rem;
+    position: relative;
+}
+
+body > .detail-wrap > .detail-profile > img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    margin-right: 0.6rem;
+}
+
+body > .detail-wrap > .detail-profile > ul > {
+}
+
+body > .detail-wrap > .detail-profile > ul > .nickname{
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+body > .detail-wrap > .detail-profile > ul > .nickname:hover {
+    text-decoration: underline;
+}
+
+body > .detail-wrap > .detail-profile > .profile-manner {
+    position: absolute;
+    right: 0;
+}
+.meters {
+    clear: both;
+    display: block;
+    width: 100px;
+    background-color: #e9ecef;
+    height: 4px;
+    border-radius: 100px;
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    position: relative;
+    vertical-align: middle;
+    margin-top: 24px;
+}
+.bar {
+    background-color: #319e45;
+}
+
+body > .detail-wrap > .detail-area {
+    margin-top: 1.8rem;
+    border-bottom: 1px solid #dbdbdb;
+    padding-bottom: 1.8rem;
+}
+
+body > .detail-wrap > .detail-area > .detail-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+body > .detail-wrap > .detail-area > .detail-address {
+    font-size: 0.9rem;
+    color: #94969b;
+}
+body > .detail-wrap > .detail-area > .write-at {
+    font-size: 0.9rem;
+    color: #94969b;
+}
+
+body > .detail-wrap > .detail-area > .price {
+    padding: 0.6rem 1rem 1rem 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+body > .detail-wrap > .detail-area > p {
+    font-size: 1rem;
+    font-weight: 400;
+}
+body > .detail-wrap > .detail-area > .detail-count {
+    font-size: 0.9rem;
+    color: #94969b;
+}
+
+body > .detail-wrap > .detail-area > .detail-btn {
+    margin-top: 1.8rem;
+}
+
+body > .detail-wrap > .detail-area > .detail-btn > a {
+    padding: 0.6rem 6%;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+body > .detail-wrap > .detail-area > .detail-btn > .cart {
+    background-color: #cbcaca;
+    margin-right: 0.4rem;
+}
+
+body > .detail-wrap > .detail-area > .detail-btn > .talk {
+    background-color: #2bae66;
+}
+
+body > .detail-wrap > .detail-hot-more {
+    margin-top: 1.8rem;
+    margin-bottom: 1.8rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+body > .detail-wrap > .detail-hot-more > h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+body > .detail-wrap > .detail-hot-more > .more {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2bae66;
+    line-height: 1.5;
+}
+
+body > .detail-wrap > .detail-hot-wrap {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0 auto;
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card {
+    width: calc(33% - 6rem);
+    margin-right: 1rem;
+    margin-bottom: 1.8rem;
+}
+body > .detail-wrap > .detail-hot-wrap > .card:nth-child(4){
+    margin-right: 0;
+}
+body > .detail-wrap > .detail-hot-wrap > .card:last-child{
+    margin-right: 0;
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link {
+
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link > .card-photo {
+
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link > .card-photo > img {
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 12px;
+    border: 1px solid transparent;
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link > .card-desc {
+    padding: 0.6rem 0;
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link > .card-desc > .card-title {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link > .card-desc > .card-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.6rem 0;
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link > .card-desc > .card-region-name {
+    font-size: 0.85rem;
+}
+
+body > .detail-wrap > .detail-hot-wrap > .card > .card-link > .card-desc > .card-counts {
+    font-size: 0.85rem;
+    color: #94969b;
+}
+
+

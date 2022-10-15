@@ -34,7 +34,7 @@ public interface IUserMapper {
     UserEmailVerifyCodeEntity selectUserEmailVerificationCode(
             @Param(value = "code") String code,
             @Param(value = "salt") String salt);
-    UserEntity selectUserByIndex(@Param(value = "index") int index);
+    UserEntity selectUserById(@Param(value = "id") int id);
 
     int updateUser(UserEntity userEntity);
     int updateUserEmailVerifyCode(UserEmailVerifyCodeEntity userEmailVerifyCodeEntity);
@@ -42,6 +42,5 @@ public interface IUserMapper {
 
     // 세션 만료된 여부
     int updateSessionExpired(
-            @Param(value = "index") int index,
-            @Param(value = "email") String email);
+            @Param(value = "id") int id);
 }

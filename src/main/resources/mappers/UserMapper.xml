@@ -4,22 +4,22 @@
 <mapper namespace="dev.junpring.scribble.mappers.IUserMapper">
     <insert id="insertUserEmailVerificationCode"
             parameterType="dev.junpring.scribble.entities.member.UserEmailVerifyCodeEntity">
-        INSERT INTO `scribble_member`.`user_email_verify_code` (`user_index`, `created_at`, `expires_at`,
+        INSERT INTO `scribble_member`.`user_email_verify_code` (`user_id`, `created_at`, `expires_at`,
                                                                 `expired_flag`, `code`, `salt`)
-        VALUES (#{userIndex}, #{createdAt}, #{expiresAt}, #{isExpired}, #{code}, #{salt})
+        VALUES (#{userId}, #{createdAt}, #{expiresAt}, #{isExpired}, #{code}, #{salt})
     </insert>
 
     <insert id="insertSession"
             parameterType="dev.junpring.scribble.entities.member.SessionEntity">
-        INSERT INTO `scribble_member`.`sessions`(`created_at`, `updated_at`, `expires_at`, `expired_flag`, `user_index`,
-                                                 `user_email`, `key`, `ua`)
-        VALUES (#{createdAt}, #{updatedAt}, #{expiresAt}, #{isExpired}, #{userIndex}, #{userEmail}, #{key}, #{ua})
+        INSERT INTO `scribble_member`.`sessions`(`created_at`, `updated_at`, `expires_at`, `expired_flag`, `user_id`,
+                                                 `key`, `ua`)
+        VALUES (#{createdAt}, #{updatedAt}, #{expiresAt}, #{isExpired}, #{userId}, #{key}, #{ua})
     </insert>
     <insert id="insertUser"
             parameterType="dev.junpring.scribble.entities.member.UserEntity"
             useGeneratedKeys="true"
-            keyColumn="index"
-            keyProperty="index">
+            keyColumn="id"
+            keyProperty="id">
         INSERT INTO `scribble_member`.`user`
         (`email`,
          `password`,
@@ -69,7 +69,7 @@
     <select id="selectUser"
             parameterType="dev.junpring.scribble.entities.member.UserEntity"
             resultType="dev.junpring.scribble.entities.member.UserEntity">
-        SELECT `index`               AS `index`,
+        SELECT `id`                  AS `id`,
                `email`               AS `email`,
                `password`            AS `password`,
                `nickname`            AS `nickname`,
@@ -91,7 +91,7 @@
 
     <select id="selectUserEmail"
             resultType="dev.junpring.scribble.entities.member.UserEntity">
-        SELECT `index`               AS `index`,
+        SELECT `id`                  AS `id`,
                `email`               AS `email`,
                `password`            AS `password`,
                `nickname`            AS `nickname`,
@@ -112,13 +112,12 @@
 
     <select id="selectSessionKey"
             resultType="dev.junpring.scribble.entities.member.SessionEntity">
-        SELECT `index`        AS `index`,
+        SELECT `id`           AS `id`,
                `created_at`   AS `createdAt`,
                `updated_at`   AS `updatedAt`,
                `expires_at`   AS `expiresAt`,
                `expired_flag` AS `isExpired`,
-               `user_index`   AS `userIndex`,
-               `user_email`   AS `userEmail`,
+               `user_id`      AS `userId`,
                `key`          AS `key`,
                `ua`           AS `ua`
         FROM `scribble_member`.`sessions`
@@ -130,8 +129,8 @@
 
     <select id="selectUserEmailVerificationCode"
             resultType="dev.junpring.scribble.entities.member.UserEmailVerifyCodeEntity">
-        SELECT `index`        AS `index`,
-               `user_index`   AS `userIndex`,
+        SELECT `id`           AS `id`,
+               `user_id`      AS `userId`,
                `created_at`   AS `createdAt`,
                `expires_at`   AS `expiresAt`,
                `expired_flag` AS `isExpired`,
@@ -143,9 +142,9 @@
         LIMIT 1
     </select>
 
-    <select id="selectUserByIndex"
+    <select id="selectUserById"
             resultType="dev.junpring.scribble.entities.member.UserEntity">
-        SELECT `index`               AS `index`,
+        SELECT `id`                  AS `id`,
                `email`               AS `email`,
                `password`            AS `password`,
                `nickname`            AS `nickname`,
@@ -160,7 +159,7 @@
                `deleted_flag`        AS `isDeleted`,
                `suspended_flag`      AS `isSuspended`
         FROM `scribble_member`.`user`
-        WHERE `index` = #{index}
+        WHERE `id` = #{id}
         LIMIT 1
     </select>
     <update id="updateUser"
@@ -179,7 +178,7 @@
             `modified_at`         = #{modifiedAt},
             `deleted_flag`        = #{isDeleted},
             `suspended_flag`      = #{isSuspended}
-        WHERE `index` = #{index}
+        WHERE `id` = #{id}
         LIMIT 1
     </update>
 
@@ -191,8 +190,8 @@
             `expired_flag` = #{isExpired},
             `code`         = #{code},
             `salt`         = #{salt},
-            `user_index`   = #{userIndex}
-        WHERE `index` = #{index}
+            `user_id`      = #{userId}
+        WHERE id = #{id}
         LIMIT 1
     </update>
 
@@ -209,8 +208,7 @@
     <update id="updateSessionExpired">
         UPDATE `scribble_member`.`sessions`
         SET `expired_flag` = TRUE
-        WHERE `user_index` = #{index}
-          AND `user_email` = #{email}
+        WHERE `user_id` = #{id}
           AND `expires_at` > NOW()
           AND expired_flag = FALSE
     </update>

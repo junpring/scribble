@@ -1,6 +1,5 @@
-// const emailInput = registerForm['email']; input 태그의 name="email"
+
 // +는 css와 같이 옆에 선택자를 지목함.
-// emailInput.value 는 email input의 value(yojop0308@)이다 작성내용
 
 // const RegisterForm = {
 //     getElement : () => window.document.getElementById('register-form'),

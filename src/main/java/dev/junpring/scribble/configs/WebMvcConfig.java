@@ -1,5 +1,7 @@
 package dev.junpring.scribble.configs;
 
+import dev.junpring.scribble.interceptors.BeforeActionInterceptor;
+import dev.junpring.scribble.interceptors.NeedToLoginInterceptor;
 import dev.junpring.scribble.interceptors.SessionInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +16,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
      * - 내부에는 많은 메소드들이 존재하는데 모두 default로 선언되어 있습니다. 즉, implements를 하여도 전체를 @Override할 필요 없이 필요한 부분만 설정할 수 있도록 되어 있는 구조입니다.
      */
     @Bean
+    public BeforeActionInterceptor BeforeActionInterceptor() {
+        return new BeforeActionInterceptor();
+    }
+
+    @Bean
     public SessionInterceptor sessionInterceptor() {
         return new SessionInterceptor();
+    }
+
+    @Bean
+    public NeedToLoginInterceptor NeedToLoginInterceptor() {
+        return new NeedToLoginInterceptor();
     }
     /**
      * - 스프링 컨테이너는 @Configuration이 붙어있는 클래스를 자동으로 빈으로 등록해두고,
@@ -31,9 +43,22 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(this.BeforeActionInterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns("/resources/**").excludePathPatterns("/board/resources/**").excludePathPatterns("/user/resources/**");
+
         registry.addInterceptor(this.sessionInterceptor()) // 핸들러 지정.
                 .addPathPatterns("/**") // 인터셉트할 기본 패턴을 지정
                 .excludePathPatterns("/resources/**");
+
+        registry.addInterceptor(this.NeedToLoginInterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns("/resources/**").excludePathPatterns("/board/resources/**")
+                .excludePathPatterns("/user/resources/**").excludePathPatterns("/")
+                .excludePathPatterns("/user/login").excludePathPatterns("/user/register")
+                .excludePathPatterns("/board/detail").excludePathPatterns("/board/list/**")
+                .excludePathPatterns("/board/getForPrintArticleRepliesRs").excludePathPatterns("/board/download-image").excludePathPatterns("/board/postWriteReply");
+
     }
 
     @Override

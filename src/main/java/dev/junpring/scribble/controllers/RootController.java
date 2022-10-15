@@ -1,6 +1,6 @@
 package dev.junpring.scribble.controllers;
 
-import dev.junpring.scribble.entities.board.BoardIdEntity;
+import dev.junpring.scribble.entities.board.BoardEntity;
 import dev.junpring.scribble.services.BoardService;
 import dev.junpring.scribble.vos.board.article.ArticleListVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,19 +24,19 @@ public class RootController {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ModelAndView getIndex(
+    public ModelAndView getIdx(
             ModelAndView modelAndView,
             ArticleListVo articleVo
     ){
-        List<BoardIdEntity> boardIdVos = this.boardServices.boardList();
+        List<BoardEntity> boardIdVos = this.boardServices.boardList();
 
         HashMap<String, ArrayList<ArticleListVo>> articles = new HashMap<>();
-        for (BoardIdEntity idVo : boardIdVos) {
-            if (!articles.containsKey(idVo.getId())) {
-                articles.put(idVo.getId(), new ArrayList<>());
+        for (BoardEntity idVo : boardIdVos) {
+            if (!articles.containsKey(idVo.getCode())) {
+                articles.put(idVo.getCode(), new ArrayList<>());
             }
-            articleVo.setArticleIndex(idVo.getIndex());
-            articles.get(idVo.getId()).addAll(this.boardServices.rootArticleList(idVo));
+//            articleVo.setArticleId(idVo.getId());
+            articles.get(idVo.getCode()).addAll(this.boardServices.rootArticleList(idVo));
         }
 
         modelAndView.addObject("articles", articles);

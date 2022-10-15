@@ -1,6 +1,7 @@
 package dev.junpring.scribble.enums.board;
 
-public enum CommentListResult {
+public enum ArticleWriteResult {
+    FAILURE,
     SUCCESS,
-    FAILURE
+    ILLEGAL
 }

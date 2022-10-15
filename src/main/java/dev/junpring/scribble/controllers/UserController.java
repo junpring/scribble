@@ -64,7 +64,7 @@ public class UserController {
             UserRegisterVo registerVo
     )throws MessagingException {
         registerVo.setLevel(DEFAULT_LEVEL);
-        registerVo.setIndex(0);
+        registerVo.setId(0);
         registerVo.setDeleted(false);
         registerVo.setSuspended(false);
         registerVo.setEmailVerified(false);
@@ -83,7 +83,7 @@ public class UserController {
             UserEmailVerifyCodeVo userEmailVerifyCodeVo,
             ModelAndView modelAndView
     ) {
-        userEmailVerifyCodeVo.setIndex(0);
+        userEmailVerifyCodeVo.setId(0);
         userEmailVerifyCodeVo.setCode(code);
         userEmailVerifyCodeVo.setSalt(salt);
         userEmailVerifyCodeVo.setResult(null);
@@ -118,8 +118,7 @@ public class UserController {
             sessionKeyCookie.setPath("/");
             // 위 설정하지않으면 기본 path : 현재주소 (/user/**) 이 주소에만 사용가능, /는 전역 사용가능.
             response.addCookie(sessionKeyCookie); // response에 생성한 쿠키를 추가. (응답보낼 쿠키)
-        }
-        System.out.println(loginVo.getResult());
+        };
 //        System.out.println("auto: " + request.getParameter("autosign"));
         JSONObject obj = new JSONObject();
         obj.put("result", loginVo.getResult().name());

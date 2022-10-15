@@ -86,9 +86,12 @@ public class UserService {
         return this.userMapper.selectSessionKey(key);
     }
 
-    // UserEntity에 저장된 이메일을 select (SessionEntity에 저장된 유저이메일과 동일한지 확인하기 위해서)
-    public UserEntity getUser(String email) {
+    // UserEntity에 저장된 이메일을 select (SessionEntity에 저장된 유저email과 동일한지 확인하기 위해서)
+    public UserEntity getUserEmail(String email) {
         return this.userMapper.selectUserEmail(email);
+    }
+    public UserEntity getUserId(int id) {
+        return this.userMapper.selectUserById(id);
     }
 
     public void expireSession(SessionEntity sessionEntity) {
@@ -112,7 +115,7 @@ public class UserService {
         UserEntity userEntity = this.userMapper.selectUser(loginVo);
 
         // 로그인 데이터가 정확하게 들어오지 않는 경우
-        if (userEntity == null || userEntity.getIndex() == 0) {
+        if (userEntity == null || userEntity.getId() == 0) {
             loginVo.setResult(LoginResult.FAILURE);
             return;
         }
@@ -134,7 +137,7 @@ public class UserService {
         }
 
         /** SELECT한 값을 보이는데로 userEntity에 담았으니 userEntity에 담긴 SELECT한 값을 매개변수 loginVo로 넘겨줘야한다.**/
-        loginVo.setIndex(userEntity.getIndex());
+        loginVo.setId(userEntity.getId());
         loginVo.setEmail(userEntity.getEmail());
         loginVo.setPassword(userEntity.getPassword());
         loginVo.setNickname(userEntity.getNickname());
@@ -149,7 +152,7 @@ public class UserService {
         loginVo.setSuspended(userEntity.isSuspended());
 
         // session 만료 처리 , expired_flag == true : 만료
-        this.userMapper.updateSessionExpired(loginVo.getIndex(), loginVo.getEmail());
+        this.userMapper.updateSessionExpired(loginVo.getId());
 
         /**      1. String.format 이용해서 %s에 (년도,월,일,시간,분,초,밀리초), email, password 담음
          2. %f에 Math.random()으로 랜덤 실수값 담음.
@@ -178,8 +181,8 @@ public class UserService {
         sessionEntity.setExpired(false); // 세션만료 여부, 강제로 isExpired에 false 지정.
 
         /** 로그인된 email, index 데이터를 sessionEntity에 담는다. **/
-        sessionEntity.setUserEmail(loginVo.getEmail());
-        sessionEntity.setUserIndex(loginVo.getIndex());
+//        sessionEntity.setUserEmail(loginVo.getEmail());
+        sessionEntity.setUserId(loginVo.getId());
 
         /** 해싱이 마무리된 sessionKey, userAgent를 sessionEntity에 담음. */
         sessionEntity.setKey(sessionKey);
@@ -226,7 +229,7 @@ public class UserService {
         Date expiresAt = DateUtils.addMinutes(createdAt, CODE_VALID_MINUTES);
         // expiresAt: 만료날짜 , 생성시간 + 30분 뒤
         String code = String.format("%d%s%s%s%f%f",
-                registerVo.getIndex(),
+                registerVo.getId(),
                 registerVo.getEmail(),
                 registerVo.getPassword(),
                 new SimpleDateFormat("yyyyMMddHHmmssSSS").format(createdAt), Math.random(),
@@ -246,7 +249,7 @@ public class UserService {
         userEmailVerifyCodeEntity.setExpired(false); // 만료되면 1
         userEmailVerifyCodeEntity.setCode(code);
         userEmailVerifyCodeEntity.setSalt(String.format("%s%s", saltA, saltB));
-        userEmailVerifyCodeEntity.setUserIndex(registerVo.getIndex());
+        userEmailVerifyCodeEntity.setUserId(registerVo.getId());
 
         this.userMapper.insertUserEmailVerificationCode(userEmailVerifyCodeEntity);
 
@@ -275,7 +278,7 @@ public class UserService {
                 userEmailVerifyCodeVo.getSalt()
         );
         if (userEmailVerifyCodeEntity == null ||
-                userEmailVerifyCodeEntity.getIndex() == 0) {
+                userEmailVerifyCodeEntity.getId() == 0) {
             userEmailVerifyCodeVo.setResult(UserEmailVerifyResult.FAILURE);
             return;
         }
@@ -284,7 +287,7 @@ public class UserService {
             userEmailVerifyCodeVo.setResult(UserEmailVerifyResult.EXPIRED);
             return;
         }
-        UserEntity userEntity = this.userMapper.selectUserByIndex(userEmailVerifyCodeEntity.getUserIndex());
+        UserEntity userEntity = this.userMapper.selectUserById(userEmailVerifyCodeEntity.getUserId());
         String saltA = userEntity.getEmail();
         String saltB = userEntity.getPassword();
 

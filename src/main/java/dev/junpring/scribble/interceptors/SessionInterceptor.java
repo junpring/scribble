@@ -4,6 +4,7 @@ import dev.junpring.scribble.entities.member.UserEntity;
 import dev.junpring.scribble.services.UserService;
 import dev.junpring.scribble.entities.member.SessionEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -11,6 +12,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@Component("SessionInterceptor") // 다른 컴포넌트 식별을 위해 이름을 붙임.
 public class SessionInterceptor implements HandlerInterceptor {
 
     @Autowired
@@ -57,12 +59,13 @@ public class SessionInterceptor implements HandlerInterceptor {
         if (sessionKeyCookie != null && sessionKeyCookie.getValue() != null) {
             String sessionKey = sessionKeyCookie.getValue();// 쿠키에 저장된 데이터
             SessionEntity sessionEntity = this.userService.getSession(sessionKey);
-            if (sessionEntity != null && sessionEntity.getUserEmail() != null) {
-                UserEntity userEntity = this.userService.getUser(sessionEntity.getUserEmail()); // 세션에 저장된 유저이메일
-                if (userEntity != null && userEntity.getEmail() != null) {
+            if (sessionEntity != null && sessionEntity.getId() != 0) {
+                UserEntity userEntity = this.userService.getUserId(sessionEntity.getUserId()); // 세션에 저장된 유저아이디
+                if (userEntity != null && userEntity.getId() != 0) {
                     this.userService.extendSession(sessionEntity);
                     request.setAttribute("sessionEntity", sessionEntity);
                     request.setAttribute("userEntity", userEntity);
+                    request.setAttribute("userEntityId", userEntity.getId());
                 }
             }
         }
@@ -71,8 +74,6 @@ public class SessionInterceptor implements HandlerInterceptor {
             sessionKeyCookie.setMaxAge(0); // Cookie는 remove나 delete같은게 없어서 setMaxAge를 0으로 둠으로써 삭제할 수 있다. 쿠키수명 0으로 만듬  == 제거
         }
         return true;
-
-
     }
 
 }
