@@ -258,12 +258,14 @@ public class BoardController {
             String value = viewCookie.getValue();
             System.out.println("cookie 값 : " + value);
         }
+        int test = (int)request.getAttribute("userEntityId");
 
-        int likePoint = this.boardServices.getLikePoint(id);
+        int likeUserPoint = this.boardServices.getLikeUserPoint(id, test);
+
         List<ArticleReplyDTO> articleReplyDtos = this.boardServices.getForPrintArticleReplies(articleListDto.getId());
         model.addAttribute("articleReplyDtos", articleReplyDtos);
         model.addAttribute("articleListDto", articleListDto);
-        model.addAttribute("likePoint", likePoint);
+        model.addAttribute("likeUserPoint", likeUserPoint);
         return "board/detail";
     }
 
@@ -361,6 +363,10 @@ public class BoardController {
         int likePoint = this.boardServices.getLikePoint(id);
         articleLikeDto.setLikePoint(likePoint);
 
+
+        int likeUserPoint = this.boardServices.getLikeUserPoint(id, userId);
+        articleLikeDto.setLikeUserPoint(likeUserPoint);
+        System.out.println("likeUserPoint: " + likeUserPoint);
         return articleLikeDto;
     }
 
@@ -385,8 +391,9 @@ public class BoardController {
 
         articleLikeDto = this.boardServices.cancelLikeArticle(id, userId);
         int likePoint = this.boardServices.getLikePoint(id);
+        int likeUserPoint = this.boardServices.getLikeUserPoint(id, userId);
         articleLikeDto.setLikePoint(likePoint);
-
+        articleLikeDto.setLikeUserPoint(likeUserPoint);
         return articleLikeDto;
     }
 }

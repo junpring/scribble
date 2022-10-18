@@ -276,6 +276,13 @@
         WHERE `AL`.`article_id` = #{id}
     </select>
 
+    <select id="selectLikePoint2" resultType="_int">
+        SELECT COUNT(*) AS `point`
+        FROM `scribble_board`.`article_like` AS `AL`
+        WHERE `AL`.`article_id` = #{id}
+          AND AL.user_id = #{userId}
+    </select>
+
     <delete id="deleteCancelLikeArticle">
         DELETE
         FROM `scribble_board`.`article_like`

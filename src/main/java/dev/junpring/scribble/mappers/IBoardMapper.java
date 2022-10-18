@@ -55,7 +55,11 @@ public interface IBoardMapper {
     ArticleEntity selectArticle(@Param(value = "id") int id);
 
     int selectLikePoint(@Param(value = "id") int id);
+    int selectLikePoint2(@Param(value = "id") int id,
+                         @Param(value = "userId") int userId);
 
     int deleteCancelLikeArticle(@Param(value = "id") int id,
                                 @Param(value = "userId") int userId);
+
+
 }

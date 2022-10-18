@@ -222,6 +222,9 @@ public class BoardService {
     public int getLikePoint(int id) {
         return boardMapper.selectLikePoint(id);
     }
+    public int getLikeUserPoint(int id, int connectedUserId) {
+        return boardMapper.selectLikePoint2(id, connectedUserId);
+    }
 
     public ArticleLikeDto getArticleCancelLikeAvailable(int id, int connectedUserId) {
         ArticleLikeDto articleLikeDto = new ArticleLikeDto();

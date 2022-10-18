@@ -169,7 +169,7 @@
         let ArticleReplyInterval;
         let ArticleReply__$listTbody;
         let ArticleReply__lastLoadedArticleReplyId = 0;
-        let likePoint = [[${likePoint}]];
+        let likePoint = [[${likeUserPoint}]];
 
 
         function ArticleReply__loadList() {
@@ -244,7 +244,7 @@
         }
 
         $(function () {
-            ViewArticle2__updateLikePoint();
+            ViewArticle3__updateLikePoint();
 
             $('.article-written-at').html(timeForToday(ArticleListWrittenAt))
 
@@ -260,20 +260,26 @@
     </script>
 
     <script th:inline="javascript">
-        function ViewArticle2__updateLikePoint(){
-            if (likePoint > 1) {
+        function ViewArticle3__updateLikePoint() {
+            if (likePoint > 0) {
                 $('.cancel-like').html('좋아요 취소');
-            }else {
+                $('.do-like').html('');
+
+            } else {
+                $('.cancel-like').html('');
                 $('.do-like').html('좋아요');
             }
         }
-        function ViewArticle1__updateLikePoint(newLikePoint) {
-            $('.article--like-point').empty().append(newLikePoint);
 
-            if (newLikePoint > 1) {
-                $('.do-like').html('');
+        function ViewArticle1__updateLikePoint(likePoint) {
+            $('.article--like-point').empty().append(likePoint);
+        }
+        function ViewArticle2__updateLikePoint(likeUserPoint) {
+            if (likeUserPoint > 0) {
                 $('.cancel-like').html('좋아요 취소');
-            }else {
+                $('.do-like').html('');
+
+            } else {
                 $('.cancel-like').html('');
                 $('.do-like').html('좋아요');
             }
@@ -294,6 +300,8 @@
                     success: function (data) {
                         if (data.resultCode.substr(0, 2) === 'S-') {
                             ViewArticle1__updateLikePoint(data.likePoint);
+                            ViewArticle2__updateLikePoint(data.likeUserPoint);
+
                         } else {
                             if (data.msg) {
                                 alert(data.msg);
@@ -323,6 +331,7 @@
                     success: function (data) {
                         if (data.resultCode.substr(0, 2) === 'S-') {
                             ViewArticle1__updateLikePoint(data.likePoint);
+                            ViewArticle2__updateLikePoint(data.likeUserPoint);
                         } else {
                             if (data.msg) {
                                 alert(data.msg);
@@ -385,17 +394,22 @@
     <div class="article-content">
         <span th:utext="${articleListDto.getContent()}"></span>
         <div class="article-info">
-            <a class="btn like" onclick="callInsertLike();">
+            <a class="btn do-like" onclick="callInsertLike();">
                 <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="공감">
                 <span class="article--like-point" th:text="${articleListDto.extra.likePoint}"></span>
             </a>
+            <a class="btn cancel-like" onclick="callDoCancelLike();">
+                <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="공감">
+                <span class="article--like-point" th:text="${articleListDto.extra.likePoint}"></span>
+            </a>
+
             <a class="btn cmt">
                 <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
                 <span class="reply-count-a count"></span>
             </a>
 
-            <a class="do-like" href="#" onclick="callInsertLike();"></a>
-            <a class="cancel-like" href="#" onclick="callDoCancelLike();"></a>
+<!--            <a class="do-like" href="#" onclick="callInsertLike();"></a>-->
+<!--            <a class="cancel-like" href="#" onclick="callDoCancelLike();"></a>-->
         </div>
 
     </div>
