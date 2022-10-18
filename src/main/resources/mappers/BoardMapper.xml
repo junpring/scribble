@@ -67,22 +67,25 @@
     <select id="selectForPrintArticle"
             resultType="dev.junpring.scribble.entities.board.ArticleEntity"
             resultMap="article">
-        SELECT `A`.`id`          AS `id`,
-               `A`.`title`       AS `title`,
-               `A`.`content`     AS `content`,
-               `A`.`board_code`  AS `boardCode`,
-               `A`.`user_id`     AS `userId`,
-               `A`.`like`        AS `like`,
-               `A`.`reply_count` AS `replyCount`,
-               `A`.`view`        AS `view`,
-               `A`.`written_at`  AS `writtenAt`,
-               `B`.`name`        AS `extra__boardCodeName`,
-               `U`.`nickname`    AS `extra__userWriter`
+        SELECT `A`.`id`                     AS `id`,
+               `A`.`title`                  AS `title`,
+               `A`.`content`                AS `content`,
+               `A`.`board_code`             AS `boardCode`,
+               `A`.`user_id`                AS `userId`,
+               `A`.`like`                   AS `like`,
+               `A`.`reply_count`            AS `replyCount`,
+               `A`.`view`                   AS `view`,
+               `A`.`written_at`             AS `writtenAt`,
+               `B`.`name`                   AS `extra__boardCodeName`,
+               `U`.`nickname`               AS `extra__userWriter`,
+               IFNULL(SUM(`AL`.`point`), 0) AS `extra__like`
         FROM `scribble_board`.`articles` AS `A`
                  LEFT JOIN `scribble_board`.`boards` AS `B`
                            ON `A`.`board_code` = b.`code`
                  LEFT JOIN `scribble_member`.`user` AS `U`
                            ON `A`.`user_id` = `U`.`id`
+                 LEFT JOIN `scribble_board`.`article_like` AS `AL`
+                           ON `A`.`id` = `AL`.`article_id`
         WHERE `A`.`id` = #{id}
     </select>
 
@@ -121,7 +124,7 @@
     <select id="selectRootArticleList"
             parameterType="dev.junpring.scribble.entities.board.BoardEntity"
             resultType="dev.junpring.scribble.vos.board.article.ArticleListVo">
-        SELECT `board`.`id`    AS `id`,
+        SELECT `B`.`id`        AS `id`,
                `code`          AS `boardCode`,
                `articles`.`id` AS `articleId`,
                `user_id`       AS `userId`,
@@ -132,10 +135,22 @@
                `view`          AS `view`,
                `written_at`    AS `writtenAt`
         FROM `scribble_board`.`articles`
-                 LEFT JOIN `scribble_board`.`boards` AS `board` ON `articles`.`board_code` = `board`.`code`
-        WHERE `board`.id = #{id}
+                 LEFT JOIN `scribble_board`.`boards` AS `B` ON `articles`.`board_code` = `B`.`code`
+        WHERE `B`.id = #{id}
         ORDER BY `articles`.`id` DESC
         LIMIT 5
+    </select>
+
+    <select id="selectArticle" resultMap="article">
+        SELECT `A`.`id`         AS `id`,
+               `A`.`written_at` AS `writtenAt`,
+               `A`.`title`      AS `title`,
+               `A`.`content`    AS `content`,
+               `A`.`user_id`    AS `userId`,
+               `A`.`like`       AS `like`,
+               `A`.`view`       AS `view`
+        FROM `scribble_board`.`articles` AS `A`
+        WHERE `A`.`id` = #{id}
     </select>
 
     <select id="selectBoardByCode"
@@ -240,6 +255,33 @@
         LIMIT 1
     </delete>
 
+    <insert id="insertLikeArticle">
+        INSERT INTO `scribble_board`.`article_like`
+        SET `reg_date`   = NOW(),
+            `article_id` = #{id},
+            `user_id`    = #{userId},
+            `point`      = 1
+    </insert>
+
+    <select id="selectLikePointByUserId" resultType="_int">
+        SELECT IFNULL(SUM(`AL`.`point`), 0) AS `point`
+        FROM `scribble_board`.`article_like` AS `AL`
+        WHERE `AL`.`article_id` = #{id}
+          AND AL.`user_id` = #{userId}
+    </select>
+
+    <select id="selectLikePoint" resultType="_int">
+        SELECT IFNULL(SUM(`AL`.`point`), 0) AS `point`
+        FROM `scribble_board`.`article_like` AS `AL`
+        WHERE `AL`.`article_id` = #{id}
+    </select>
+
+    <delete id="deleteCancelLikeArticle">
+        DELETE
+        FROM `scribble_board`.`article_like`
+        WHERE `article_id` = #{id}
+          AND user_id = #{userId}
+    </delete>
 
     <resultMap type="dev.junpring.scribble.entities.board.ArticleEntity"
                id="article">
@@ -256,6 +298,7 @@
         <association property="extra" javaType="map">
             <result property="boardCodeName" column="extra__boardCodeName"/>
             <result property="userWriter" column="extra__userWriter"/>
+            <result property="likePoint" column="extra__like"/>
         </association>
     </resultMap>
 

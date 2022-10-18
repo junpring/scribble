@@ -16,7 +16,6 @@ public class ArticleListVo extends ArticleEntity implements IResult<ArticleListR
     private String msg;
     private String resultCode;
     private int articleId;
-
     private Map<String, Object> extra;
 
 //  articleId 이거 방법이 있을거임 루트페이지와 함께 수정해야됨 !

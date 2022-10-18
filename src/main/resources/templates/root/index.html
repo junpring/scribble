@@ -30,15 +30,15 @@
             <a href="#" class="cell col1">카테고리</a>
             <a href="#" class="cell col2">내용</a>
             <a href="#" class="cell col3">
-                <img class="icon" src="../resources/images/like-purple.png" alt="공감">
+                <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="좋아요">
                 <span class="link count">100</span>
             </a>
             <a href="#" class="cell col4">
-                <img class="icon" src="../resources/images/comment-purple.png" alt="댓글">
+                <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
                 <span class="comment count">220</span>
             </a>
             <a href="#" class="cell col5">
-                <img class="icon" src="../resources/images/view-purple.png" alt="조회수">
+                <img class="icon" th:src="@{../resources/images/view-purple.png}" alt="조회수">
                 <span class="view count">220</span>
             </a>
         </div>
@@ -80,15 +80,15 @@
                 <a th:href="@{/board/detail (id=${article.getArticleId()})}"
                    th:text="*{article.getTitle()}" class="cell col2">제목</a>
                 <a href="#" class="cell col3">
-                    <img class="icon" src="../resources/images/like-purple.png" alt="공감">
-                    <span class="link count" th:text="*{article.getLike()}"></span>
+                    <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="공감">
+                    <span class="link count"></span>
                 </a>
                 <a th:href="@{/board/detail (id=${article.getArticleId()})}" class="cell col4">
-                    <img class="icon" src="../resources/images/comment-purple.png" alt="댓글">
-                    <span class="comment count" th:text="*{article.replyCount}"></span>
+                    <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
+                    <span class="comment count" ></span>
                 </a>
                 <a th:href="@{/board/detail (id=${article.getArticleId()})}" class="cell col5">
-                    <img class="icon" src="../resources/images/view-purple.png" alt="조회수">
+                    <img class="icon" th:src="@{../resources/images/view-purple.png}" alt="조회수">
                     <span class="view count" th:text="*{article.getView()}">22</span>
                 </a>
             </div>

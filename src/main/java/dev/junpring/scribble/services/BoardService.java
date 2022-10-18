@@ -1,5 +1,6 @@
 package dev.junpring.scribble.services;
 
+import dev.junpring.scribble.dtos.ArticleLikeDto;
 import dev.junpring.scribble.dtos.ArticleListDto;
 import dev.junpring.scribble.dtos.ArticleReplyDTO;
 import dev.junpring.scribble.dtos.SearchDto;
@@ -28,7 +29,6 @@ public class BoardService {
     public BoardService(IBoardMapper mapper) {
         this.boardMapper = mapper;
     }
-
 
 
     public void removeArticle(ArticleListVo articleListVo) {
@@ -65,6 +65,7 @@ public class BoardService {
     public ImageEntity getImage(String id) {
         return this.boardMapper.selectImage(id);
     }
+
     public void getArticle(ArticleListDto articleListDto) {
         ArticleEntity articleEntity = this.boardMapper.selectForPrintArticle(articleListDto.getId());
         articleListDto.setBoardCode(articleEntity.getBoardCode());
@@ -76,13 +77,13 @@ public class BoardService {
         articleListDto.setExtra(articleEntity.getExtra());
     }
 
-    public void getForPrintArticle(ArticleListVo articleListVo, int actorUserId) {
+    public void getForPrintArticle(ArticleListVo articleListVo, int connectedUserId) {
         ArticleEntity articleEntity = this.boardMapper.selectForPrintArticle(articleListVo.getId());
         if (articleEntity == null || articleEntity.getId() == 0) {
             articleListVo.setResult(ArticleListResult.FAILURE);
             return;
         }
-        if (articleEntity.getUserId() == actorUserId) {
+        if (articleEntity.getUserId() == connectedUserId) {
             articleListVo.setResultCode("S-1");
             articleListVo.setMsg("권한이 있습니다.");
         } else {
@@ -147,9 +148,9 @@ public class BoardService {
         }
     }
 
-    public ArticleReplyDTO getArticleModifyReplyAvailable(int id, int actorUserId) {
+    public ArticleReplyDTO getArticleModifyReplyAvailable(int id, int connectedUserId) {
         ArticleReplyDTO articleReplyDto = this.boardMapper.selectArticleReply(id);
-        if (articleReplyDto.getUserId() == actorUserId) {
+        if (articleReplyDto.getUserId() == connectedUserId) {
             articleReplyDto.setResultCode("S-1");
             articleReplyDto.setMsg("수정권한이 있습니다.");
         } else {
@@ -166,8 +167,8 @@ public class BoardService {
         }
     }
 
-    public ArticleReplyDTO getArticleDeleteReplyAvailableRs(int id, int actorUserId) {
-        ArticleReplyDTO articleReplyDto = getArticleModifyReplyAvailable(id, actorUserId);
+    public ArticleReplyDTO getArticleDeleteReplyAvailableRs(int id, int connectedUserId) {
+        ArticleReplyDTO articleReplyDto = getArticleModifyReplyAvailable(id, connectedUserId);
         String msg = articleReplyDto.getMsg().replace("수정", "삭제");
         articleReplyDto.setMsg(msg);
         return articleReplyDto;
@@ -180,7 +181,71 @@ public class BoardService {
         }
     }
 
-    public void articleViewCount(int id) {
-        this.boardMapper.updateViewCount(id);
+    public int articleViewCount(int id) {
+        return this.boardMapper.updateViewCount(id);
+    }
+
+    public ArticleLikeDto getArticleLikeAvailable(int id, int connectedUserId) {
+        ArticleEntity articleEntity = this.boardMapper.selectArticle(id);
+
+        ArticleLikeDto articleLikeDto = new ArticleLikeDto();
+
+        if (articleEntity.getUserId() == connectedUserId) {
+            articleLikeDto.setResultCode("F-1");
+            articleLikeDto.setMsg("본인은 추천 할 수 없습니다.");
+            return articleLikeDto;
+        }
+
+        int likePoint = this.boardMapper.selectLikePointByUserId(id, connectedUserId);
+
+        if (likePoint > 0) {
+            articleLikeDto.setResultCode("F-2");
+            articleLikeDto.setMsg("이미 좋아요를 하셨습니다.");
+            return articleLikeDto;
+        }
+
+        articleLikeDto.setResultCode("S-1");
+        articleLikeDto.setMsg("좋아요가 가능합니다.");
+
+        return articleLikeDto;
+    }
+
+    public ArticleLikeDto addLikeArticle(int id, int connectedUserId) {
+        ArticleLikeDto articleLikeDto = new ArticleLikeDto();
+        if (this.boardMapper.insertLikeArticle(id, connectedUserId) > 0) {
+            articleLikeDto.setResultCode("S-1");
+            articleLikeDto.setMsg(String.format("%d번 게시물을 추천하였습니다.", id));
+        }
+        return articleLikeDto;
+    }
+
+    public int getLikePoint(int id) {
+        return boardMapper.selectLikePoint(id);
+    }
+
+    public ArticleLikeDto getArticleCancelLikeAvailable(int id, int connectedUserId) {
+        ArticleLikeDto articleLikeDto = new ArticleLikeDto();
+
+        int likePoint = this.boardMapper.selectLikePointByUserId(id, connectedUserId);
+
+        if (likePoint == 0) {
+            articleLikeDto.setResultCode("F-1");
+            articleLikeDto.setMsg("추천하신 분만 취소가 가능합니다.");
+            return articleLikeDto;
+        }
+
+        articleLikeDto.setResultCode("S-1");
+        articleLikeDto.setMsg("취소가 가능합니다");
+
+        return articleLikeDto;
+    }
+
+    public ArticleLikeDto cancelLikeArticle(int id, int connectedUserId) {
+        this.boardMapper.deleteCancelLikeArticle(id, connectedUserId);
+        ArticleLikeDto articleLikeDto = new ArticleLikeDto();
+
+        articleLikeDto.setResultCode("S-1");
+        articleLikeDto.setMsg(String.format("%d번 게시물을 추천을 취소하였습니다.", id));
+        return articleLikeDto;
     }
 }

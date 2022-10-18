@@ -45,4 +45,17 @@ public interface IBoardMapper {
     int updateArticleReply(ArticleReplyDTO articleReplyDTO);
 
     int deleteArticleReply(ArticleReplyDTO articleReplyDto);
+
+    int insertLikeArticle(@Param(value = "id") int id,
+                          @Param(value = "userId") int userId);
+
+    int selectLikePointByUserId(@Param(value = "id") int id,
+                                @Param(value = "userId") int userId);
+
+    ArticleEntity selectArticle(@Param(value = "id") int id);
+
+    int selectLikePoint(@Param(value = "id") int id);
+
+    int deleteCancelLikeArticle(@Param(value = "id") int id,
+                                @Param(value = "userId") int userId);
 }

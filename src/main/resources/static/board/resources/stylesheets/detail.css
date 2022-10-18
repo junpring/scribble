@@ -125,6 +125,7 @@ body > .section > .article-content > .article-info {
 }
 
 body > .section > .article-content > .article-info > .btn {
+    cursor: pointer;
     padding-right: 1rem;
 }
 body > .section > .article-content > .article-info > .btn > .icon{

@@ -29,7 +29,7 @@
             if ([[${userEntity}]] == null) {
                 alert("로그인 후 이용해 주세요.");
                 location.replace('/user/login');
-            }else {
+            } else {
                 $.ajax({
                     url: './postWriteReply',
                     type: 'POST',
@@ -169,6 +169,7 @@
         let ArticleReplyInterval;
         let ArticleReply__$listTbody;
         let ArticleReply__lastLoadedArticleReplyId = 0;
+        let likePoint = [[${likePoint}]];
 
 
         function ArticleReply__loadList() {
@@ -211,7 +212,6 @@
         }
 
 
-
         function ArticleReply__drawReply(articleReply) {
 
             let html = $('.template-box-1').html();
@@ -244,6 +244,8 @@
         }
 
         $(function () {
+            ViewArticle2__updateLikePoint();
+
             $('.article-written-at').html(timeForToday(ArticleListWrittenAt))
 
             ArticleReply__$listTbody = $('.reply-wrap > .reply-box');
@@ -255,6 +257,85 @@
 
 
         });
+    </script>
+
+    <script th:inline="javascript">
+        function ViewArticle2__updateLikePoint(){
+            if (likePoint > 1) {
+                $('.cancel-like').html('좋아요 취소');
+            }else {
+                $('.do-like').html('좋아요');
+            }
+        }
+        function ViewArticle1__updateLikePoint(newLikePoint) {
+            $('.article--like-point').empty().append(newLikePoint);
+
+            if (newLikePoint > 1) {
+                $('.do-like').html('');
+                $('.cancel-like').html('좋아요 취소');
+            }else {
+                $('.cancel-like').html('');
+                $('.do-like').html('좋아요');
+            }
+        }
+
+        function callInsertLike() {
+            if ([[${userEntity}]] == null) {
+                alert("로그인 후 이용해 주세요.");
+                location.replace('/user/login');
+            } else {
+                $.ajax({
+                    url: './postInsertLike',
+                    type: 'POST',
+                    data: {
+                        'id': id
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.resultCode.substr(0, 2) === 'S-') {
+                            ViewArticle1__updateLikePoint(data.likePoint);
+                        } else {
+                            if (data.msg) {
+                                alert(data.msg);
+                            }
+                        }
+                    },
+                    error: function () {
+                        alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
+                        console.log("ajax 통신 실패");
+                    }
+                });
+            }
+        }
+
+        function callDoCancelLike() {
+            if ([[${userEntity}]] == null) {
+                alert("로그인 후 이용해 주세요.");
+                location.replace('/user/login');
+            } else {
+                $.ajax({
+                    url: './postDeleteLike',
+                    type: 'POST',
+                    data: {
+                        'id': id
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.resultCode.substr(0, 2) === 'S-') {
+                            ViewArticle1__updateLikePoint(data.likePoint);
+                        } else {
+                            if (data.msg) {
+                                alert(data.msg);
+                            }
+                        }
+                    },
+                    error: function () {
+                        alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
+                        console.log("ajax 통신 실패");
+                    }
+                });
+            }
+        }
     </script>
 </head>
 <body>
@@ -304,15 +385,19 @@
     <div class="article-content">
         <span th:utext="${articleListDto.getContent()}"></span>
         <div class="article-info">
-            <a href="#" class="btn like">
+            <a class="btn like" onclick="callInsertLike();">
                 <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="공감">
-                <span>좋아요</span>
+                <span class="article--like-point" th:text="${articleListDto.extra.likePoint}"></span>
             </a>
             <a class="btn cmt">
                 <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
                 <span class="reply-count-a count"></span>
             </a>
+
+            <a class="do-like" href="#" onclick="callInsertLike();"></a>
+            <a class="cancel-like" href="#" onclick="callDoCancelLike();"></a>
         </div>
+
     </div>
 </section>
 <div class="reply-wrap">
