@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -41,6 +42,15 @@ public class BoardController {
         this.boardServices = boardServices;
     }
 
+    @RequestMapping(value = "/list/best", method = RequestMethod.GET)
+    public String getBestBoard(
+            Model model
+    ) {
+        List<ArticleListDto> getForPrintRcmdArticlesRs = this.boardServices.getForPrintRcmdArticles();
+        model.addAttribute("getForPrintRcmdArticlesRs", getForPrintRcmdArticlesRs);
+        return "board/best-list";
+    }
+
     @RequestMapping(value = "/list/{boardCode}", method = RequestMethod.GET)
     public String getBoard(
             @PathVariable(name = "boardCode", required = false) String boardCode,
@@ -51,7 +61,7 @@ public class BoardController {
         boardIdVo.setResult(null);
         boardIdVo.setCode(boardCode);
         this.boardServices.boardIdList(boardIdVo);
-        PagingResponse<ArticleEntity> articlesResponse = this.boardServices.getArticlesForBoardList(params);
+        PagingResponse<ArticleListDto> articlesResponse = this.boardServices.getArticlesForBoardList(params);
         model.addAttribute("boardIdVo", boardIdVo);
         model.addAttribute("articlesResponse", articlesResponse);
         return "board/list";
@@ -59,8 +69,22 @@ public class BoardController {
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     public String getSearch(
+            @ModelAttribute("params") final SearchDto params,
+            Model model
     ) {
+        PagingResponse<ArticleListDto> articlesResponse = this.boardServices.getFindArticlesForList(params);
 
+        System.out.println(params.getBoardCode());
+        model.addAttribute("articlesResponse", articlesResponse);
+
+
+        HashMap<String, String> boardCodes = new HashMap<>();
+        List<BoardEntity> boardEntities = this.boardServices.getBoardList();
+        for (BoardEntity boardEntity : boardEntities) {
+            boardCodes.put(boardEntity.getCode(), boardEntity.getName());
+        }
+
+        model.addAttribute("boardCodes", boardCodes);
         return "board/search";
     }
 
@@ -122,11 +146,18 @@ public class BoardController {
     }
 
     @RequestMapping(value = "write", method = RequestMethod.GET)
-    public ModelAndView getWrite(
-            ModelAndView modelAndView
+    public String getWrite(
+            Model model
     ) {
-        modelAndView.setViewName("board/write");
-        return modelAndView;
+
+        HashMap<String, String> boardCodes = new HashMap<>();
+        List<BoardEntity> boardEntities = this.boardServices.getBoardList();
+        for (BoardEntity boardEntity : boardEntities) {
+            boardCodes.put(boardEntity.getCode(), boardEntity.getName());
+        }
+
+        model.addAttribute("boardCodes", boardCodes);
+        return "board/write";
     }
 
     @RequestMapping(value = "write", method = RequestMethod.POST)
@@ -161,7 +192,7 @@ public class BoardController {
         }
         byte[] data = null;
         HttpHeaders headers = new HttpHeaders();
-        HttpStatus status = HttpStatus.NOT_FOUND; // 404 담음
+        HttpStatus status = HttpStatus.NOT_FOUND;
         if (imageEntity != null && imageEntity.getData() != null) {
             data = imageEntity.getData();
             headers.add("Content-Type", imageEntity.getFileType());
@@ -198,25 +229,25 @@ public class BoardController {
             urlJson.put(String.format("http://127.0.0.1:8080/board/download-image?id=%s", imageEntity.getId()));
         }
         responseJson.put("url", urlJson);
-        return responseJson.toString(); // Json 리턴, 업로드 성공했다는 응답을 돌려주기위함.
+        return responseJson.toString();
     }
 
     @RequestMapping(value = "detail", method = RequestMethod.GET)
     public String getDetail(
-            @RequestParam(value = "id", required = false) int id,
+            @RequestParam(value = "id") int id,
             ArticleListDto articleListDto,
             Model model,
             HttpServletRequest request,
             HttpServletResponse response
 
     ) {
+        int userId = (int)request.getAttribute("connectedUserId");
+
         articleListDto.setId(id);
         this.boardServices.getArticle(articleListDto);
 
 //      쿠키 value 해싱 해야됨.
-
         Cookie[] cookies = request.getCookies();
-
         // 비교하기 위해 새로운 쿠키
         Cookie viewCookie = null;
 
@@ -225,7 +256,7 @@ public class BoardController {
             for (int i = 0; i < cookies.length; i++) {
                 // Cookie의 name이 cookie + id와 일치하는 쿠키를 viewCookie에 넣어줌
                 if (cookies[i].getName().equals("cookie" + id)) {
-                    System.out.println("처음 쿠키가 생성한 뒤 들어옴.");
+//                    System.out.println("처음 쿠키가 생성한 뒤 들어옴.");
                     viewCookie = cookies[i];
                 }
             }
@@ -233,17 +264,16 @@ public class BoardController {
 
         // 만일 viewCookie가 null일 경우 쿠키를 생성해서 조회수 증가 로직을 처리함.
         if (viewCookie == null) {
+            System.out.println("----------------");
             System.out.println("cookie 없음");
 
             // 쿠키 생성(이름, 값)
             Cookie newCookie = new Cookie("cookie" + id, "|" + id + "|");
-
             // 쿠키 추가
             response.addCookie(newCookie);
 
             // 쿠키를 추가 시키고 조회수 증가시킴
             int result = this.boardServices.articleViewCount(articleListDto.getId());
-            ;
 
             if (result > 0) {
                 System.out.println("조회수 증가");
@@ -253,19 +283,24 @@ public class BoardController {
         }
         // viewCookie가 null이 아닐경우 쿠키가 있으므로 조회수 증가 로직을 처리하지 않음.
         else {
+            System.out.println("----------------");
             System.out.println("cookie 있음");
             // 쿠키 값 받아옴.
             String value = viewCookie.getValue();
             System.out.println("cookie 값 : " + value);
         }
-        int test = (int)request.getAttribute("userEntityId");
-
-        int likeUserPoint = this.boardServices.getLikeUserPoint(id, test);
 
         List<ArticleReplyDTO> articleReplyDtos = this.boardServices.getForPrintArticleReplies(articleListDto.getId());
+        int likePointByUserId = this.boardServices.getLikePointByUserId(id, userId);
+
         model.addAttribute("articleReplyDtos", articleReplyDtos);
         model.addAttribute("articleListDto", articleListDto);
-        model.addAttribute("likeUserPoint", likeUserPoint);
+        model.addAttribute("likePointByUserId", likePointByUserId);
+
+
+        List<ArticleListDto> getForPrintRcmdArticlesRs = this.boardServices.getForPrintRcmdArticles();
+        model.addAttribute("getForPrintRcmdArticlesRs", getForPrintRcmdArticlesRs);
+
         return "board/detail";
     }
 
@@ -276,7 +311,6 @@ public class BoardController {
             ArticleReplyDTO articleReplyDTO
     ) {
         List<ArticleReplyDTO> articleReplies = this.boardServices.getForPrintArticleReplies(id);
-
         articleReplyDTO.setMsg(String.format("총 %d개의 댓글이 있습니다.", articleReplies.size()));
         articleReplyDTO.setResultCode("S-1");
 
@@ -286,10 +320,9 @@ public class BoardController {
     @RequestMapping(value = "postWriteReply", method = RequestMethod.POST)
     @ResponseBody
     public ArticleReplyDTO postWriteReply(
-            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
+            @RequestAttribute(value = "connectedUserId", required = false) int userId,
             ArticleReplyDTO articleReplyDTO
     ) {
-        int userId = userEntity.getId();
         articleReplyDTO.setUserId(userId);
         this.boardServices.writeReply(articleReplyDTO);
         return articleReplyDTO;
@@ -343,13 +376,11 @@ public class BoardController {
 
     @RequestMapping(value = "postInsertLike", method = RequestMethod.POST)
     @ResponseBody
-    public ArticleLikeDto doLikeAjax(
+    public ArticleLikeDto postInsertLike(
             @RequestParam(value = "id") int id,
-            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity
+            @RequestAttribute(value = "connectedUserId", required = false) int userId
     ) {
         ArticleLikeDto articleLikeDto = new ArticleLikeDto();
-        int userId = userEntity.getId();
-
         ArticleLikeDto articleLikeAvailableRs = this.boardServices.getArticleLikeAvailable(id, userId);
 
         if ((articleLikeAvailableRs.getResultCode().startsWith("F-"))) {
@@ -361,24 +392,19 @@ public class BoardController {
 
         articleLikeDto = this.boardServices.addLikeArticle(id, userId);
         int likePoint = this.boardServices.getLikePoint(id);
+        int likePointByUserId = this.boardServices.getLikePointByUserId(id, userId);
         articleLikeDto.setLikePoint(likePoint);
-
-
-        int likeUserPoint = this.boardServices.getLikeUserPoint(id, userId);
-        articleLikeDto.setLikeUserPoint(likeUserPoint);
-        System.out.println("likeUserPoint: " + likeUserPoint);
+        articleLikeDto.setLikePointByUserId(likePointByUserId);
         return articleLikeDto;
     }
 
     @RequestMapping(value = "postDeleteLike", method = RequestMethod.POST)
     @ResponseBody
-    public ArticleLikeDto doCancelLikeAjax(
+    public ArticleLikeDto postDeleteLike(
             @RequestParam(value = "id") int id,
-            @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity
+            @RequestAttribute(value = "connectedUserId", required = false) int userId
     ) {
-
         ArticleLikeDto articleLikeDto = new ArticleLikeDto();
-        int userId = userEntity.getId();
 
         ArticleLikeDto articleCancelLikeAvailableRs = this.boardServices.getArticleCancelLikeAvailable(id, userId);
 
@@ -391,9 +417,9 @@ public class BoardController {
 
         articleLikeDto = this.boardServices.cancelLikeArticle(id, userId);
         int likePoint = this.boardServices.getLikePoint(id);
-        int likeUserPoint = this.boardServices.getLikeUserPoint(id, userId);
+        int likePointByUserId = this.boardServices.getLikePointByUserId(id, userId);
         articleLikeDto.setLikePoint(likePoint);
-        articleLikeDto.setLikeUserPoint(likeUserPoint);
+        articleLikeDto.setLikePointByUserId(likePointByUserId);
         return articleLikeDto;
     }
 }

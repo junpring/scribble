@@ -57,7 +57,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/user/resources/**").excludePathPatterns("/")
                 .excludePathPatterns("/user/login").excludePathPatterns("/user/register")
                 .excludePathPatterns("/board/detail").excludePathPatterns("/board/list/**")
-                .excludePathPatterns("/board/getForPrintArticleRepliesRs").excludePathPatterns("/board/download-image").excludePathPatterns("/board/postWriteReply");
+                .excludePathPatterns("/board/getForPrintArticleRepliesRs").excludePathPatterns("/board/download-image")
+                .excludePathPatterns("/user/check-email").excludePathPatterns("/user/check-nickname").excludePathPatterns("/user/verify-email").excludePathPatterns("/board/search");
 
     }
 

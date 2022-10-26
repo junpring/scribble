@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SearchDto{
-//    public class SearchDto extends BoardIdEntity {
     private String boardCode;
     private int page;             // 현재 페이지 번호
     private int recordSize;       // 페이지당 출력할 데이터 개수

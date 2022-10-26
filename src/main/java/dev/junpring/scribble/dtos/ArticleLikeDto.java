@@ -10,5 +10,5 @@ public class ArticleLikeDto extends ArticleLikeEntity {
     private String resultCode;
     private String msg;
     private int likePoint;
-    private int likeUserPoint;
+    private int likePointByUserId;
 }

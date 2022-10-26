@@ -15,34 +15,23 @@
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/resources/libraries/ckeditor/ckeditor.js}"></script>
     <script defer th:src="@{/board/resources/scripts/write.js}"></script>
+    <script defer th:src="@{/resources/scripts/common.js}"></script>
 </head>
 <body>
 <th:block th:replace="~{fragments/header.html :: header}"></th:block>
 <form id="main" class="main" method="post" >
     <label class="label">
-        <select autofocus class="category" name="boardCode">
+        <select class="category" name="boardCode">
             <option value="none">게시판을 선택해 주세요.</option>
-            <option value="stock">주식·투자</option>
-            <option value="realestate">부동산</option>
-            <option value="free">자유게시판</option>
-            <option value="exercise">헬스·다이어트</option>
-            <option value="bitcoin">비트코인</option>
-            <option value="car">자동차</option>
-            <option value="love">썸·연애</option>
-            <option value="shopping">쇼핑</option>
-            <option value="corona">코로나</option>
-            <option value="sports">스포츠</option>
-            <option value="pet">반려동물</option>
-            <option value="humor">유머저장소</option>
-            <option value="travel">여행</option>
-            <option value="parenting">육아</option>
-            <option value="fashion">패션·뷰티</option>
-            <option value="game">게임</option>
-            <option value="tv">TV·연예</option>
-            <option value="scribble-market">스블마켓</option>
-            <option value="promotion">홍보·소문내기</option>
+            <option th:each="key : ${boardCodes.keySet()}"
+                    th:value="${key}"
+                    th:text="${boardCodes.get(key)}">
+            </option>
         </select>
-        <input class="input" maxlength="40" name="title" placeholder="글 제목을 입력해주세요." type="text">
+<!--            <option th:if="${userEntity.id == 1}" value="gallery">갤러리</option>-->
+<!--            <option th:if="${userEntity.id == 1}">공지사항</option>-->
+
+        <input class="input" maxlength="40" name="title" placeholder="글 제목을 입력해주세요." type="text" spellcheck="false">
     </label>
     <label class="label">
         <textarea class="editor" name="content" id="editor" spellcheck="false"></textarea>

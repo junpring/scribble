@@ -1,4 +1,3 @@
-
 // +는 css와 같이 옆에 선택자를 지목함.
 
 // const RegisterForm = {
@@ -52,7 +51,10 @@ passwordInput.addEventListener('keyup', () => {
     if (!passwordRegex.test(passwordInput.value)) {
         passwordWarning.innerText = '비밀번호 형식이 올바르지 않습니다.';
         passwordWarning.style.display = 'inline';
-        return;
+    } else {
+        passwordWarning.innerText = '사용 가능한 비밀번호 입니다.';
+        passwordWarning.style.display = 'inline';
+        passwordWarning.style.color = '#6167b2';
     }
 });
 passwordCheckInput.addEventListener('keyup', () => {
@@ -87,7 +89,6 @@ emailInput.addEventListener('keyup', () => {
             if (xhr.status >= 200 && xhr.status < 300) {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     const response = parseInt(xhr.responseText);
-                    // 컨트롤러에서 받은 String 타입을 다시 Integer로 변환.
                     switch (response) {
                         case 0:
                             emailWarning.innerText = '사용 가능한 이메일입니다.';
@@ -181,9 +182,30 @@ document.addEventListener('mouseup', () => {
 })
 
 
+let checkAll = document.getElementById('check_all');
+const registerCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+
+function selectAll(selectAll)  {
+    registerCheckboxes.forEach((checkbox) => {
+        checkbox.checked = selectAll.checked
+    });
+}
+checkAll.addEventListener('click', () => {
+    selectAll(checkAll);
+});
+
+
 // 회원가입 버튼 실행
 registerForm.onsubmit = (e) => {
     e.preventDefault();
+    for (let i = 0; i < registerCheckboxes.length; i++) {
+        if (i !== 0 && !registerCheckboxes[i].checked) {
+            alert('이용약관을 읽고 동의해주세요.');
+            e.preventDefault();
+            return;
+        }
+    }
+
     // 이메일
     if (!emailRegex.test(emailInput.value)) {
         alert('이메일 형식이 올바르지 않습니다.');
@@ -211,7 +233,7 @@ registerForm.onsubmit = (e) => {
         nicknameInput.select();
         return;
     }
-    if (!contactRegex.test(contactInput.value)){
+    if (!contactRegex.test(contactInput.value)) {
         alert('휴대폰 번호가 올바르지 않습니다.');
         contactInput.focus();
         contactInput.select();
@@ -261,8 +283,8 @@ registerForm.onsubmit = (e) => {
                         alert('해당 번호은 중복된 번호입니다.');
                         break;
                     case 'SUCCESS':
-                        alert('임시 회원가입이 완료되었습니다.\n이메일 인증 후 로그인 해주세요.\n확인 버튼을 클릭하면 로그인 화면으로 돌아갑니다.');
-                        location.href = '/user/login';
+                        alert('임시 회원가입이 완료되었습니다.\n이메일 인증 후 로그인 해주세요.');
+                        location.href = '/';
                         break;
                     default :
                         alert('알 수 없는 이유로 회원가입에 실패하였습니다.');

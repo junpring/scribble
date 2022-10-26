@@ -16,20 +16,14 @@ loginForm.onsubmit = (e) => {
 
     const xhr = new XMLHttpRequest();
     const formData = new FormData(loginForm);
-    xhr.open('POST', 'login');
+    xhr.open('POST', './login');
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status >= 200 && xhr.status < 300) {
                 const response = JSON.parse(xhr.responseText);
                 switch (response['result']) {
                     case 'SUCCESS':
-                        if (document.referrer && document.referrer.indexOf("/") !== -1) {
-                            history.back(); // 뒤로가기
-                        }
-                        // 히스토리가 없는 경우 (URL을 직접 입력하여 유입된 경우)
-                        else {
-                            location.href = "/"; // 메인페이지로
-                        }
+                        location.href = document.referrer;
                         break;
                     case 'DELETED':
                         alert('삭제된 이메일입니다.');

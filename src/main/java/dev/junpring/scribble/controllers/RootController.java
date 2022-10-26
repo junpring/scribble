@@ -1,10 +1,13 @@
 package dev.junpring.scribble.controllers;
 
+import dev.junpring.scribble.dtos.ArticleListDto;
+import dev.junpring.scribble.entities.board.ArticleEntity;
 import dev.junpring.scribble.entities.board.BoardEntity;
 import dev.junpring.scribble.services.BoardService;
 import dev.junpring.scribble.vos.board.article.ArticleListVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -24,24 +27,24 @@ public class RootController {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ModelAndView getIdx(
-            ModelAndView modelAndView,
-            ArticleListVo articleVo
+    public String getIndex(
+            Model model
     ){
-        List<BoardEntity> boardIdVos = this.boardServices.boardList();
+        List<BoardEntity> boardList = this.boardServices.getBoardList();
 
-        HashMap<String, ArrayList<ArticleListVo>> articles = new HashMap<>();
-        for (BoardEntity idVo : boardIdVos) {
-            if (!articles.containsKey(idVo.getCode())) {
-                articles.put(idVo.getCode(), new ArrayList<>());
+        HashMap<String, ArrayList<ArticleEntity>> articles = new HashMap<>();
+        for (BoardEntity list : boardList) {
+            if (!articles.containsKey(list.getCode())) {
+                articles.put(list.getCode(), new ArrayList<>());
             }
-//            articleVo.setArticleId(idVo.getId());
-            articles.get(idVo.getCode()).addAll(this.boardServices.rootArticleList(idVo));
+            articles.get(list.getCode()).addAll(this.boardServices.rootArticleList(list));
         }
+        model.addAttribute("articles", articles);
+        model.addAttribute("boardList", boardList);
 
-        modelAndView.addObject("articles", articles);
-        modelAndView.addObject("boardIdVos", boardIdVos);
-        modelAndView.setViewName("root/index");
-        return modelAndView;
+        List<ArticleListDto> getForPrintRcmdArticlesRs = this.boardServices.getForPrintRcmdArticles();
+        model.addAttribute("getForPrintRcmdArticlesRs", getForPrintRcmdArticlesRs);
+        return "root/index";
+
     }
 }

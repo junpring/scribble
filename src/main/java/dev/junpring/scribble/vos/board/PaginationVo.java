@@ -2,6 +2,7 @@ package dev.junpring.scribble.vos.board;
 
 import dev.junpring.scribble.dtos.SearchDto;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class PaginationVo {

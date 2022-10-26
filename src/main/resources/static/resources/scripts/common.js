@@ -1,7 +1,7 @@
-function maskingName (strName) {
+function maskingName(strName) {
     if (strName.length > 2) {
         var originName = strName.split('');
-        originName.forEach(function(name, i) {
+        originName.forEach(function (name, i) {
             if (i === 0 || i === originName.length - 1) return;
             originName[i] = '*';
         });
@@ -56,3 +56,18 @@ function timeForToday(value) {
 function replaceAll(str, searchStr, replaceStr) {
     return str.split(searchStr).join(replaceStr);
 }
+
+let searchButton = document.querySelector('.search-button');
+let keywordInput = document.querySelector('.keyword-input');
+searchButton.addEventListener('click', function (e) {
+    console.log(keywordInput.value);
+    if (keywordInput.value === '') {
+        e.preventDefault();
+        alert('검색어를 입력해 주세요.')
+    }
+});
+
+// document.addEventListener("DOMContentLoaded", function () { // html에서 script코드 짜서할 때
+//
+// })
+

@@ -2,6 +2,7 @@
 
 .section {
     width: var(--content-max-width);
+    margin-top: 6rem;
 }
 
 .section > .board-type {

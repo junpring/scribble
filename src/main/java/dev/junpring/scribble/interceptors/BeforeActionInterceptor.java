@@ -34,9 +34,9 @@ public class BeforeActionInterceptor implements HandlerInterceptor {
 
         ObjectMapper mapper = new ObjectMapper();
         String paramJson = mapper.writeValueAsString(param);
-//        System.out.println("paramJson : " + paramJson);
-//        log.info("paramJson: " + paramJson);
+        String paramKeyword = request.getParameter("keyword");
 
+        request.setAttribute("paramKeyword", paramKeyword);
         request.setAttribute("param", param);
         request.setAttribute("paramJson", paramJson);
 

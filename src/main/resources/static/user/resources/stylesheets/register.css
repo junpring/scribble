@@ -8,6 +8,7 @@ body > .register-form {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    padding: 1rem;
 }
 
 body > .register-form > .logo-container {
@@ -43,8 +44,7 @@ body > .register-form > .input-container {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    margin-bottom: 0.75rem;
-    border-radius: 0.25rem;
+    border-radius: 0.45rem;
 }
 
 body > .register-form > .input-container:focus-within {
@@ -86,10 +86,11 @@ body > .register-form > .input-container > .email-verified-button {
 
 body > .register-form > .warning {
     color: red;
-    position: relative;
-    top: -0.355rem;
-    left: 0.3rem;
+    /*position: relative;*/
+    /*top: -0.355rem;*/
+    /*left: 0.3rem;*/
     font-size: 0.825rem;
+    margin: 0.4rem;
 }
 
 body > .register-form > .button {

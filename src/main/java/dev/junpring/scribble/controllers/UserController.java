@@ -38,6 +38,11 @@ public class UserController {
             UserEntity userEntity
     ) {
         int emailCount = this.userService.CountByEmail(userEntity);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return String.valueOf(emailCount);
     }
 
@@ -47,6 +52,11 @@ public class UserController {
             UserEntity userEntity
     ) {
         int nicknameCount = this.userService.CountByNickname(userEntity);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return String.valueOf(nicknameCount);
     }
 
@@ -118,8 +128,7 @@ public class UserController {
             sessionKeyCookie.setPath("/");
             // 위 설정하지않으면 기본 path : 현재주소 (/user/**) 이 주소에만 사용가능, /는 전역 사용가능.
             response.addCookie(sessionKeyCookie); // response에 생성한 쿠키를 추가. (응답보낼 쿠키)
-        };
-//        System.out.println("auto: " + request.getParameter("autosign"));
+        }
         JSONObject obj = new JSONObject();
         obj.put("result", loginVo.getResult().name());
         return obj.toString();

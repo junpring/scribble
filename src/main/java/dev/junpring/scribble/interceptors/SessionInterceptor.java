@@ -21,6 +21,7 @@ public class SessionInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        /** 뒤로가기 캐쉬 제거*/
         response.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
         response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
         response.addHeader("Cache-Control", "post-check=0, pre-check=0");
@@ -55,7 +56,7 @@ public class SessionInterceptor implements HandlerInterceptor {
 //            ~.findFirst() 는 Optional<cookie>를 돌려줌
 //            Optional<T>
         }
-
+        int connectedUserId = 0;
         if (sessionKeyCookie != null && sessionKeyCookie.getValue() != null) {
             String sessionKey = sessionKeyCookie.getValue();// 쿠키에 저장된 데이터
             SessionEntity sessionEntity = this.userService.getSession(sessionKey);
@@ -66,9 +67,11 @@ public class SessionInterceptor implements HandlerInterceptor {
                     request.setAttribute("sessionEntity", sessionEntity);
                     request.setAttribute("userEntity", userEntity);
                     request.setAttribute("userEntityId", userEntity.getId());
+                    connectedUserId = userEntity.getId();
                 }
             }
         }
+        request.setAttribute("connectedUserId", connectedUserId);
 
         if (request.getAttribute("userEntity") == null && sessionKeyCookie != null) {
             sessionKeyCookie.setMaxAge(0); // Cookie는 remove나 delete같은게 없어서 setMaxAge를 0으로 둠으로써 삭제할 수 있다. 쿠키수명 0으로 만듬  == 제거

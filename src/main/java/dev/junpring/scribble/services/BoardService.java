@@ -13,12 +13,9 @@ import dev.junpring.scribble.vos.board.article.ArticleListVo;
 import dev.junpring.scribble.vos.board.BoardIdVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service(value = "dev.junpring.scribble.services.BoardService")
 public class BoardService {
@@ -95,7 +92,6 @@ public class BoardService {
         articleListVo.setUserId(articleEntity.getUserId());
         articleListVo.setTitle(articleEntity.getTitle());
         articleListVo.setContent(articleEntity.getContent());
-        articleListVo.setLike(articleEntity.getLike());
         articleListVo.setReplyCount(articleEntity.getReplyCount());
         articleListVo.setView(articleEntity.getView());
         articleListVo.setExtra(articleEntity.getExtra());
@@ -109,21 +105,31 @@ public class BoardService {
         articleListVo.setResult(ArticleListResult.SUCCESS);
     }
 
-    public PagingResponse<ArticleEntity> getArticlesForBoardList(final SearchDto params) {
+    public PagingResponse<ArticleListDto> getArticlesForBoardList(SearchDto params) {
+        int count = this.boardMapper.selectArticlesBoardListCount(params);
+        PaginationVo paginationVo = new PaginationVo(count, params);
+        params.setPaginationVo(paginationVo);
+
+
+        List<ArticleListDto> list = this.boardMapper.selectArticlesForBoardList(params);
+        return new PagingResponse<>(list, paginationVo);
+    }
+
+    public PagingResponse<ArticleListDto> getFindArticlesForList(final SearchDto params) {
         int count = this.boardMapper.selectArticlesCount(params);
         PaginationVo paginationVo = new PaginationVo(count, params);
         params.setPaginationVo(paginationVo);
 
-        List<ArticleEntity> list = this.boardMapper.selectArticlesForBoardList(params);
+        List<ArticleListDto> list = this.boardMapper.selectFindArticlesForList(params);
         return new PagingResponse<>(list, paginationVo);
     }
 
-    public List<ArticleListVo> rootArticleList(BoardEntity boardIdEntity) {
-        return this.boardMapper.selectRootArticleList(boardIdEntity);
+    public List<ArticleEntity> rootArticleList(BoardEntity boardIdEntity) {
+        return this.boardMapper.selectHomeArticleList(boardIdEntity);
     }
 
-    public List<BoardEntity> boardList() {
-        return this.boardMapper.selectBoardCode();
+    public List<BoardEntity> getBoardList() {
+        return this.boardMapper.selectBoardList();
     }
 
     public void boardIdList(BoardIdVo boardIdVo) {
@@ -138,9 +144,10 @@ public class BoardService {
 
 
     public List<ArticleReplyDTO> getForPrintArticleReplies(int articleId) {
-        return this.boardMapper.getForPrintArticleRepliesFrom(articleId);
+        return this.boardMapper.selectForPrintArticleRepliesFrom(articleId);
     }
 
+//    @Transactional
     public void writeReply(ArticleReplyDTO articleReplyDTO) {
         if (this.boardMapper.writeArticleReply(articleReplyDTO) > 0) {
             articleReplyDTO.setResultCode("S-1");
@@ -159,7 +166,7 @@ public class BoardService {
         }
         return articleReplyDto;
     }
-
+    @Transactional
     public void modifyArticleReply(ArticleReplyDTO articleReplyDto) {
         if (this.boardMapper.updateArticleReply(articleReplyDto) > 0) {
             articleReplyDto.setResultCode("S-1");
@@ -173,14 +180,13 @@ public class BoardService {
         articleReplyDto.setMsg(msg);
         return articleReplyDto;
     }
-
+    @Transactional
     public void deleteArticleReply(ArticleReplyDTO articleReplyDto) {
         if (this.boardMapper.deleteArticleReply(articleReplyDto) > 0) {
             articleReplyDto.setResultCode("S-1");
             articleReplyDto.setMsg(String.format("%d번 댓글이 삭제되었습니다.", articleReplyDto.getId()));
         }
     }
-
     public int articleViewCount(int id) {
         return this.boardMapper.updateViewCount(id);
     }
@@ -206,7 +212,6 @@ public class BoardService {
 
         articleLikeDto.setResultCode("S-1");
         articleLikeDto.setMsg("좋아요가 가능합니다.");
-
         return articleLikeDto;
     }
 
@@ -222,8 +227,8 @@ public class BoardService {
     public int getLikePoint(int id) {
         return boardMapper.selectLikePoint(id);
     }
-    public int getLikeUserPoint(int id, int connectedUserId) {
-        return boardMapper.selectLikePoint2(id, connectedUserId);
+    public int getLikePointByUserId(int id, int connectedUserId) {
+        return boardMapper.selectLikePointByUserId(id, connectedUserId);
     }
 
     public ArticleLikeDto getArticleCancelLikeAvailable(int id, int connectedUserId) {
@@ -239,7 +244,6 @@ public class BoardService {
 
         articleLikeDto.setResultCode("S-1");
         articleLikeDto.setMsg("취소가 가능합니다");
-
         return articleLikeDto;
     }
 
@@ -251,4 +255,9 @@ public class BoardService {
         articleLikeDto.setMsg(String.format("%d번 게시물을 추천을 취소하였습니다.", id));
         return articleLikeDto;
     }
+
+    public List<ArticleListDto> getForPrintRcmdArticles() {
+        return this.boardMapper.selectRcmdArticles();
+    }
+
 }

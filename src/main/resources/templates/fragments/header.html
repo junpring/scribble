@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<!--/*@thymesVar id="userEntity" type="dev.junpring.scribble.entities.member.UserEntity"*/-->
 <header class="header" th:fragment="header">
     <!-- navigation -->
     <nav id="nav" class="nav">
@@ -20,29 +19,21 @@
         </ul>
 
         <div class="search">
-            <!--/*@thymesVar id="boardIdVo" type="dev.junpring.scribble.vos.board.BoardIdVo"*/-->
             <form th:action="@{/board/search}" class="search-form" method="get">
-<!--                <input type="hidden" name="page" value="1">-->
-<!--                <input type="hidden" name="recordSize" value="10">-->
-<!--                <input type="hidden" name="pageSize" value="10">-->
+                <input type="hidden" name="page" value="1">
+                <input type="hidden" name="recordSize" value="10">
+                <input type="hidden" name="pageSize" value="10">
                 <label class="select-container">
                     <span hidden>검색 기준</span>
                     <select class="search-select" name="searchType">
-                        <option value="all" selected>전체</option>
-                        <option value="title">제목</option>
+                        <option value="title" selected>제목</option>
                         <option value="content">내용</option>
-                        <option value="all">오늘의 이슈</option>
-                        <option value="all">토픽 베스트</option>
-                        <option value="all">주식·투자</option>
-                        <option value="all">암호화폐</option>
-                        <option value="all">부동산</option>
-                        <option value="all">자동차</option>
-                        <option value="all">헬스·다이어트</option>
+                        <option value="">전체</option>
                     </select>
                 </label>
                 <label class="keyword-input-container">
                     <span hidden>검색어</span>
-                    <input class="keyword-input" maxlength="50" name="keyword" placeholder="내용을 검색해보세요." type="text">
+                    <input class="keyword-input" maxlength="50" name="keyword" placeholder="내용을 검색해보세요." type="search" th:value="${paramKeyword}">
                 </label>
 
                 <button class="search-button">
@@ -58,6 +49,7 @@
             <a class="login" th:href="@{/user/login}" th:if="${userEntity == null}">로그인</a>
             <a class="register" th:href="@{/user/register}" th:if="${userEntity == null}">회원가입</a>
 
+<!--            <div th:text="${userEntity.id}"></div>-->
             <a class="nickname" th:if="${userEntity != null}">
                 <b th:text="${userEntity.getNickname() +' 님'}"></b>
             </a>

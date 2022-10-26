@@ -14,6 +14,7 @@
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/resources/libraries/ckeditor/ckeditor.js}"></script>
     <script defer th:src="@{/board/resources/scripts/modify.js}"></script>
+    <script defer th:src="@{/resources/scripts/common.js}"></script>
 
 <!--    <script th:if="${loginVo.getResult().name().equals('NOT_FOUND')}">-->
 <!--        alert("로그인 후 글 수정을 할 수 있습니다. \n로그인 페이지로 이동합니다.");-->
@@ -29,12 +30,7 @@
 <form id="main" class="main" method="post">
     <label class="label">
         <div class="category" th:text="${articleListVo.extra.boardCodeName}"></div>
-<!--        <select hidden class="category" name="boardCode">-->
-<!--            <option th:text="${articleListVo.extra.boardCodeName}"-->
-<!--                    th:value="${articleListVo.getBoardCode()}" selected>-->
-<!--            </option>-->
-<!--        </select>-->
-        <input class="input" th:value="${articleListVo.getTitle()}" autofocus  maxlength="40" name="title" placeholder="글 제목을 입력해주세요." type="text">
+        <input class="input" th:value="${articleListVo.getTitle()}" autofocus  maxlength="40" name="title" placeholder="글 제목을 입력해주세요." type="text" spellcheck="false">
 
     </label>
     <label class="label">

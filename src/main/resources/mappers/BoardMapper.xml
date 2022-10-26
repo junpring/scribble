@@ -72,7 +72,6 @@
                `A`.`content`                AS `content`,
                `A`.`board_code`             AS `boardCode`,
                `A`.`user_id`                AS `userId`,
-               `A`.`like`                   AS `like`,
                `A`.`reply_count`            AS `replyCount`,
                `A`.`view`                   AS `view`,
                `A`.`written_at`             AS `writtenAt`,
@@ -89,8 +88,6 @@
         WHERE `A`.`id` = #{id}
     </select>
 
-    <!--    IFNULL(SUM(`AL`.`point`), 0) AS `extra__like`-->
-
     <select id="selectArticlesCount"
             parameterType="dev.junpring.scribble.dtos.SearchDto"
             resultType="_int">
@@ -98,46 +95,110 @@
         FROM `scribble_board`.`articles` AS `A`
         INNER JOIN `scribble_board`.`boards` AS `B`
         ON `A`.`board_code` = `B`.`code`
-        WHERE B.id = #{boardCode}
+        WHERE `A`.`view` >= 0
         <include refid="search"/>
     </select>
-    <select id="selectArticlesForBoardList"
-            resultType="dev.junpring.scribble.entities.board.ArticleEntity">
-        SELECT `A`.`id` AS `id`,
-        `A`.`board_code` AS `boardCode`,
-        `A`.`user_id` AS `userId`,
-        `A`.`title` AS `title`,
-        `A`.`content` AS `content`,
-        `A`.`like` AS `like`,
-        `A`.`reply_count` AS `replyCount`,
-        `A`.`view` AS `view`,
-        `A`.`written_at` AS `writtenAt`
+
+    <select id="selectArticlesBoardListCount"
+            parameterType="dev.junpring.scribble.dtos.SearchDto"
+            resultType="_int">
+        SELECT COUNT(*)
         FROM `scribble_board`.`articles` AS `A`
-        INNER JOIN `scribble_board`.`boards` AS `B`
-        ON `A`.`board_code` = `B`.`code`
-        WHERE `board_code` = #{boardCode}
-        <include refid="search"/>
-        ORDER BY id DESC
+                 INNER JOIN `scribble_board`.`boards` AS `B`
+                            ON `A`.`board_code` = `B`.`code`
+        WHERE `A`.`board_code` = #{boardCode}
+    </select>
+
+    <select id="selectArticlesForBoardList"
+            resultType="dev.junpring.scribble.dtos.ArticleListDto"
+            resultMap="article">
+        SELECT `B`.`id`                            AS `boardId`,
+               `B`.`name`                          AS `extra__boardCodeName`,
+               `B`.`code`                          AS `extra__boardCode`,
+               `A`.`id`                            AS `id`,
+               `A`.`user_id`                       AS `userId`,
+               `A`.`title`                         AS `title`,
+               `A`.`content`                       AS `content`,
+               (SELECT COUNT(*)
+                FROM `scribble_board`.`reply` AS `R`
+                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+               `A`.`view`                          AS `view`,
+               `A`.`written_at`                    AS `writtenAt`,
+               `U`.`nickname`                      AS `extra__userWriter`,
+               `U`.`email`                         AS `extra__userEmail`,
+               IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
+        FROM `scribble_board`.`articles` AS `A`
+                 LEFT JOIN `scribble_board`.`boards` AS `B`
+                           ON `A`.`board_code` = `B`.`code`
+                 LEFT JOIN `scribble_board`.`article_like` AS `AL`
+                           ON `A`.`id` = `AL`.`article_id`
+                 LEFT JOIN `scribble_member`.`user` AS `U`
+                           ON `A`.`user_id` = `U`.`id`
+        WHERE `A`.`board_code` = #{boardCode}
+        GROUP BY `id`
+        ORDER BY `id` DESC
         LIMIT #{paginationVo.limitStart}, #{recordSize}
     </select>
 
-    <select id="selectRootArticleList"
+    <select id="selectFindArticlesForList"
+            resultType="dev.junpring.scribble.dtos.ArticleListDto"
+            resultMap="article">
+        SELECT `B`.`id`                            AS `boardId`,
+               `B`.`name`                          AS `extra__boardCodeName`,
+               `B`.`code`                          AS `extra__boardCode`,
+               `A`.`id`                            AS `id`,
+               `A`.`board_code`                    AS `boardCode`,
+               `A`.`user_id`                       AS `userId`,
+               `A`.`title`                         AS `title`,
+               `A`.`content`                       AS `content`,
+               (SELECT COUNT(*)
+                FROM `scribble_board`.`reply` AS `R`
+                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+               `A`.`view`                          AS `view`,
+               `A`.`written_at`                    AS `writtenAt`,
+               `U`.`nickname`                      AS `extra__userWriter`,
+               `U`.`email`                         AS `extra__userEmail`,
+               IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
+        FROM `scribble_board`.`articles` AS `A`
+                 LEFT JOIN `scribble_board`.`boards` AS `B`
+                           ON `A`.`board_code` = `B`.`code`
+                 LEFT JOIN `scribble_board`.`article_like` AS `AL`
+                           ON `A`.`id` = `AL`.`article_id`
+                 LEFT JOIN `scribble_member`.`user` AS `U`
+                           ON `A`.`user_id` = `U`.`id`
+        WHERE `A`.`view` >= 0
+        <include refid="search"/>
+        GROUP BY `id`
+        ORDER BY `id` DESC
+        LIMIT #{paginationVo.limitStart}, #{recordSize}
+    </select>
+<!--             WHERE A.board_code = #{boardCode}-->
+
+    <select id="selectHomeArticleList"
             parameterType="dev.junpring.scribble.entities.board.BoardEntity"
-            resultType="dev.junpring.scribble.vos.board.article.ArticleListVo">
-        SELECT `B`.`id`        AS `id`,
-               `code`          AS `boardCode`,
-               `articles`.`id` AS `articleId`,
-               `user_id`       AS `userId`,
-               `title`         AS `title`,
-               `content`       AS `content`,
-               `like`          AS `like`,
-               `reply_count`   AS `replyCount`,
-               `view`          AS `view`,
-               `written_at`    AS `writtenAt`
-        FROM `scribble_board`.`articles`
-                 LEFT JOIN `scribble_board`.`boards` AS `B` ON `articles`.`board_code` = `B`.`code`
+            resultType="dev.junpring.scribble.entities.board.ArticleEntity"
+            resultMap="article">
+        SELECT `B`.`id`                            AS `boardId`,
+               `B`.`code`                          AS `boardCode`,
+               `B`.`name`                          AS `name`,
+               `A`.`id`                            AS `id`,
+               `A`.`user_id`                       AS `userId`,
+               `A`.`title`                         AS `title`,
+               `A`.`content`                       AS `content`,
+               (SELECT COUNT(*)
+                FROM `scribble_board`.`reply` AS `R`
+                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+               `A`.`view`                          AS `view`,
+               `A`.`written_at`                    AS `writtenAt`,
+               IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
+        FROM `scribble_board`.`articles` AS `A`
+                 LEFT JOIN `scribble_board`.`boards` AS `B`
+                           ON `A`.`board_code` = `B`.`code`
+                 LEFT JOIN `scribble_board`.`article_like` AS `AL`
+                           ON `A`.`id` = `AL`.`article_id`
         WHERE `B`.id = #{id}
-        ORDER BY `articles`.`id` DESC
+        GROUP BY `A`.`id`
+        ORDER BY `A`.`id` DESC
         LIMIT 5
     </select>
 
@@ -147,7 +208,6 @@
                `A`.`title`      AS `title`,
                `A`.`content`    AS `content`,
                `A`.`user_id`    AS `userId`,
-               `A`.`like`       AS `like`,
                `A`.`view`       AS `view`
         FROM `scribble_board`.`articles` AS `A`
         WHERE `A`.`id` = #{id}
@@ -168,7 +228,7 @@
         LIMIT 1
     </select>
 
-    <select id="selectBoardCode"
+    <select id="selectBoardList"
             parameterType="dev.junpring.scribble.entities.board.BoardEntity"
             resultType="dev.junpring.scribble.entities.board.BoardEntity">
         SELECT `id`          AS `id`,
@@ -179,6 +239,7 @@
                `write_level` AS `writeLevel`,
                reply_level   AS `commentLevel`
         FROM `scribble_board`.`boards`
+        ORDER BY `id`
     </select>
 
     <update id="updateArticle"
@@ -216,7 +277,7 @@
             `article_id` = #{articleId}
     </insert>
 
-    <select id="getForPrintArticleRepliesFrom" resultMap="articleReply">
+    <select id="selectForPrintArticleRepliesFrom" resultMap="articleReply">
         SELECT `AR`.`id`         AS `id`,
                `AR`.`written_at` AS `writtenAt`,
                `AR`.`content`    AS `content`,
@@ -276,19 +337,44 @@
         WHERE `AL`.`article_id` = #{id}
     </select>
 
-    <select id="selectLikePoint2" resultType="_int">
-        SELECT COUNT(*) AS `point`
-        FROM `scribble_board`.`article_like` AS `AL`
-        WHERE `AL`.`article_id` = #{id}
-          AND AL.user_id = #{userId}
-    </select>
-
     <delete id="deleteCancelLikeArticle">
         DELETE
         FROM `scribble_board`.`article_like`
         WHERE `article_id` = #{id}
           AND user_id = #{userId}
     </delete>
+
+    <select id="selectRcmdArticles"
+            resultType="dev.junpring.scribble.dtos.ArticleListDto"
+            resultMap="article">
+        SELECT `B`.`id`                            AS `boardId`,
+               `B`.`name`                          AS `extra__boardCodeName`,
+               `B`.`code`                          AS `extra__boardCode`,
+               `A`.`id`                            AS `id`,
+               `A`.`user_id`                       AS `userId`,
+               `A`.`title`                         AS `title`,
+               `A`.`content`                       AS `content`,
+               (SELECT COUNT(*)
+                FROM `scribble_board`.`reply` AS `R`
+                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+               `A`.`view`                          AS `view`,
+               `A`.`written_at`                    AS `writtenAt`,
+               `U`.`nickname`                      AS `extra__userWriter`,
+               `U`.`email`                         AS `extra__userEmail`,
+               IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
+        FROM `scribble_board`.`articles` AS `A`
+                 LEFT JOIN `scribble_board`.`boards` AS `B`
+                           ON `A`.`board_code` = `B`.`code`
+                 LEFT JOIN `scribble_board`.`article_like` AS `AL`
+                           ON `A`.`id` = `AL`.`article_id`
+                 LEFT JOIN `scribble_member`.`user` AS `U`
+                           ON `A`.`user_id` = `U`.`id`
+        WHERE `A`.`view` >= 50
+#           AND A.written_at >= DATE_FORMAT(sysdate(7),'%Y-%m-%d')
+        GROUP BY `A`.`id`
+        ORDER BY `A`.`id` DESC
+        LIMIT 10
+    </select>
 
     <resultMap type="dev.junpring.scribble.entities.board.ArticleEntity"
                id="article">
@@ -297,15 +383,16 @@
         <result property="content" column="content"/>
         <result property="boardCode" column="boardCode"/>
         <result property="userId" column="userId"/>
-        <result property="like" column="like"/>
         <result property="replyCount" column="replyCount"/>
         <result property="view" column="view"/>
         <result property="writtenAt" column="writtenAt"/>
         <result property="view" column="view"/>
         <association property="extra" javaType="map">
             <result property="boardCodeName" column="extra__boardCodeName"/>
+            <result property="boardCode" column="extra__boardCode"/>
             <result property="userWriter" column="extra__userWriter"/>
             <result property="likePoint" column="extra__like"/>
+            <result property="userEmail" column="extra__userEmail"/>
         </association>
     </resultMap>
 

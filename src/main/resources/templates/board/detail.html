@@ -5,7 +5,9 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>게시글 읽기</title>
+    <title
+            th:text="'스블' + ' | ' +  ${articleListDto.extra.boardCodeName} + ': ' +     ${articleListDto.title}">
+    </title>
     <link rel="stylesheet" th:href="@{/resources/stylesheets/common.css}">
     <link rel="stylesheet" th:href="@{/board/resources/stylesheets/detail.css}">
     <link rel="stylesheet" as="style" crossorigin
@@ -18,7 +20,16 @@
     <!--        window.history.back();-->
     <!--    </script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script defer th:src="@{/resources/scripts/common.js}"></script>
     <script th:inline="javascript">
+        let param = [(${paramJson})];
+        let id = [[${articleListDto.id}]];
+        let ArticleListWrittenAt = [[${articleListDto.writtenAt}]];
+        let ArticleReplyInterval;
+        let ArticleReply__$listTbody;
+        let likePointByUserId = [[${likePointByUserId}]];
+        let likePoint = [[${articleListDto.extra.likePoint}]];
+
         function ArticleReply__submitWriteForm(form) {
             form.content.value = form.content.value.trim();
             if (form.content.value.length === 0) {
@@ -26,33 +37,28 @@
                 form.content.focus();
                 return;
             }
-            if ([[${userEntity}]] == null) {
-                alert("로그인 후 이용해 주세요.");
-                location.replace('/user/login');
-            } else {
-                $.ajax({
-                    url: './postWriteReply',
-                    type: 'POST',
-                    data: {
-                        'articleId': param.id,
-                        'content': form.content.value
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        form.content.value = '';
-                        ArticleReply__loadList();
-                        if (data.resultCode.substring(0, 2) === 'S-') {
-                            alert(data.msg);
-                        }
-                    },
-                    error: function () {
-                        alert('댓글 작성 도중 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요,');
-                        console.log("ajax 통신 실패");
+            $.ajax({
+                url: './postWriteReply',
+                type: 'POST',
+                data: {
+                    'articleId': param.id,
+                    'content': form.content.value
+                },
+                dataType: 'json',
+                success: function (data) {
+                    form.content.value = '';
+                    ArticleReply__loadList();
+                    if (data.resultCode.substring(0, 2) === 'S-') {
+                        alert(data.msg);
+                    } else {
+                        alert(data.msg);
                     }
-                });
-            }
-
-
+                },
+                error: function () {
+                    alert('댓글 작성 도중 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요,');
+                    console.log("ajax 통신 실패");
+                }
+            });
         }
     </script>
 
@@ -115,6 +121,7 @@
                             alert(data.msg);
                         }
                     }
+
                 },
                 error: function () {
                     alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
@@ -128,6 +135,7 @@
             let $clickedBtn = $(obj);
             let $rArea = $($clickedBtn).closest('.reply-area');
             let replyId = parseInt($rArea.attr('data-article-reply-id'));
+
             $rArea.attr('data-loading', 'Y');
             $rArea.attr('data-loading-delete', 'Y');
             clearInterval(ArticleReplyInterval);
@@ -162,23 +170,12 @@
         }
     </script>
     <script th:inline="javascript">
-        let param = [(${paramJson})];
-        let id = [[${articleListDto.id}]];
-        let LoginedUserId = [[${userEntityId}]];
-        let ArticleListWrittenAt = [[${articleListDto.writtenAt}]];
-        let ArticleReplyInterval;
-        let ArticleReply__$listTbody;
-        let ArticleReply__lastLoadedArticleReplyId = 0;
-        let likePoint = [[${likeUserPoint}]];
-
-
         function ArticleReply__loadList() {
             $.ajax({
                 url: './getForPrintArticleRepliesRs',
                 type: 'GET',
                 data: {
                     'id': param.id,
-                    // 'ajax': 'Y'
                 },
                 dataType: 'json',
                 success: function (data) {
@@ -198,9 +195,10 @@
                         // });
                         for (let i = 0; i < data.length; i++) {
                             $rCountA.html(data.length);
-                            $rCountB.html('댓글 ' + data.length + '개');
+                            $rCountB.text('댓글 ' + data.length + '개');
                             let articleReply = data[i];
                             ArticleReply__drawReply(articleReply);
+
                         }
                     }
                 },
@@ -220,6 +218,7 @@
             html = replaceAll(html, "{$작성자}", articleReply.extra.userWriter);
             html = replaceAll(html, "{$이메일}", maskingName(articleReply.extra.userEmail));
             html = replaceAll(html, "{$내용}", articleReply.content);
+            html = replaceAll(html, "{$유저번호}", articleReply.userId);
 
             // let html = '';
             //
@@ -250,104 +249,102 @@
 
             ArticleReply__$listTbody = $('.reply-wrap > .reply-box');
             ArticleReply__loadList();
-            // 1초마다 댓글 갱신
-            ArticleReplyInterval = setInterval(function () {
-                ArticleReply__loadList();
-            }, 1000);
 
+            // 1초마다 댓글 갱신
+            // ArticleReplyInterval = setInterval(function () {
+            //     ArticleReply__loadList();
+            // }, 1000);
 
         });
     </script>
 
     <script th:inline="javascript">
         function ViewArticle3__updateLikePoint() {
-            if (likePoint > 0) {
-                $('.cancel-like').html('좋아요 취소');
-                $('.do-like').html('');
+            if (likePoint === 0) {
+                $('.article--like-point').html('좋아요');
+            }
+            if (likePointByUserId > 0) {
+                $('.cancel-like').show();
+                $('.do-like').hide();
 
             } else {
-                $('.cancel-like').html('');
-                $('.do-like').html('좋아요');
+                $('.cancel-like').hide();
+                $('.do-like').show();
             }
+
         }
 
         function ViewArticle1__updateLikePoint(likePoint) {
-            $('.article--like-point').empty().append(likePoint);
-        }
-        function ViewArticle2__updateLikePoint(likeUserPoint) {
-            if (likeUserPoint > 0) {
-                $('.cancel-like').html('좋아요 취소');
-                $('.do-like').html('');
-
+            if (likePoint === 0) {
+                $('.article--like-point').empty().append('좋아요');
             } else {
-                $('.cancel-like').html('');
-                $('.do-like').html('좋아요');
+                $('.article--like-point').empty().append(likePoint);
+            }
+        }
+
+        function ViewArticle2__updateLikePoint(likePointByUserId) {
+            if (likePointByUserId > 0) {
+                $('.cancel-like').show();
+                $('.do-like').hide();
+            } else {
+                $('.cancel-like').hide();
+                $('.do-like').show();
             }
         }
 
         function callInsertLike() {
-            if ([[${userEntity}]] == null) {
-                alert("로그인 후 이용해 주세요.");
-                location.replace('/user/login');
-            } else {
-                $.ajax({
-                    url: './postInsertLike',
-                    type: 'POST',
-                    data: {
-                        'id': id
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.resultCode.substr(0, 2) === 'S-') {
-                            ViewArticle1__updateLikePoint(data.likePoint);
-                            ViewArticle2__updateLikePoint(data.likeUserPoint);
-
-                        } else {
-                            if (data.msg) {
-                                alert(data.msg);
-                            }
+            $.ajax({
+                url: './postInsertLike',
+                type: 'POST',
+                data: {
+                    'id': id
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.resultCode.substr(0, 2) === 'S-') {
+                        ViewArticle1__updateLikePoint(data.likePoint);
+                        ViewArticle2__updateLikePoint(data.likePointByUserId);
+                    } else {
+                        if (data.msg) {
+                            alert(data.msg);
                         }
-                    },
-                    error: function () {
-                        alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
-                        console.log("ajax 통신 실패");
                     }
-                });
-            }
+                },
+                error: function () {
+                    alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
+                    console.log("ajax 통신 실패");
+                }
+            });
         }
 
         function callDoCancelLike() {
-            if ([[${userEntity}]] == null) {
-                alert("로그인 후 이용해 주세요.");
-                location.replace('/user/login');
-            } else {
-                $.ajax({
-                    url: './postDeleteLike',
-                    type: 'POST',
-                    data: {
-                        'id': id
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.resultCode.substr(0, 2) === 'S-') {
-                            ViewArticle1__updateLikePoint(data.likePoint);
-                            ViewArticle2__updateLikePoint(data.likeUserPoint);
-                        } else {
-                            if (data.msg) {
-                                alert(data.msg);
-                            }
+            $.ajax({
+                url: './postDeleteLike',
+                type: 'POST',
+                data: {
+                    'id': id
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.resultCode.substr(0, 2) === 'S-') {
+                        ViewArticle1__updateLikePoint(data.likePoint);
+                        ViewArticle2__updateLikePoint(data.likePointByUserId);
+                    } else {
+                        if (data.msg) {
+                            alert(data.msg);
                         }
-                    },
-                    error: function () {
-                        alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
-                        console.log("ajax 통신 실패");
                     }
-                });
-            }
+                },
+                error: function () {
+                    alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
+                    console.log("ajax 통신 실패");
+                }
+            });
         }
     </script>
 </head>
 <body>
+
 <th:block th:replace="~{fragments/header.html :: header}"></th:block>
 <section class="section">
     <div class="article-head-wrap">
@@ -360,16 +357,16 @@
 
         <div class="article-body">
             <a th:text="${articleListDto.extra.userWriter}" class="article-user"></a>
-            <a class="line" href="#">∣</a>
+            <a class="line">∣</a>
             <a class="article-written-at"></a>
         </div>
 
         <div class="article-foot">
-            <a href="#" class="cell col4">
+            <a class="cell col4">
                 <img class="icon" src="/resources/images/comment-purple.png" alt="댓글">
                 <span class="reply-count-a count"></span>
             </a>
-            <a href="#" class="cell col5">
+            <a class="cell col5">
                 <img class="icon" src="/resources/images/view-purple.png" alt="조회수">
                 <span th:text="${articleListDto.view}" class="view count"></span>
             </a>
@@ -392,24 +389,23 @@
     </div>
 
     <div class="article-content">
-        <span th:utext="${articleListDto.getContent()}"></span>
+        <span th:utext="${articleListDto.content}"></span>
         <div class="article-info">
             <a class="btn do-like" onclick="callInsertLike();">
                 <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="공감">
-                <span class="article--like-point" th:text="${articleListDto.extra.likePoint}"></span>
+                <span class="article--like-point"
+                      th:text="${articleListDto.extra.likePoint}"></span>
             </a>
             <a class="btn cancel-like" onclick="callDoCancelLike();">
-                <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="공감">
-                <span class="article--like-point" th:text="${articleListDto.extra.likePoint}"></span>
+                <img class="icon" th:src="@{../resources/images/like-on.png}" alt="공감">
+                <span class="article--like-point"
+                      th:text="${articleListDto.extra.likePoint}"></span>
             </a>
 
             <a class="btn cmt">
                 <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
                 <span class="reply-count-a count"></span>
             </a>
-
-<!--            <a class="do-like" href="#" onclick="callInsertLike();"></a>-->
-<!--            <a class="cancel-like" href="#" onclick="callDoCancelLike();"></a>-->
         </div>
 
     </div>
@@ -425,6 +421,43 @@
     <div class="reply-box">
 
     </div>
+</div>
+<script>
+
+
+</script>
+<div class="rcmd-board">
+    <h2>인기 게시글</h2>
+    <section th:if="${articleListDto.id != rcmd.id }" class="article-list" th:each="rcmd: ${getForPrintRcmdArticlesRs}">
+        <div class="article-list-pre">
+
+            <div class="main">
+                <a th:href="@{/board/detail(id=${rcmd.id})}"
+                   th:text="${rcmd.extra.boardCodeName}"></a>
+                <h3>
+                    <a th:href="@{/board/detail(id=${rcmd.id})}"
+                       th:text="${rcmd.title}"></a>
+                </h3>
+                <div>
+                    <a th:href="@{/board/detail(id=${rcmd.id})}"
+                       th:utext="${rcmd.content}"></a>
+                </div>
+            </div>
+            <div class="sub">
+                <div>
+                    <a th:href="@{/board/detail(id=${rcmd.id})}"
+                       th:text="${rcmd.extra.userWriter}"></a>
+                </div>
+                <span>|</span>
+                <div>
+                    <a th:href="@{/board/detail(id=${rcmd.id})}"
+                       th:text="'조회수 ' + ${rcmd.view}"></a>
+                    <a class="like" th:href="@{/board/detail(id=${rcmd.id})}"
+                       th:text="'좋아요 ' + ${rcmd.extra.likePoint}"></a>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
 <div style="display: none" class="template-box-1">
@@ -443,21 +476,27 @@
             </form>
         </div>
         <ul class="reply-second-line">
-            <li th:if="${userEntity != null}" class="reply-btn">
+            <li th:if="${userEntity != null}" class="reply-btn" data-user-id="{$유저번호}">
                 <span class="loading-modify-msg">수정 중입니다....</span>
                 <span class="loading-delete-msg">삭제 중입니다....</span>
-                <a class="modify-button modify-mode-none"
-                   onclick="ArticleReply__enableModifyMode(this); return false;">수정</a>
-                <a class="modify-button modify-mode-inline"
-                   onclick="ArticleReply__disableModifyMode(this); return false;">수정취소</a>
-                <a class="delete-button loading-none"
-                   onclick="if (confirm('정말 삭제하시겠습니까?')) {ArticleReply__delete(this);} return false;">삭제</a>
+
+                <a class="more">⋯</a>
+                <div class="more-popper">
+                    <div class="url-link">
+                        <a class="modify-button modify-mode-none"
+                           onclick="ArticleReply__enableModifyMode(this); return false;">수정</a>
+                        <a class="modify-button modify-mode-inline"
+                           onclick="ArticleReply__disableModifyMode(this); return false;">수정취소</a>
+                        <a class="delete-button loading-none"
+                           onclick="if (confirm('정말 삭제하시겠습니까?')) {ArticleReply__delete(this);} return false;">삭제</a>
+                    </div>
+                </div>
+
             </li>
             <li class="reply-written-at">{$날짜}</li>
         </ul>
     </ul>
 </div>
-
 <th:block th:replace="~{fragments/footer.html :: footer}"></th:block>
 </body>
 </html>

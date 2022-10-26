@@ -10,15 +10,16 @@
     <link rel="stylesheet" th:href="@{/resources/stylesheets/common.css}">
     <link rel="stylesheet" th:href="@{/board/resources/stylesheets/article.css}">
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
-    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_FOUND')}">
-        alert('해당 갤러리는 존재하지 않습니다.');
-        window.history.back();
-    </script>
-    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_ALLOWED')}">
-        alert('NOT_ALLOWED! 권한이 없습니다.');
-        window.history.back();
-    </script>
-    <title th:text="${boardIdVo.getName()}"></title>
+    <script defer th:src="@{/resources/scripts/common.js}"></script>
+<!--    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_FOUND')}">-->
+<!--        alert('해당 갤러리는 존재하지 않습니다.');-->
+<!--        window.history.back();-->
+<!--    </script>-->
+<!--    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_ALLOWED')}">-->
+<!--        alert('NOT_ALLOWED! 권한이 없습니다.');-->
+<!--        window.history.back();-->
+<!--    </script>-->
+    <title th:text="'스크리블 | ' + ${boardIdVo.getName()}"></title>
 </head>
 
 <body>
@@ -71,24 +72,24 @@
                 <a th:href="@{/board/detail (id=*{article.getId()})}"
                    th:text="*{article.getTitle()}"></a>
             </td>
-<!--            <td th:text="*{article.getUserNickname()}"></td>-->
+            <td th:text="*{article.extra.userWriter}"></td>
             <td class="write-at" th:text="*{#dates.format(article.getWrittenAt(), 'yy.MM.dd HH:mm')}"></td>
             <td>
-                <a th:href="@{/}" class="cell col1">
-                    <img class="icon" th:src="@{/resources/images/like-purple.png}" alt="공감">
-                    <span th:text="*{article.getLike()}" class="count"></span>
+                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col1">
+                    <img class="icon" th:src="@{/resources/images/like-purple.png}" alt="좋아요">
+                    <span th:text="*{article.extra.likePoint}" class="count"></span>
                 </a>
             </td>
             <td>
                 <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col2">
                     <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글수">
-                    <span th:text="*{article.getReplyCount()}" class="count"></span>
+                    <span th:text="*{article.replyCount}" class="count"></span>
                 </a>
             </td>
             <td>
                 <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col3">
                     <img class="icon" th:src="@{/resources/images/view-purple.png}" alt="조회수">
-                    <span th:text="*{article.getView()}" class="count"></span>
+                    <span th:text="*{article.view}" class="count"></span>
                 </a>
             </td>
 
@@ -117,13 +118,13 @@
     <ul class="ul">
         <li>
             <a th:if="${params.paginationVo.existPrevPage}"
-               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.minPage}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.minPage}, recordSize=${params.recordSize},pageSize=${params.pageSize})}">
                 <span>&laquo;</span>
             </a>
         </li>
         <li>
             <a th:if="${params.paginationVo.existPrevPage}"
-               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.startPage - 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.startPage - 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize})}">
                 <span>&lsaquo;</span>
             </a>
         </li>
@@ -131,7 +132,7 @@
         <li class="a"
             th:each="page : ${#numbers.sequence(articlesResponse.paginationVo.startPage, articlesResponse.paginationVo.endPage)}">
 
-            <a th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${page}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}"
+            <a th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${page}, recordSize=${params.recordSize},pageSize=${params.pageSize})}"
                th:text="${page}"
                th:if="${page != params.page}"
                th:style="${articlesResponse.list.size()} == 0 ? 'display:none': ''"></a>
@@ -142,13 +143,13 @@
 
         <li>
             <a th:if="${params.paginationVo.existNextPage}"
-               th:href="@{/board/list/{code}(code=${boardIdVo.code}, page=${params.paginationVo.endPage + 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+               th:href="@{/board/list/{code}(code=${boardIdVo.code}, page=${params.paginationVo.endPage + 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize})}">
                 <span>&rsaquo;</span>
             </a>
         </li>
         <li>
             <a th:if="${params.paginationVo.existNextPage}"
-               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.totalPageCount}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+               th:href="@{/board/list/{code}(code = ${boardIdVo.code}, page=${params.paginationVo.totalPageCount}, recordSize=${params.recordSize},pageSize=${params.pageSize})}">
                 <span>&raquo;</span>
             </a>
         </li>

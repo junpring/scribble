@@ -2,7 +2,7 @@
 
 body > .section {
     width: var(--content-max-width);
-    margin-top: 2.2rem;
+    margin-top: 7.6rem;
 }
 
 body > .section > .article-head-wrap {
@@ -117,6 +117,15 @@ body > .section > .article-content > span {
     font-weight: 400;
     line-height: 1.5rem;
 }
+body > .section > .article-content > span a {
+    color: #6167b2;
+}
+body > .section > .article-content > span a:hover {
+    text-decoration: underline;
+}
+body > .section > .article-content > span a:target {
+
+}
 body > .section > .article-content > .article-info {
     margin-top: 3rem;
     color: var(--color-purple--);
@@ -127,6 +136,7 @@ body > .section > .article-content > .article-info {
 body > .section > .article-content > .article-info > .btn {
     cursor: pointer;
     padding-right: 1rem;
+    user-select: none;
 }
 body > .section > .article-content > .article-info > .btn > .icon{
     width: 1rem;
@@ -140,6 +150,7 @@ body > .section > .article-content > .article-info > .btn > span {
 body > .reply-wrap {
     width: var(--content-max-width);
     position: relative;
+    margin-bottom: 3rem;
 }
 
 body > .reply-wrap > form > .content {
@@ -175,11 +186,11 @@ body > .reply-wrap > .reply-box {
 }
 body > .reply-wrap > .reply-box > .reply-area{
     padding: 0.8rem;
-    border-top: 1px solid #dbdbdb;
+    border-bottom: 1px solid #dbdbdb;
 }
 
 body > .reply-wrap > .reply-box > .reply-area > li {
-    padding: 0.4rem 0.2rem 0.7rem 0;
+    padding: 0.6rem 0.2rem 0.8rem 0;
 }
 
 body > .reply-wrap > .reply-box > .reply-area > .reply-first-line {
@@ -210,7 +221,7 @@ body > .reply-wrap > .reply-box > .reply-area > .reply-second-line {
     display: flex;
 }
 
-body > .reply-wrap > .reply-box > .reply-area > .reply-second-line > .reply-content {
+body > .reply-wrap > .reply-box > .reply-area > .reply-content {
     font-size: 1rem;
     font-weight: 400;
 }
@@ -226,6 +237,12 @@ body > .reply-wrap > .reply-box > .reply-area > .reply-second-line > .reply-btn{
     position: absolute;
     right: 0;
 }
+
+body > .reply-wrap > .reply-box > .reply-area > .reply-second-line > .reply-btn > .more{
+    cursor: pointer;
+}
+
+
 
 .reply-empty {
     text-align: center;
@@ -296,4 +313,74 @@ body > .reply-wrap > .reply-box > .reply-area > .reply-second-line > .reply-btn{
     font-size: 0.8rem;
     font-weight: 500;
     margin-bottom: 1rem;
+}
+
+
+/* rcmd_board */
+body > .rcmd-board {
+    width: var(--content-max-width);
+    margin-bottom: 2rem;
+}
+body > .rcmd-board > h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+body > .rcmd-board > .article-list{
+    border: 1px solid #dbdbdb;
+    border-bottom: none;
+    padding: 1.2rem 3%;
+}
+body > .rcmd-board > .article-list:last-child {
+    border-bottom: 1px solid #dbdbdb;
+}
+
+/**/
+body > .rcmd-board > .article-list > .article-list-pre > .main > a{
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
+body > .rcmd-board > .article-list > .article-list-pre > .main > h3{
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    margin-top: 0.6rem;
+}
+body > .rcmd-board > .article-list > .article-list-pre > .main > div {
+    font-weight: 400;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+}
+body > .rcmd-board > .article-list > .article-list-pre > .main  p {
+    margin: 0;
+}
+
+body > .rcmd-board > .article-list > .article-list-pre > .main .image {
+    display: none;
+}
+body > .rcmd-board > .article-list > .article-list-pre > .sub {
+    display: flex;
+    font-size: 0.8rem;
+    font-weight: 400;
+    margin-top: 1rem;
+}
+body > .rcmd-board > .article-list > .article-list-pre > .sub > div {
+    margin-right: 1rem;
+}
+body > .rcmd-board > .article-list > .article-list-pre > .sub > div:first-child > a:first-child {
+    color: var(--color-purple--);
+}
+body > .rcmd-board > .article-list > .article-list-pre > .sub > div:last-child {
+    color: #94969b;
+}
+body > .rcmd-board > .article-list > .article-list-pre > .sub > span {
+    margin-right: 1rem;
+    color: #e7e7e7;
+}
+body > .rcmd-board > .article-list > .article-list-pre > .sub > div > .like {
+    margin-left: 1rem;
 }

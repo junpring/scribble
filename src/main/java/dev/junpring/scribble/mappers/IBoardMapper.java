@@ -1,5 +1,6 @@
 package dev.junpring.scribble.mappers;
 
+import dev.junpring.scribble.dtos.ArticleListDto;
 import dev.junpring.scribble.dtos.ArticleReplyDTO;
 import dev.junpring.scribble.dtos.SearchDto;
 import dev.junpring.scribble.entities.board.*;
@@ -20,22 +21,25 @@ public interface IBoardMapper {
 
     ArticleEntity selectForPrintArticle(@Param(value = "id") int id);
 
-//    List<ArticleListVo> selectArticlesForBoardList(@Param(value = "id") String id);
+    int selectArticlesBoardListCount(SearchDto params);
     int selectArticlesCount(SearchDto params);
-    List<ArticleEntity> selectArticlesForBoardList(SearchDto params);
+    List<ArticleListDto> selectArticlesForBoardList(SearchDto params);
 
-    List<ArticleListVo> selectRootArticleList(BoardEntity _);
+    List<ArticleListDto> selectFindArticlesForList(SearchDto params);
+
+
+    List<ArticleEntity> selectHomeArticleList(BoardEntity _);
 
     BoardEntity selectBoardByCode(BoardEntity boardIdEntity);
 
-    List<BoardEntity> selectBoardCode();
+    List<BoardEntity> selectBoardList();
 
     int updateArticle(ArticleEntity articleEntity);
 
     int updateViewCount(@Param(value = "id") int id);
 
 
-    List<ArticleReplyDTO> getForPrintArticleRepliesFrom(
+    List<ArticleReplyDTO> selectForPrintArticleRepliesFrom(
             @Param(value = "articleId") int articleId);
 
     int writeArticleReply(ArticleReplyDTO articleReplyDTO);
@@ -55,11 +59,9 @@ public interface IBoardMapper {
     ArticleEntity selectArticle(@Param(value = "id") int id);
 
     int selectLikePoint(@Param(value = "id") int id);
-    int selectLikePoint2(@Param(value = "id") int id,
-                         @Param(value = "userId") int userId);
 
     int deleteCancelLikeArticle(@Param(value = "id") int id,
                                 @Param(value = "userId") int userId);
 
-
+    List<ArticleListDto> selectRcmdArticles();
 }

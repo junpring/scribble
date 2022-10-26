@@ -258,7 +258,7 @@ public class UserService {
         Context context = new Context();
         context.setVariable("registerVo", registerVo);
         context.setVariable("userEmailVerifyCodeEntity", userEmailVerifyCodeEntity);
-        mimeMessageHelper.setSubject("회원가입 인증 메일");
+        mimeMessageHelper.setSubject("[SCRIBBLE] 회원가입 인증 메일");
         mimeMessageHelper.setFrom("yojop0803@gmail.com");
         mimeMessageHelper.setTo(registerVo.getEmail());
         mimeMessageHelper.setText(this.springTemplateEngine.process("emailVerifyTemplate", context), true);

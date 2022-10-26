@@ -8,12 +8,12 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>회원가입</title>
     <link th:href="@{/resources/stylesheets/common.css}" rel="stylesheet">
-    <link th:href="@{/user/resources/stylesheets/rgister.css}" rel="stylesheet">
+    <link th:href="@{/user/resources/stylesheets/register.css}" rel="stylesheet">
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/user/resources/scripts/register.js}"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
-<body>
+<body style="overflow-y: hidden;">
 
 <form id="register-form" class="register-form" method="post">
     <a class="logo-container" th:href="@{/}">
@@ -60,19 +60,20 @@
         <input class="input" maxlength="100" name="addressPostal" placeholder="우편번호" type="text" readonly>
         <input type="button" value="주소 찾기" class="address-search-button">
     </label>
+    <span class="warning"></span>
 
     <label class="input-container">
         <span hidden>기본주소</span>
         <input class="input" maxlength="100" name="addressPrimary" placeholder="기본주소" type="text" readonly>
     </label>
+    <span class="warning"></span>
     <label class="input-container">
         <span hidden>상세주소</span>
         <input class="input" maxlength="100" name="addressSecondary" placeholder="상세주소" type="text">
     </label>
     <input class="button register" type="submit" value="회원가입">
-
     <label class="autosign-container">
-        <input class="checkbox" name="autosign" type="checkbox">
+        <input class="checkbox" id="check_all" type="checkbox">
         <span class="checker">
             <i class="icon fa-solid fa-check"></i>
         </span>
@@ -80,7 +81,7 @@
     </label>
 
     <label class="autosign-container">
-        <input class="checkbox" name="autosign" type="checkbox">
+        <input class="checkbox" name="agree" type="checkbox">
         <span class="checker">
             <i class="icon fa-solid fa-check"></i>
         </span>
@@ -88,7 +89,7 @@
     </label>
 
     <label class="autosign-container">
-        <input class="checkbox" name="autosign" type="checkbox">
+        <input class="checkbox" name="agree" type="checkbox">
         <span class="checker">
             <i class="icon fa-solid fa-check"></i>
         </span>

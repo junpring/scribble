@@ -17,7 +17,9 @@
     </script>
     <script th:if="${userEmailVerifyCodeVo.getResult().name().equals('SUCCESS')}">
         alert('이메일 인증이 완료되었습니다. 로그인해주세요.');
-        window.location.href = '/user/login';
+        window.location.href = '/';
+        // window.location.replace('/user/login');
+        // window.open('/user/login');
     </script>
 </head>
 </html>
