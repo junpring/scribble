@@ -2,15 +2,12 @@ package dev.junpring.scribble.services;
 
 import dev.junpring.scribble.entities.member.UserEmailVerifyCodeEntity;
 import dev.junpring.scribble.entities.member.UserEntity;
-import dev.junpring.scribble.enums.member.user.LoginResult;
-import dev.junpring.scribble.enums.member.user.RegisterResult;
-import dev.junpring.scribble.enums.member.user.UserEmailVerifyResult;
+import dev.junpring.scribble.enums.member.user.*;
+import dev.junpring.scribble.mappers.IBoardMapper;
 import dev.junpring.scribble.utills.CryptoUtil;
 import dev.junpring.scribble.entities.member.SessionEntity;
 import dev.junpring.scribble.mappers.IUserMapper;
-import dev.junpring.scribble.vos.member.user.UserEmailVerifyCodeVo;
-import dev.junpring.scribble.vos.member.user.UserLoginVo;
-import dev.junpring.scribble.vos.member.user.UserRegisterVo;
+import dev.junpring.scribble.vos.member.user.*;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -38,7 +35,7 @@ public class UserService {
     }
 
     public static boolean checkPassword(String input) {
-        return input != null && input.matches("^([0-9a-zA-Z`~!@#$%^&*()\\-_=+\\[{\\]}\\\\|;:'\",<.>/?]{8,100})$");
+        return input != null && input.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$");
     }
 
     public static boolean checkNickname(String input) {
@@ -50,12 +47,14 @@ public class UserService {
     }
 
     private final IUserMapper userMapper;
+    private final IBoardMapper boardMapper;
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine springTemplateEngine;
 
     @Autowired
-    public UserService(IUserMapper userMapper, JavaMailSender javaMailSender, SpringTemplateEngine springTemplateEngine) {
+    public UserService(IUserMapper userMapper, IBoardMapper boardMapper, JavaMailSender javaMailSender, SpringTemplateEngine springTemplateEngine) {
         this.userMapper = userMapper;
+        this.boardMapper = boardMapper;
         this.javaMailSender = javaMailSender;
         this.springTemplateEngine = springTemplateEngine;
     }
@@ -82,6 +81,13 @@ public class UserService {
         this.userMapper.updateSession(sessionEntity);
     }
 
+    public void extendSession2(SessionEntity sessionEntity) { // 세션 연장
+        sessionEntity.setUpdatedAt(new Date());
+        sessionEntity.setExpiresAt(DateUtils.addMinutes(sessionEntity.getUpdatedAt(), 60 * 24 * 7));
+        this.userMapper.updateSession2(sessionEntity);
+    }
+
+
     public SessionEntity getSession(String key) { // select key가 동일하면 세션 데이터 가져오기
         return this.userMapper.selectSessionKey(key);
     }
@@ -90,6 +96,7 @@ public class UserService {
     public UserEntity getUserEmail(String email) {
         return this.userMapper.selectUserEmail(email);
     }
+
     public UserEntity getUserId(int id) {
         return this.userMapper.selectUserById(id);
     }
@@ -119,7 +126,6 @@ public class UserService {
             loginVo.setResult(LoginResult.FAILURE);
             return;
         }
-
         // 유저가 삭제된 경우
         if (userEntity.isDeleted()) {
             loginVo.setResult(LoginResult.DELETED);
@@ -172,16 +178,24 @@ public class UserService {
         sessionKey = CryptoUtil.hashSha512(sessionKey);
         userAgent = CryptoUtil.hashSha512(userAgent);
 
-        SessionEntity sessionEntity = new SessionEntity(); // (*) 데이터를 담을 sessionEntity 객체생성
+        SessionEntity sessionEntity = new SessionEntity();
+        // (*) 데이터를 담을 sessionEntity 객체생성
         sessionEntity.setCreatedAt(new Date()); // 세션 생성시간
         sessionEntity.setUpdatedAt(sessionEntity.getCreatedAt()); // 세션 생성시간 업데이트
 
         // 세션 만료시간, DateUtils.addMinutes : (세션 생성시간 + 30분)
-        sessionEntity.setExpiresAt(DateUtils.addMinutes(sessionEntity.getCreatedAt(), 30));
+        sessionEntity.setExpiresAt(DateUtils.addMinutes(sessionEntity.getCreatedAt(), 60 * 60));
+
+        if (loginVo.isAutologin()) {
+            System.out.println(loginVo.isAutologin());
+            sessionEntity.setKeepLoggedIn(true);
+            System.out.println(sessionEntity.isKeepLoggedIn());
+        }
+
+
         sessionEntity.setExpired(false); // 세션만료 여부, 강제로 isExpired에 false 지정.
 
         /** 로그인된 email, index 데이터를 sessionEntity에 담는다. **/
-//        sessionEntity.setUserEmail(loginVo.getEmail());
         sessionEntity.setUserId(loginVo.getId());
 
         /** 해싱이 마무리된 sessionKey, userAgent를 sessionEntity에 담음. */
@@ -189,7 +203,7 @@ public class UserService {
         sessionEntity.setUa(userAgent);
 
         this.userMapper.insertSession(sessionEntity); // (*)에서 생성하고 값을 담고 그 값을 insert
-        loginVo.setSessionEntity(sessionEntity); //
+        loginVo.setSessionEntity(sessionEntity);
 
         loginVo.setResult(LoginResult.SUCCESS);
     }
@@ -266,6 +280,7 @@ public class UserService {
         registerVo.setResult(RegisterResult.SUCCESS);
     }
 
+
     public void verifyEmail(UserEmailVerifyCodeVo userEmailVerifyCodeVo) {
         if (userEmailVerifyCodeVo.getCode() == null || userEmailVerifyCodeVo.getSalt() == null ||
                 !userEmailVerifyCodeVo.getCode().matches("^([0-9a-z]{128})$") ||
@@ -277,13 +292,13 @@ public class UserService {
                 userEmailVerifyCodeVo.getCode(),
                 userEmailVerifyCodeVo.getSalt()
         );
-        if (userEmailVerifyCodeEntity == null ||
-                userEmailVerifyCodeEntity.getId() == 0) {
+
+        if (userEmailVerifyCodeEntity == null || userEmailVerifyCodeEntity.getId() == 0) {
             userEmailVerifyCodeVo.setResult(UserEmailVerifyResult.FAILURE);
             return;
         }
         if (userEmailVerifyCodeEntity.isExpired() ||
-                userEmailVerifyCodeEntity.getExpiresAt().compareTo(new Date()) < 0){
+                userEmailVerifyCodeEntity.getExpiresAt().compareTo(new Date()) < 0) {
             userEmailVerifyCodeVo.setResult(UserEmailVerifyResult.EXPIRED);
             return;
         }
@@ -306,5 +321,159 @@ public class UserService {
         this.userMapper.updateUserEmailVerifyCode(userEmailVerifyCodeEntity);
 
         userEmailVerifyCodeVo.setResult(UserEmailVerifyResult.SUCCESS);
+    }
+
+    //    public void passwordRecover(UserFindVo userFindVo) throws MessagingException {
+//        // 회원가입 데이터가 정확하게 들어오지 않는 경우
+////        if (this.userMapper.insertUser(registerVo) == 0) {
+////            registerVo.setResult(RegisterResult.FAILURE);
+////            return;
+////        }
+//
+//        Date createdAt = new Date();
+//        Date expiresAt = DateUtils.addMinutes(createdAt, CODE_VALID_MINUTES);
+//
+//        UserEntity userEntity = this.userMapper.selectUserEmail(userFindVo.getEmail());
+//        userFindVo.setId(userEntity.getId());
+//        userFindVo.setNickname(userEntity.getNickname());
+//
+//
+//        String hashedPassword = CryptoUtil.hashSha512(userEntity.getPassword());
+//        userFindVo.setPassword(hashedPassword);
+//
+//        System.out.println(userEntity.getPassword());
+//        System.out.println("hash userFindVo.getPassword: " + userFindVo.getPassword());
+//        System.out.println("userEntity getPassword:" + userEntity.getPassword());
+//
+//        String code = String.format("%d%s%s%s%f%f",
+//                userFindVo.getId(),
+//                userFindVo.getEmail(),
+//                userFindVo.getPassword(),
+//                new SimpleDateFormat("yyyyMMddHHmmssSSS").format(createdAt), Math.random(),
+//                Math.random());
+//        String saltA = userEntity.getEmail();
+//        String saltB = userEntity.getPassword();
+//
+//        for (int i = 0; i < CODE_HASH_ITERATION_COUNT; i++) {
+//            code = CryptoUtil.hashSha512(code);
+//        }
+//        for (int i = 0; i < SALT_HASH_ITERATION_COUNT; i++) {
+//            saltA = CryptoUtil.hashSha512(saltA);
+//            saltB = CryptoUtil.hashSha512(saltB);
+//        }
+//        UserEmailVerifyCodeEntity userEmailVerifyCodeEntity = new UserEmailVerifyCodeEntity();
+//        userEmailVerifyCodeEntity.setCreatedAt(createdAt);
+//        userEmailVerifyCodeEntity.setExpiresAt(expiresAt);
+//        userEmailVerifyCodeEntity.setExpired(false); // 만료되면 1
+//        userEmailVerifyCodeEntity.setCode(code);
+//        userEmailVerifyCodeEntity.setSalt(String.format("%s%s", saltA, saltB));
+//        userEmailVerifyCodeEntity.setUserId(userFindVo.getId());
+//
+//        this.userMapper.insertUserEmailVerificationCode(userEmailVerifyCodeEntity);
+//        // 인설트 해야됨 수정해보셈.
+//
+//        MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
+//        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+//        Context context = new Context();
+//        context.setVariable("userFindVo", userFindVo);
+//        context.setVariable("userEmailVerifyCodeEntity", userEmailVerifyCodeEntity);
+//        mimeMessageHelper.setSubject("[SCRIBBLE] 비밀번호 인증 메일");
+//        mimeMessageHelper.setFrom("yojop0803@gmail.com");
+//        mimeMessageHelper.setTo(userFindVo.getEmail());
+//        mimeMessageHelper.setText(this.springTemplateEngine.process("emailVerifyTemplate2", context), true);
+//        this.javaMailSender.send(mimeMessage);
+//        userFindVo.setResult(FindResult.SUCCESS);
+//    }
+    public void findEmail(UserFindVo userFindVo) {
+        UserEntity userEntity = this.userMapper.selectUserEmailEqualContact(userFindVo.getEmail(), userFindVo.getContact());
+
+        if (userEntity == null || userEntity.getId() == 0 || userEntity.isDeleted()) {
+            userFindVo.setResult(FindResult.FAILURE);
+            return;
+        }
+        userFindVo.setNickname(userEntity.getNickname());
+        userFindVo.setResult(FindResult.SUCCESS);
+    }
+
+    public void modifyPassword(UserModifyPasswordVo userModifyPasswordVo) {
+        UserEntity userEntity = this.userMapper.selectUserById(userModifyPasswordVo.getId());
+
+        if (!UserService.checkPassword(userModifyPasswordVo.getPassword())) {
+            userModifyPasswordVo.setResult(UserModifyPasswordResult.ILLEGAL);
+            System.out.println("비밀번호 정규식이 바르지 않음.");
+            return;
+        }
+
+        // password hash
+        String hashedPassword = CryptoUtil.hashSha512(userModifyPasswordVo.getPassword());
+        String hashedCurrentPassword = CryptoUtil.hashSha512(userModifyPasswordVo.getCurrentPasswordCheck());
+        userModifyPasswordVo.setPassword(hashedPassword);
+        userModifyPasswordVo.setCurrentPasswordCheck(hashedCurrentPassword);
+
+
+        if (userEntity.getId() == 0 || !userEntity.getPassword().equals(userModifyPasswordVo.getCurrentPasswordCheck())) {
+            userModifyPasswordVo.setResult(UserModifyPasswordResult.FAILURE);
+            return;
+        }
+
+        if (userEntity.getPassword().equals(userModifyPasswordVo.getPassword())) {
+            userModifyPasswordVo.setResult(UserModifyPasswordResult.DUPLICATE_PASSWORD);
+            System.out.println("현재 비밀번호와 같은 비밀번호로 변경하려고 함.");
+            return;
+        }
+
+        userEntity.setPassword(userModifyPasswordVo.getPassword());
+        this.userMapper.updateUser(userEntity);
+        userModifyPasswordVo.setResult(UserModifyPasswordResult.SUCCESS);
+    }
+
+    public void modifyNickname(UserModifyNicknameVo userModifyNicknameVo) {
+        UserEntity userEntity = this.userMapper.selectUserById(userModifyNicknameVo.getId());
+
+        if (!UserService.checkNickname(userModifyNicknameVo.getNickname())) {
+            userModifyNicknameVo.setResult(UserModifyNicknameResult.ILLEGAL);
+            System.out.println("닉네임 정규식이 바르지 않음.");
+            return;
+        }
+
+        if (this.userMapper.selectUserCountByNickname(userModifyNicknameVo.getNickname()) > 0) {
+            userModifyNicknameVo.setResult(UserModifyNicknameResult.DUPLICATE_NICKNAME);
+            System.out.println("중복");
+            return;
+        }
+
+        userEntity.setNickname(userModifyNicknameVo.getNickname());
+        userEntity.setModifiedAt(new Date());
+        userEntity.setModifyExpiresAt(DateUtils.addMonths(userEntity.getModifiedAt(), 1));
+
+        if (this.userMapper.updateUserNickname(userEntity) == 0) {
+            userModifyNicknameVo.setResult(UserModifyNicknameResult.FAILURE);
+            return;
+        }
+
+        userModifyNicknameVo.setResult(UserModifyNicknameResult.SUCCESS);
+    }
+
+    public void deletedUser(UserWithdrawalVo userWithdrawalVo) {
+        UserEntity userEntity = this.userMapper.selectUserById(userWithdrawalVo.getId());
+
+        String hashedPassword = CryptoUtil.hashSha512(userWithdrawalVo.getPassword());
+        userWithdrawalVo.setPassword(hashedPassword);
+
+        if (userEntity.getId() == 0 || !userEntity.getPassword().equals(userWithdrawalVo.getPassword())) {
+            userWithdrawalVo.setResult(UserWithdrawalResult.FAILURE);
+            return;
+        }
+
+        userEntity.setLevel(11);
+        userEntity.setDeleted(true);
+        this.userMapper.updateUser(userEntity);
+
+        if (userEntity.isDeleted()) {
+            this.boardMapper.updateDeletedReply(userEntity.isDeleted(), userEntity.getId());
+
+        }
+        userWithdrawalVo.setResult(UserWithdrawalResult.SUCCESS);
+
     }
 }

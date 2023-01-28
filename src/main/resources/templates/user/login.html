@@ -10,8 +10,11 @@
     <link th:href="@{/user/resources/stylesheets/login.css}" rel="stylesheet">
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/user/resources/scripts/login.js}"></script>
+    <script th:if="${userEntity != null}">
+        location.href = '/';
+    </script>
 </head>
-<body th:if="${userEntity == null}">
+<body>
 <form id="login-form" class="login-form" method="post">
     <a th:href="@{/}" class="logo-container">
 <!--        <img alt="Coupang" class="logo" th:src="@{/resources/images/logo.png}">-->
@@ -29,13 +32,20 @@
     </label>
     <div class="sub">
         <label class="autosign-container">
-            <input class="checkbox" name="autosign" type="checkbox">
+            <input class="checkbox" name="remember-me" type="checkbox" value="true">
             <span class="checker">
                 <i class="icon fa-solid fa-check"></i>
             </span>
             <span class="text">로그인유지</span>
         </label>
-        <a class="link" th:href="@{/user/recover}">아이디/비밀번호 찾기</a>
+        <div class="forgot">
+            <i class="fa-solid fa-lock"></i>
+            <a class="link" th:href="@{/user/find-email}">아이디 찾기</a>
+            <a class="link"> · </a>
+            <a class="link" th:href="@{/user/recover}">비밀번호 찾기</a>
+        </div>
+
+
     </div>
     <input class="button login" type="submit" value="로그인">
     <span class="copyright">아직 회원이 아니신가요? <a th:href="@{/user/register}">회원가입</a></span>

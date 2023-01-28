@@ -14,11 +14,13 @@ const passwordCheckWarning = registerForm.querySelector('.warning.password-check
 const nicknameInput = registerForm['nickname'];
 const nicknameWarning = registerForm.querySelector('.warning.nickname');
 const contactInput = registerForm['contact'];
+const loader = document.querySelector('.loader-container');
 
 
 // RegExp 정규식이 담긴 상수
 const emailRegex = new RegExp('^(?=.{10,100}$)([0-9a-z][0-9a-z_]*[0-9a-z])@([0-9a-z][0-9a-z\\-]*[0-9a-z]\\.)?([0-9a-z][0-9a-z\\-]*[0-9a-z])\\.([a-z]{2,15})(\\.[a-z]{2})?$');
-const passwordRegex = new RegExp('^([0-9a-zA-Z`~!@#$%^&*()\\-_=+\\[{\\]}\\\\|;:\'\",<.>/?]{8,100})$');
+const passwordRegex1 = new RegExp('^([0-9a-zA-Z`~!@#$%^&*()\\-_=+\\[{\\]}\\\\|;:\'\",<.>/?]{8,100})$');
+const passwordRegex = new RegExp('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$')
 const nicknameRegex = new RegExp('^([0-9a-zA-Z가-힣]{2,10})$');
 const contactRegex = new RegExp('^([0-9]{11})$');
 
@@ -31,8 +33,9 @@ const addressPostalRegex = new RegExp('^([0-9]{5})$');
 const addressPrimaryInput = registerForm['addressPrimary'];
 const addressPrimaryRegex = new RegExp('^(?=.{8,100})([가-힣][0-9가-힣 ]*[0-9])$');
 const addressSecondaryInput = registerForm['addressSecondary'];
+const checkAll = document.getElementById('check_all');
+const registerCheckboxes = document.querySelectorAll('input[type="checkbox"]');
 
-// show , hide
 const showAddressPopUp = () => {
     addressSearch.classList.add('visible');
 }
@@ -47,9 +50,13 @@ let passwordChecked = null;
 
 // xhr
 passwordInput.addEventListener('keyup', () => {
-    passwordWarning.style.display = 'none';
+    if (passwordInput.value === '') {
+        passwordWarning.innerText = '';
+        return;
+    }
     if (!passwordRegex.test(passwordInput.value)) {
-        passwordWarning.innerText = '비밀번호 형식이 올바르지 않습니다.';
+        passwordWarning.innerText = '비밀번호 형식이 올바르지 않습니다. \n숫자, 문자, 특수문자가 조합된 8~20자';
+        passwordWarning.style.color = '#000000';
         passwordWarning.style.display = 'inline';
     } else {
         passwordWarning.innerText = '사용 가능한 비밀번호 입니다.';
@@ -58,11 +65,14 @@ passwordInput.addEventListener('keyup', () => {
     }
 });
 passwordCheckInput.addEventListener('keyup', () => {
-    passwordCheckWarning.style.display = 'none';
+    if (passwordCheckInput.value === '') {
+        passwordCheckWarning.innerText = '';
+        return;
+    }
     if (passwordInput.value !== passwordCheckInput.value) {
         passwordCheckWarning.innerText = '비밀번호가 일치하지 않습니다.';
         passwordCheckWarning.style.display = 'inline';
-        passwordCheckWarning.style.color = 'red';
+        passwordCheckWarning.style.color = '#f86161';
         passwordChecked = false;
     }
     if (passwordInput.value === passwordCheckInput.value && passwordCheckInput.value !== '') {
@@ -72,14 +82,17 @@ passwordCheckInput.addEventListener('keyup', () => {
         passwordChecked = true;
     }
 });
-console.log(passwordCheckInput.value);
+
 
 emailInput.addEventListener('keyup', () => {
-    emailWarning.style.display = 'none';
+    if (emailInput.value === '') {
+        emailWarning.innerText = '';
+        return;
+    }
     if (!emailRegex.test(emailInput.value)) {
         emailWarning.innerText = '이메일 형식이 올바르지 않습니다.'
         emailWarning.style.display = 'inline';
-        emailWarning.style.color = 'red';
+        emailWarning.style.color = '#f86161';
     } else {
         const xhr = new XMLHttpRequest();
         const formData = new FormData();
@@ -116,11 +129,14 @@ emailInput.addEventListener('keyup', () => {
 });
 // readyState : 준비상태 ,  DONE : 요청 완료
 nicknameInput.addEventListener('keyup', () => {
-    nicknameWarning.style.display = 'none';
+    if (nicknameInput.value === '') {
+        nicknameWarning.innerText = '';
+        return;
+    }
     if (!nicknameRegex.test(nicknameInput.value)) {
         nicknameWarning.innerText = '닉네임 형식이 올바르지 않습니다.'
         nicknameWarning.style.display = 'inline';
-        nicknameWarning.style.color = 'red';
+        nicknameWarning.style.color = '#f86161';
     } else {
         const xhr = new XMLHttpRequest();
         const formData = new FormData();
@@ -130,7 +146,6 @@ nicknameInput.addEventListener('keyup', () => {
             if (xhr.status >= 200 && xhr.status < 300) {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     const response = parseInt(xhr.responseText);
-
                     switch (response) {
                         case 0:
                             nicknameWarning.innerText = '사용 가능한 닉네임입니다.';
@@ -182,22 +197,25 @@ document.addEventListener('mouseup', () => {
 })
 
 
-let checkAll = document.getElementById('check_all');
-const registerCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-
-function selectAll(selectAll)  {
+function selectAll(selectAll) {
     registerCheckboxes.forEach((checkbox) => {
         checkbox.checked = selectAll.checked
     });
 }
+
 checkAll.addEventListener('click', () => {
     selectAll(checkAll);
 });
 
 
 // 회원가입 버튼 실행
+
 registerForm.onsubmit = (e) => {
     e.preventDefault();
+    if (!confirm('회원가입을 진행하시겠습니까?')) {
+        e.preventDefault();
+        return;
+    }
     for (let i = 0; i < registerCheckboxes.length; i++) {
         if (i !== 0 && !registerCheckboxes[i].checked) {
             alert('이용약관을 읽고 동의해주세요.');
@@ -215,7 +233,7 @@ registerForm.onsubmit = (e) => {
     }
     // 패스워드 체크
     if (!passwordRegex.test(passwordInput.value)) {
-        alert('비밀번호 형식이 올바르지 않습니다.');
+        alert('비밀번호 형식이 올바르지 않습니다.\n 숫자, 문자, 특수문자가 조합된 8~20자로 다시 작성해주세요.');
         passwordInput.focus();
         passwordInput.select();
         return;
@@ -255,6 +273,7 @@ registerForm.onsubmit = (e) => {
         addressSecondaryInput.select();
         return;
     }
+    loader.classList.add('visible');
 
     const xhr = new XMLHttpRequest();
     const formData = new FormData(registerForm);
@@ -268,18 +287,21 @@ registerForm.onsubmit = (e) => {
                         e.preventDefault();
                         emailInput.focus();
                         emailInput.select();
+                        loader.classList.remove('visible');
                         alert('해당 이메일은 이미 사용 중입니다.');
                         break;
                     case 'DUPLICATE_NICKNAME':
                         e.preventDefault();
                         nicknameInput.focus();
                         nicknameInput.select();
+                        loader.classList.remove('visible');
                         alert('해당 닉네임은 이미 사용 중입니다.');
                         break;
                     case 'DUPLICATE_CONTACT':
                         e.preventDefault();
                         contactInput.focus();
                         contactInput.select();
+                        loader.classList.remove('visible');
                         alert('해당 번호은 중복된 번호입니다.');
                         break;
                     case 'SUCCESS':
@@ -296,6 +318,7 @@ registerForm.onsubmit = (e) => {
         }
     };
     xhr.send(formData);
+
 }
 
 

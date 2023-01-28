@@ -1,0 +1,79 @@
+@charset "UTF-8";
+
+body > .my-container {
+    background-color: rgb(254, 254, 254);
+    padding: 8rem;
+    user-select: none;
+}
+
+body > .my-container > .my-wrap {
+    border: 0.0625rem solid rgb(203, 203, 203);
+    border-radius: 0.6rem;
+    margin-top: 0.6rem;
+    padding: 1.2rem 1.4rem;
+    width: 44vh;
+}
+
+
+body > .my-container > .my-wrap > .my-title {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    padding-bottom: 1rem;
+}
+
+body > .my-container > .my-wrap > .my-title > h1 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    flex: auto;
+}
+
+body > .my-container > .my-wrap > .my-title > a {
+    padding: 0 1rem;
+    background-color: #ffffff;
+    border: 1px solid #d9d9d9;
+    color: #000000;
+    line-height: 30px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: 100ms;
+}
+body > .my-container > .my-wrap > .my-title > a:hover {
+    background-color: var(--color-red--);
+    color: #ffffff;
+}
+
+body > .my-container > .my-wrap > .my-profile {
+    border-radius: 18px;
+    position: relative;
+    padding-left: 72px;
+}
+body > .my-container > .my-wrap > .my-profile img{
+    width: 56px;
+    height: 56px;
+    position: absolute;
+    left: 0;
+    border-radius: 18px;
+}
+
+body > .my-container > .my-wrap > .my-profile > h3 {
+    padding-top: 0.4rem;
+    font-weight: 500;
+}
+body > .my-container > .my-wrap > .my-profile > p {
+    font-size: 0.7rem;
+    color: #94969b;
+}
+
+body > .my-container > .my-wrap > h2{
+    font-size: 1rem;
+    font-weight: 500;
+}
+body > .my-container > .my-wrap > .item{
+    display: block;
+    padding-top: 1.4rem;
+}
+
+body > .my-container > .my-wrap > .item:hover {
+    color: var(--color-purple--);
+}

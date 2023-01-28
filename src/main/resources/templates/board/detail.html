@@ -14,24 +14,23 @@
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard-dynamic-subset.css"/>
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script th:src="@{/board/resources/scripts/detail.js}" defer></script>
-    <script th:src="@{/resources/scripts/common.js}" defer></script>
-    <!--    <script th:if="${articleListVo != null && articleListVo.getResult().name().equals('FAILURE')}">-->
-    <!--        alert('해당 게시물은 존재하지 않습니다.');-->
-    <!--        window.history.back();-->
-    <!--    </script>-->
+    <script th:src="@{../resources/scripts/common.js}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script defer th:src="@{/resources/scripts/common.js}"></script>
     <script th:inline="javascript">
         let param = [(${paramJson})];
         let id = [[${articleListDto.id}]];
+        let articleUserId = [[${articleListDto.userId}]];
+        let connectedUserId = [[${userEntityId}]];
         let ArticleListWrittenAt = [[${articleListDto.writtenAt}]];
         let ArticleReplyInterval;
-        let ArticleReply__$listTbody;
+        let articleComment_wrap;
         let likePointByUserId = [[${likePointByUserId}]];
         let likePoint = [[${articleListDto.extra.likePoint}]];
 
-        function ArticleReply__submitWriteForm(form) {
+        function ArticleComment__submitWriteForm(form) {
             form.content.value = form.content.value.trim();
+            let content = form.content.value;
+
             if (form.content.value.length === 0) {
                 alert('댓글을 입력해 주세요.');
                 form.content.focus();
@@ -42,7 +41,7 @@
                 type: 'POST',
                 data: {
                     'articleId': param.id,
-                    'content': form.content.value
+                    'content': content
                 },
                 dataType: 'json',
                 success: function (data) {
@@ -60,42 +59,108 @@
                 }
             });
         }
+
+        function ArticleReply__submitWriteForm(form) {
+            form.content.value = form.content.value.trim();
+            let content = form.content.value;
+
+            let cArea = $(form).closest('.comment-area');
+            let replyId = parseInt(cArea.attr('data-article-reply-id'));
+
+            if (form.content.value.length === 0) {
+                alert('댓글을 입력해 주세요.');
+                form.content.focus();
+                return;
+            }
+            $.ajax({
+                url: './postWriteReply',
+                type: 'POST',
+                data: {
+                    'replyId': replyId,
+                    'articleId': param.id,
+                    'content': content
+                },
+                dataType: 'json',
+                success: function (data) {
+                    form.content.value = '';
+                    ArticleReply__loadList();
+                    if (data.resultCode.substring(0, 2) === 'S-') {
+                        alert(data.msg);
+                    } else {
+                        alert(data.msg);
+                    }
+                },
+                error: function () {
+                    alert('댓글 작성 도중 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요,');
+                    console.log("ajax 통신 실패");
+                }
+            });
+        }
+
     </script>
-
     <script>
+        // modifyMode
         function ArticleReply__enableModifyMode(obj) {
-            let $clickedBtn = $(obj);
-            let $rArea = $clickedBtn.closest('.reply-area');
-            let $rContent = $rArea.find('.reply-content');
-            let $textarea = $rArea.find('form textarea');
+            let clickedBtn = $(obj);
+            let cArea = clickedBtn.closest('.comment-area');
+            let cContent = cArea.find('.comment_content');
+            let $textarea = cArea.find('form textarea');
+            $textarea.val(cContent.text().trim());
+            cArea.attr('data-modify-mode', 'Y');
 
-            $textarea.val($rContent.text().trim());
-            $rArea.attr('data-modify-mode', 'Y');
             clearInterval(ArticleReplyInterval);
         }
 
         function ArticleReply__disableModifyMode(obj) {
-            let $clickedBtn = $(obj);
-            let $rArea = $clickedBtn.closest('.reply-area');
-            $rArea.attr('data-modify-mode', 'N');
+            let clickedBtn = $(obj);
+            let cArea = clickedBtn.closest('.comment-area');
+            cArea.attr('data-modify-mode', 'N');
             ArticleReplyInterval = setInterval(function () {
                 ArticleReply__loadList();
             }, 1000);
         }
 
+        // writeMode
+        function ArticleReply__enableWriteMode(obj) {
+            let clickedBtn = $(obj);
+            let cArea = clickedBtn.closest('.comment-area');
+            cArea.attr('data-write-mode', 'Y');
+            clearInterval(ArticleReplyInterval);
+        }
+
+        function ArticleReply__disableWriteMode(obj) {
+            let clickedBtn = $(obj);
+            let cArea = clickedBtn.closest('.comment-area');
+            cArea.attr('data-write-mode', 'N');
+            ArticleReplyInterval = setInterval(function () {
+                ArticleReply__loadList();
+            }, 1000);
+        }
+
+        function ArticleReply__enableMoreMode(obj) {
+            let clickedBtn = $(obj);
+            let cArea = clickedBtn.closest('.comment-area');
+            cArea.attr('data-more-mode', 'Y');
+            document.addEventListener('mouseup', () => {
+                cArea.attr('data-more-mode', 'N');
+            })
+            clearInterval(ArticleReplyInterval);
+        }
+
+
         function ArticleReply__submitModifyReplyForm(form) {
             form.content.value = form.content.value.trim();
             let content = form.content.value;
-            let $rArea = $(form).closest('.reply-area');
-            let replyId = parseInt($rArea.attr('data-article-reply-id'));
+            let cArea = $(form).closest('.comment-area');
+            let replyId = parseInt(cArea.attr('data-article-reply-id'));
 
             if (form.content.value.length === 0) {
                 alert('댓글을 입력해주세요.');
                 form.content.focus();
                 return false;
             }
-            $rArea.attr('data-loading', 'Y');
-            $rArea.attr('data-loading-modify', 'Y');
+            cArea.attr('data-loading', 'Y');
+            cArea.attr('data-loading-modify', 'Y');
 
             $.ajax({
                 url: './postModifyReply',
@@ -106,20 +171,18 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    $rArea.attr('data-loading', 'N');
-                    $rArea.attr('data-loading-modify', 'N');
+                    cArea.attr('data-loading', 'N');
+                    cArea.attr('data-loading-modify', 'N');
                     ArticleReply__disableModifyMode(form);
                     ArticleReply__loadList();
 
                     if (data.resultCode.substring(0, 2) === 'S-') {
-                        let $rContent = $rArea.find('.reply-content');
-                        let $textarea = $rArea.find('form textarea');
+                        let cContent = cArea.find('.comment_content');
+                        let $textarea = cArea.find('form textarea');
                         alert(data.msg);
-                        $rContent.text($textarea.val());
+                        cContent.text($textarea.val());
                     } else {
-                        if (data.msg) {
-                            alert(data.msg);
-                        }
+                        alert(data.msg);
                     }
 
                 },
@@ -132,12 +195,12 @@
     </script>
     <script>
         function ArticleReply__delete(obj) {
-            let $clickedBtn = $(obj);
-            let $rArea = $($clickedBtn).closest('.reply-area');
-            let replyId = parseInt($rArea.attr('data-article-reply-id'));
+            let clickedBtn = $(obj);
+            let cArea = $(clickedBtn).closest('.comment-area');
+            let replyId = parseInt(cArea.attr('data-article-reply-id'));
 
-            $rArea.attr('data-loading', 'Y');
-            $rArea.attr('data-loading-delete', 'Y');
+            cArea.attr('data-loading', 'Y');
+            cArea.attr('data-loading-delete', 'Y');
             clearInterval(ArticleReplyInterval);
             $.ajax({
                 url: './postDeleteReply',
@@ -147,19 +210,17 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    $rArea.attr('data-loading', 'N');
-                    $rArea.attr('data-loading-delete', 'N');
+                    cArea.attr('data-loading', 'N');
+                    cArea.attr('data-loading-delete', 'N');
                     if (data.resultCode.substring(0, 2) === 'S-') {
                         alert(data.msg);
-                        $rArea.remove();
+                        cArea.remove();
                         ArticleReply__loadList();
                         ArticleReplyInterval = setInterval(function () {
                             ArticleReply__loadList();
                         }, 1000);
                     } else {
-                        if (data.msg) {
-                            alert(data.msg);
-                        }
+                        alert(data.msg);
                     }
                 },
                 error: function () {
@@ -172,35 +233,27 @@
     <script th:inline="javascript">
         function ArticleReply__loadList() {
             $.ajax({
-                url: './getForPrintArticleRepliesRs',
+                url: './getForPrintArticleCommentsRs',
                 type: 'GET',
                 data: {
                     'id': param.id,
                 },
                 dataType: 'json',
                 success: function (data) {
-                    let $rBox = $(".reply-box");
-                    let $rCountA = $('.reply-count-a');
-                    let $rCountB = $('.reply-count-b');
+                    let cWrap = $(".comment-wrap");
+                    let cCountA = $('.comments-count-a');
+                    let cCountB = $('.comments-count-b');
 
-                    if (data == '') { // 조회할 댓글이 없는 경우
-                        $rBox.html("<h3 class='reply-empty'>등록된 댓글이 없습니다.</h3>");
-                        $rCountA.html(0);
-                        $rCountB.html('댓글 ' + 0 + '개');
+                    if (data.length > 0) { // 조회할 댓글이 있는 경우
+                        cWrap.html(''); // 기존 댓글 목록 삭제
+                        ArticleReply__drawReply(data);
                     } else {
-                        $rBox.html(''); // 기존 댓글 목록 삭제
-                        // $.each(data, function (i) {
-                        //     ArticleReply__drawReply(data[i]);
-                        //     $rCount.html('댓글 ' + data.length + '개');
-                        // });
-                        for (let i = 0; i < data.length; i++) {
-                            $rCountA.html(data.length);
-                            $rCountB.text('댓글 ' + data.length + '개');
-                            let articleReply = data[i];
-                            ArticleReply__drawReply(articleReply);
-
-                        }
+                        cWrap.html("<h3 class='result-none'>등록된 댓글이 없습니다.</h3>");
+                        cCountA.html(0);
+                        cCountB.html('댓글 ' + 0 + '개');
                     }
+                    cCountA.html(data.length);
+                    cCountB.text('댓글 ' + data.length + '개');
                 },
                 error: function () {
                     alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
@@ -211,43 +264,133 @@
 
 
         function ArticleReply__drawReply(articleReply) {
+            let html = '';
+            articleReply.forEach(function (reply) {
+                if (reply.replyId === 0) {
+                    let rc = 0;
+                    articleReply.forEach(function (i) {
+                        if (reply.id === i.replyId) rc++;
+                    })
+                    html += '<div class="comment-area" data-article-reply-id="' + reply.id + '">'
+                    if (reply.deleted) {
+                        html += '<span class="comment-writer">' + '(알 수 없음)' + '</span>';
+                    } else {
+                        html += '<span class="comment-writer">' + reply.extra.userWriter + ' [' + rc + ']' + '</span>';
+                    }
+                    if (articleUserId === reply.userId) {
+                        html += '<span class="article-writer">작성자</span>';
+                    }
+                    html += '<p class="comment_content">' + reply.content + '</p>';
+                    html += '<span class="loading-modify-msg">수정 중입니다....</span>'
+                    html += '<span class="loading-delete-msg">삭제 중입니다....</span>'
 
-            let html = $('.template-box-1').html();
-            html = replaceAll(html, "{$번호}", articleReply.id);
-            html = replaceAll(html, "{$날짜}", timeForToday(articleReply.writtenAt));
-            html = replaceAll(html, "{$작성자}", articleReply.extra.userWriter);
-            html = replaceAll(html, "{$이메일}", maskingName(articleReply.extra.userEmail));
-            html = replaceAll(html, "{$내용}", articleReply.content);
-            html = replaceAll(html, "{$유저번호}", articleReply.userId);
+                    html += '<div class="modify-mode-block">'
+                    html += '<form onsubmit="ArticleReply__submitModifyReplyForm(this); return false;">'
+                    html += '<textarea name="content" spellcheck="false">' + reply.content + '</textarea>';
+                    html += '<input class="loading-modify-inline a" type="submit" value="수정">'
+                    html += '<input class="modify-button modify-mode-inline"' +
+                        ' onclick="if (confirm(\'정말로 취소할까요? 작성하신 정보가 모두 유실됩니다.\')) {ArticleReply__disableModifyMode(this);} return false;" value="수정 취소">'
+                    html += '</form>';
+                    html += '</div>';
 
-            // let html = '';
-            //
-            // html = '<ul class="reply-area" data-article-reply-id="' + articleReply.id + '">';
-            // html += '<ul class="reply-first-line">'
-            // html += '<li class="reply-writer">' + articleReply.extra.userWriter + '</li>';
-            // html += '<li> · </li>'
-            // html += '<li class="reply-email">' + maskingName(articleReply.extra.userEmail) + '</li>';
-            // html += '</ul>'
-            // html += '<li class="reply-content">' + articleReply.content + '</li>';
-            //
-            // html += '<ul class="reply-second-line">'
-            // html += '<li class="reply-written-at">' + timeForToday(articleReply.writtenAt) + '</li>';
-            // html += '<li class="reply-btn">';
-            // html += '<a href="#">삭제</a>';
-            // html += '<a href="#">수정</a>';
-            // html += '</li>';
-            // html += '</ul>';
-            // html += '</ul>';
 
-            ArticleReply__$listTbody.append(html)
+                    html += '<div class="wrap-info">'
+                    html += '<i class="fa-regular fa-clock"></i>';
+                    html += '<span class="written_at">' + timeForToday(reply.writtenAt) + '</span>';
+                    html += '<a class="rpy-button write-mode-none" ' +
+                        'onclick="ArticleReply__enableWriteMode(this); return false">답글</a>';
+                    html += '<a class="rpy-button write-mode-inline" ' +
+                        'onclick="ArticleReply__disableWriteMode(this); return false">답글취소</a>';
+
+                    html += '<div class="btn">'
+                    html += '<div class="more" onclick="ArticleReply__enableMoreMode(this); return false;">⋯</div>';
+
+                    html += '<div class="btn-wrap">'
+                    html += '<a class="rpy-button write-mode-none" ' +
+                        'onclick="ArticleReply__enableWriteMode(this); return false">답글</a>';
+                    if (reply.userId === connectedUserId) {
+                        html += '<a class="modify-button modify-mode-none"' +
+                            ' onclick="ArticleReply__enableModifyMode(this); return false;">수정</a>';
+                        html += '<a class="delete-button loading-none"' +
+                            ' onclick="if (confirm(\'정말 삭제하시겠습니까?\')) {ArticleReply__delete(this);} return false;">삭제</a>';
+                    }
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<form class="reply-form" name="form" onsubmit="ArticleReply__submitWriteForm(this); return false;">'
+                    html += '<label>'
+                    html += '<textarea spellCheck="false" maxLength="300" class="content" name="content" placeholder = "답글을 입력해주세요." >';
+                    html += '</textarea>';
+                    html += '</label>';
+                    html += '<input type="hidden" name="replyId" value="' + reply.replyId + '">'
+                    html += '<input class="submit" type="submit" value="답글 작성">';
+                    html += '</form>';
+                    html += '</div>';
+
+                    html += '<div class="reply-wrap sub' + reply.id + '">';
+                    html += '</div>';
+                }
+            });
+            articleComment_wrap.append(html);
+
+            articleReply.forEach(function (reply) {
+                let subHtml = '';
+                if (reply.replyId !== 0) {
+                    subHtml += '<div class="comment-area subReply" data-article-reply-id="' + reply.id + '">'
+
+                    if (reply.deleted) {
+                        subHtml += '<span class="comment-writer">' + '(알 수 없음)' + '</span>';
+                    } else {
+                        subHtml += '<span class="comment-writer">' + reply.extra.userWriter + '</span>';
+                    }
+
+                    if (articleUserId === reply.userId) {
+                        subHtml += '<span class="article-writer"> 작성자</span>';
+                    }
+                    subHtml += '<p class="comment_content">' + reply.content + '</p>';
+
+                    subHtml += '<span class="loading-modify-msg">수정 중입니다....</span>'
+                    subHtml += '<span class="loading-delete-msg">삭제 중입니다....</span>'
+
+                    subHtml += '<div class="modify-mode-block">'
+                    subHtml += '<form onsubmit="ArticleReply__submitModifyReplyForm(this); return false;">'
+                    subHtml += '<textarea name="content" spellcheck="false">' + reply.content + '</textarea>';
+                    subHtml += '<input class="loading-modify-inline a" type="submit" value="수정">'
+                    subHtml += '<input class="modify-button modify-mode-inline"' +
+                        ' onclick="if (confirm(\'정말로 취소할까요? 작성하신 정보가 모두 유실됩니다.\')) {ArticleReply__disableModifyMode(this);} return false;" value="수정 취소">'
+                    subHtml += '</form>';
+                    subHtml += '</div>';
+
+                    subHtml += '<div class="wrap-info">'
+                    subHtml += '<i class="fa-regular fa-clock"></i>';
+                    subHtml += '<span class="written_at">' + timeForToday(reply.writtenAt) + '</span>';
+
+                    subHtml += '<div class="btn">'
+                    subHtml += '<div class="more" onclick="ArticleReply__enableMoreMode(this); return false;">⋯</div>';
+                    subHtml += '<div class="btn-wrap">'
+                    if (reply.userId === connectedUserId) {
+                        subHtml += '<a class="modify-button modify-mode-none"' +
+                            ' onclick="ArticleReply__enableModifyMode(this); return false;">수정</a>';
+                        subHtml += '<a class="delete-button loading-none"' +
+                            ' onclick="if (confirm(\'정말 삭제하시겠습니까?\')) {ArticleReply__delete(this);} return false;">삭제</a>';
+                    }
+                    subHtml += '</div>';
+                    subHtml += '</div>';
+                    subHtml += '</div>';
+                    // subHtml += '<ul class="reply-area sub' + reply.id + '">';
+                    // subHtml += '</ul>'; // 넣으면 무한 댓글
+
+                    $(".sub" + reply.replyId).append(subHtml);
+                }
+            });
         }
 
         $(function () {
             ViewArticle3__updateLikePoint();
 
-            $('.article-written-at').html(timeForToday(ArticleListWrittenAt))
+            $('.article-written_at').html(timeForToday(ArticleListWrittenAt))
 
-            ArticleReply__$listTbody = $('.reply-wrap > .reply-box');
+            articleComment_wrap = $('.article-comments > .comment-wrap');
             ArticleReply__loadList();
 
             // 1초마다 댓글 갱신
@@ -257,7 +400,6 @@
 
         });
     </script>
-
     <script th:inline="javascript">
         function ViewArticle3__updateLikePoint() {
             if (likePoint === 0) {
@@ -344,9 +486,8 @@
     </script>
 </head>
 <body>
-
 <th:block th:replace="~{fragments/header.html :: header}"></th:block>
-<section class="section">
+<section class="container">
     <div class="article-head-wrap">
         <div class="article-head">
             <a th:href="@{/board/list/{code}(code=${articleListDto.getBoardCode()})}"
@@ -356,17 +497,20 @@
         </div>
 
         <div class="article-body">
-            <a th:text="${articleListDto.extra.userWriter}" class="article-user"></a>
+            <a th:if="${articleListDto.extra.userLevel < 10}"
+               th:text="${articleListDto.extra.userWriter}" class="article-user"></a>
+            <a th:if="${articleListDto.extra.userLevel > 10}"
+               th:text="${articleListDto.extra.userLevelText}" class="article-user"></a>
             <a class="line">∣</a>
-            <a class="article-written-at"></a>
+            <a class="article-written_at"></a>
         </div>
 
         <div class="article-foot">
-            <a class="cell col4">
+            <a class="cell">
                 <img class="icon" src="/resources/images/comment-purple.png" alt="댓글">
-                <span class="reply-count-a count"></span>
+                <span class="comments-count-a count"></span>
             </a>
-            <a class="cell col5">
+            <a class="cell">
                 <img class="icon" src="/resources/images/view-purple.png" alt="조회수">
                 <span th:text="${articleListDto.view}" class="view count"></span>
             </a>
@@ -380,6 +524,7 @@
                         </li>
                         <li th:if="${userEntity != null && articleListDto.getUserId() == userEntity.getId()}">
                             <a id="delete" class="delete-button"
+                               onclick="if (!confirm('정말로 게시글을 삭제 하시겠습니까?')){return false;}"
                                th:href="@{/board/delete (id=${articleListDto.getId()})}">삭제</a>
                         </li>
                     </ul>
@@ -404,28 +549,54 @@
 
             <a class="btn cmt">
                 <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
-                <span class="reply-count-a count"></span>
+                <span class="comments-count-a count"></span>
             </a>
         </div>
 
     </div>
+
+    <div class="article-comments">
+        <h2 class="comments-count-b"></h2>
+        <div class="comment-write-wrap">
+            <form name="form" onsubmit="ArticleComment__submitWriteForm(this); return false;">
+                <label>
+                    <textarea spellcheck="false" maxlength="300" class="content" name="content"
+                              placeholder="댓글을 입력해주세요."></textarea>
+                </label>
+                <input type="submit" value="작성">
+            </form>
+        </div>
+
+        <div class="comment-wrap">
+
+        </div>
+    </div>
 </section>
-<div class="reply-wrap">
-    <h2 class="reply-count-b"></h2>
-    <form name="form" onsubmit="ArticleReply__submitWriteForm(this); return false;">
-        <textarea spellcheck="false" maxlength="300" class="content" name="content"
-                  placeholder="댓글을 입력해주세요."></textarea>
-        <input class="write-reply" type="submit" value="작성">
-    </form>
 
-    <div class="reply-box">
 
+<div class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <form action="postWriteReply" method="post">
+            <div class="writer">
+                <p>작성자</p>
+                <input type="text" class="writer" value="박영준" readonly>
+            </div>
+
+            <p>내용</p>
+            <input type="hidden" name="articleId" th:value="${articleListDto.id}">
+
+            <textarea name="content" placeholder="답글을 작성해주세요." spellcheck="false"></textarea>
+
+            <div class="btn">
+                <input type="button" value="취소">
+                <input type="submit" value="보내기">
+            </div>
+
+        </form>
     </div>
 </div>
-<script>
 
-
-</script>
 <div class="rcmd-board">
     <h2>인기 게시글</h2>
     <section th:if="${articleListDto.id != rcmd.id }" class="article-list" th:each="rcmd: ${getForPrintRcmdArticlesRs}">
@@ -460,42 +631,13 @@
     </section>
 </div>
 
-<div style="display: none" class="template-box-1">
-    <ul class="reply-area" data-article-reply-id="{$번호}">
-        <ul class="reply-first-line">
-            <li class="reply-writer">{$작성자}</li>
-            <li> ·</li>
-            <li class="reply-email">{$이메일}</li>
-        </ul>
-        <li class="reply-content modify-mode-none">{$내용}</li>
-        <div class="modify-mode-block">
-            <form onsubmit="ArticleReply__submitModifyReplyForm(this); return false;">
-                <textarea style="width: 100%; height: 5rem; margin-top: 0.6rem" name="content"
-                          spellcheck="false">{$내용}</textarea>
-                <input class="loading-modify-inline a" type="submit" value="수정">
-            </form>
+<div class="container" style="margin-top:30px">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2 id="cnt"></h2>
+            <div id="replyArea"></div>
         </div>
-        <ul class="reply-second-line">
-            <li th:if="${userEntity != null}" class="reply-btn" data-user-id="{$유저번호}">
-                <span class="loading-modify-msg">수정 중입니다....</span>
-                <span class="loading-delete-msg">삭제 중입니다....</span>
-
-                <a class="more">⋯</a>
-                <div class="more-popper">
-                    <div class="url-link">
-                        <a class="modify-button modify-mode-none"
-                           onclick="ArticleReply__enableModifyMode(this); return false;">수정</a>
-                        <a class="modify-button modify-mode-inline"
-                           onclick="ArticleReply__disableModifyMode(this); return false;">수정취소</a>
-                        <a class="delete-button loading-none"
-                           onclick="if (confirm('정말 삭제하시겠습니까?')) {ArticleReply__delete(this);} return false;">삭제</a>
-                    </div>
-                </div>
-
-            </li>
-            <li class="reply-written-at">{$날짜}</li>
-        </ul>
-    </ul>
+    </div>
 </div>
 <th:block th:replace="~{fragments/footer.html :: footer}"></th:block>
 </body>

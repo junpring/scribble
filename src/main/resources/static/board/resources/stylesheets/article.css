@@ -2,7 +2,7 @@
 
 .section {
     width: var(--content-max-width);
-    margin-top: 6rem;
+    margin-top: 8rem;
 }
 
 .section > .board-type {
@@ -10,10 +10,12 @@
     margin-top: 1rem;
     position: relative;
 }
+
 .section > .board-type > .icon {
     font-size: 1.4rem;
     padding-right: 0.2rem;
 }
+
 .section > .board-type > .board-name {
     font-size: 1.4rem;
     font-weight: 500;
@@ -39,12 +41,13 @@
     text-align: center;
     border-top: 2px solid var(--color-purple--);
     border-bottom: 1px solid #dbdbdb;
-    /*padding: 1rem 1rem 0.45rem 1rem;*/
     padding: 0.6rem;
 }
 
 .section > .table > tbody > .article {
     border-bottom: 1px solid #dbdbdb;
+
+    /*height: 5rem;*/
     transition-duration: 200ms;
 }
 
@@ -54,22 +57,39 @@
 
 .section > .table > tbody > .article > td {
     text-align: center;
-    /*padding: 1rem 1rem 0.45rem 1rem;*/
-    padding: 0.6rem;
+    height: 6.4rem;
 }
 
 .section > .table > tbody > .article > .write-at {
     font-size: 0.8rem;
 }
 
+.section > .table > tbody > .article > .title {
+    display: flex;
+    align-items: center;
+}
+
 .section > .table > tbody > .article > .title > a {
-    /*text-overflow: ellipsis;*/
+    text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 3;
     overflow: hidden;
     text-align: left;
-    width: 34rem;
+}
+
+.section > .table > tbody > .article > .title > .category {
+    font-size: 1.1rem;
+    font-weight: 700;
+    width: 70%;
+}
+.section > .table > tbody > .article > .title > a:nth-child(2) {
+    width: 70%;
+}
+
+
+.section > .table > tbody > .article > .title > p {
+    display: none;
 }
 
 .section > .table > tbody > .article > .title:hover {
@@ -82,3 +102,47 @@
     position: relative;
 }
 
+
+.section > .table > tbody > .article > .title > .content {
+    width: 40%;
+    margin-left: 3rem;
+}
+
+.section > .table > tbody > .article > .title > .content > p {
+    display: none;
+    font-size: 0.4rem;
+}
+
+.section > .table > tbody > .article > .title > .content > p > img {
+    width: 4rem;
+    height: 4rem;
+}
+
+.section > .table > tbody > .article > .title > .content > .image {
+    width: 30%;
+    margin-left: -0.020rem;
+}
+
+.section > .table > tbody > .article > .title > .content > .image > img {
+    width: 5rem;
+    height: 5rem;
+}
+
+.section > .table > tbody > .article > .title > .content > p:nth-child(2) {
+    display: block;
+}
+
+
+/*pagination*/
+
+.pagination {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.pagination > li {
+    margin: 0.5rem;
+}

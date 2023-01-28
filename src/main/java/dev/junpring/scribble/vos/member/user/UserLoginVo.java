@@ -8,8 +8,8 @@ import dev.junpring.scribble.entities.member.SessionEntity;
 public class UserLoginVo extends UserEntity implements IResult<LoginResult> {
     private LoginResult result;
 
-    private boolean autosign;
-    private SessionEntity sessionEntity; // SessionEntity 타입 (확장) , Vo는 이미 UserEntity를 상속받고잇음
+    private boolean autologin;
+    private SessionEntity sessionEntity;
 
     @Override
     public LoginResult getResult() {
@@ -20,12 +20,12 @@ public class UserLoginVo extends UserEntity implements IResult<LoginResult> {
         this.result = result;
     }
 
-    public boolean isAutosign() {
-        return autosign;
+    public boolean isAutologin() {
+        return autologin;
     }
 
-    public void setAutosign(boolean autosign) {
-        this.autosign = autosign;
+    public void setAutologin(boolean autologin) {
+        this.autologin = autologin;
     }
 
     public SessionEntity getSessionEntity() {

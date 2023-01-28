@@ -63,6 +63,7 @@ body > .login-form > .sub {
     align-items: center;
     display: flex;
     flex-direction: row;
+    /*justify-content: space-between;*/
     justify-content: space-between;
 }
 
@@ -110,10 +111,15 @@ body > .login-form > .sub > .autosign-container > .text {
     position: relative;
     white-space: nowrap;
 }
-
-body > .login-form > .sub > .link {
+body > .login-form > .sub > .forgot > i{
+    color: var(--color-purple--);
+    font-size: 0.7rem;
+    vertical-align: 0.1rem;
+}
+body > .login-form > .sub > .forgot > .link {
     color: var(--color-purple--);
 }
+
 
 body > .login-form > .button {
     border-radius: 0.25rem;

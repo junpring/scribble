@@ -14,11 +14,12 @@ public class ArticleEntity {
     private int userId;
     private String title; // 제목
     private String content; // 내용
-    private int bestLevel; // 베스트 유무
-    private int replyCount; //댓글 수
+    private int commentCount; //댓글 수
+    private int likeCount;
     private int view; // 조회수
     private Date writtenAt; // 글 작성한 시간
-    private int boardId;
+    private int boardId; // ????
+    private boolean isDeleted;
 
     private Map<String, Object> extra;
 

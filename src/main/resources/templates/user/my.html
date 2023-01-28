@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>스크리블 | 내 정보</title>
+    <link th:href="@{/resources/stylesheets/common.css}" rel="stylesheet">
+    <link th:href="@{/user/resources/stylesheets/my.css}" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<th:block th:replace="~{fragments/header.html :: header}"></th:block>
+
+<div class="my-container">
+    <section class="my-wrap">
+        <div class="my-title">
+            <h1>내 정보</h1>
+            <a th:href="@{/user/logout}">로그아웃</a>
+        </div>
+        <div class="my-profile">
+            <img th:src="@{../resources/images/my.png}" alt="profile">
+            <h3 th:text="${userEntity.email}"></h3>
+            <p th:text="${userEntity.nickname} + ' 님 / ' + ${userEntity.levelText}">관리자 님 / 관리자</p>
+        </div>
+    </section>
+    <section class="my-wrap">
+        <h2>계정</h2>
+        <a th:href="@{/user/modify-password}" class="item">비밀번호 변경</a>
+        <a href="" class="item">이메일 변경</a>
+    </section>
+    <section class="my-wrap">
+        <h2>커뮤니티</h2>
+        <a th:href="@{/user/modify-nickname}" class="item">닉네임 변경</a>
+        <a href="" class="item">이용 제한 내역</a>
+        <a href="" class="item">커뮤니티 이용규칙</a>
+    </section>
+    <section class="my-wrap">
+        <h2>이용 안내</h2>
+        <a href="" class="item">문의하기</a>
+        <a href="" class="item">공지사항</a>
+        <a href="" class="item">서비스 이용약관</a>
+        <a href="" class="item">개인정보 처리방침</a>
+        <a href="" class="item">청소년 보호 정책</a>
+    </section>
+    <section class="my-wrap">
+        <h2>기타</h2>
+        <a th:href="@{/user/withdrawal}" class="item">회원 탈퇴</a>
+    </section>
+</div>
+
+
+<th:block th:replace="~{fragments/footer.html :: footer}"></th:block>
+</body>
+</html>

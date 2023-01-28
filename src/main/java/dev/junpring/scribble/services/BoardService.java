@@ -1,8 +1,8 @@
 package dev.junpring.scribble.services;
 
+import dev.junpring.scribble.dtos.ArticleCommentDto;
 import dev.junpring.scribble.dtos.ArticleLikeDto;
 import dev.junpring.scribble.dtos.ArticleListDto;
-import dev.junpring.scribble.dtos.ArticleReplyDTO;
 import dev.junpring.scribble.dtos.SearchDto;
 import dev.junpring.scribble.entities.board.*;
 import dev.junpring.scribble.enums.board.*;
@@ -42,17 +42,19 @@ public class BoardService {
 
     public void writeArticle(ArticleWriteVo writeVo) {
         if (this.boardMapper.insertArticleList(writeVo) == 0) {
+            System.out.println("FAILURE");
             writeVo.setResult(ArticleWriteResult.FAILURE);
             return;
         }
         if (writeVo.getBoardCode() == null) {
+            System.out.println("ILLEGAL");
             writeVo.setResult(ArticleWriteResult.ILLEGAL);
             return;
         }
         writeVo.setResult(ArticleWriteResult.SUCCESS); // 성공
     }
 
-    // 가변인자. 여러 개의 매개변수를 받을 수 있다는 말
+    // 가변인자. 여러 개의 매개변수를 받을 수 있음
     public void uploadImages(ImageEntity... imageEntities) {
         for (ImageEntity imageEntity : imageEntities) {
             this.boardMapper.insertImage(imageEntity);
@@ -65,6 +67,16 @@ public class BoardService {
 
     public void getArticle(ArticleListDto articleListDto) {
         ArticleEntity articleEntity = this.boardMapper.selectForPrintArticle(articleListDto.getId());
+
+        if (articleEntity.getId() == 0 || articleEntity.isDeleted()) {
+            articleListDto.setResultCode("F-1");
+            articleListDto.setMsg("게시글이 존재하지 않거나 삭제된 게시물입니다.");
+            return;
+        }
+
+        articleListDto.setResultCode("S-1");
+        articleListDto.setMsg("게시글이 존재합니다.");
+        articleListDto.setDeleted(articleEntity.isDeleted());
         articleListDto.setBoardCode(articleEntity.getBoardCode());
         articleListDto.setTitle(articleEntity.getTitle());
         articleListDto.setUserId(articleEntity.getUserId());
@@ -92,17 +104,19 @@ public class BoardService {
         articleListVo.setUserId(articleEntity.getUserId());
         articleListVo.setTitle(articleEntity.getTitle());
         articleListVo.setContent(articleEntity.getContent());
-        articleListVo.setReplyCount(articleEntity.getReplyCount());
+        articleListVo.setCommentCount(articleEntity.getCommentCount());
         articleListVo.setView(articleEntity.getView());
         articleListVo.setExtra(articleEntity.getExtra());
         articleListVo.setWrittenAt(articleEntity.getWrittenAt());
-
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
-//        //원하는 데이터 포맷 지정
-//        String strNowDate = simpleDateFormat.format(articleEntity.getWrittenAt());
-//        //지정한 포맷으로 변환
-//        System.out.println("포맷 지정 후 : " + strNowDate);
         articleListVo.setResult(ArticleListResult.SUCCESS);
+
+        /*
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+        //원하는 데이터 포맷 지정
+        String strNowDate = simpleDateFormat.format(articleEntity.getWrittenAt());
+        //지정한 포맷으로 변환
+        System.out.println("포맷 지정 후 : " + strNowDate);
+        */
     }
 
     public PagingResponse<ArticleListDto> getArticlesForBoardList(SearchDto params) {
@@ -112,6 +126,16 @@ public class BoardService {
 
 
         List<ArticleListDto> list = this.boardMapper.selectArticlesForBoardList(params);
+        return new PagingResponse<>(list, paginationVo);
+    }
+
+    public PagingResponse<ArticleListDto> getUserArticlesForBoardList(SearchDto params) {
+        int count = this.boardMapper.selectUserArticlesCount(params);
+        PaginationVo paginationVo = new PaginationVo(count, params);
+        params.setPaginationVo(paginationVo);
+
+
+        List<ArticleListDto> list = this.boardMapper.selectUserArticlesForList(params);
         return new PagingResponse<>(list, paginationVo);
     }
 
@@ -142,21 +166,19 @@ public class BoardService {
         boardIdVo.setResult(BoardIdResult.SUCCESS);
     }
 
-
-    public List<ArticleReplyDTO> getForPrintArticleReplies(int articleId) {
+    public List<ArticleCommentDto> getForPrintArticleReplies(int articleId) {
         return this.boardMapper.selectForPrintArticleRepliesFrom(articleId);
     }
 
-//    @Transactional
-    public void writeReply(ArticleReplyDTO articleReplyDTO) {
+    public void writeReply(ArticleCommentDto articleReplyDTO) {
         if (this.boardMapper.writeArticleReply(articleReplyDTO) > 0) {
             articleReplyDTO.setResultCode("S-1");
             articleReplyDTO.setMsg(String.format("%d번 게시글에 댓글이 생성되었습니다.", articleReplyDTO.getArticleId()));
         }
     }
 
-    public ArticleReplyDTO getArticleModifyReplyAvailable(int id, int connectedUserId) {
-        ArticleReplyDTO articleReplyDto = this.boardMapper.selectArticleReply(id);
+    public ArticleCommentDto getArticleModifyReplyAvailable(int id, int connectedUserId) {
+        ArticleCommentDto articleReplyDto = this.boardMapper.selectArticleReply(id);
         if (articleReplyDto.getUserId() == connectedUserId) {
             articleReplyDto.setResultCode("S-1");
             articleReplyDto.setMsg("수정권한이 있습니다.");
@@ -166,29 +188,40 @@ public class BoardService {
         }
         return articleReplyDto;
     }
+
     @Transactional
-    public void modifyArticleReply(ArticleReplyDTO articleReplyDto) {
-        if (this.boardMapper.updateArticleReply(articleReplyDto) > 0) {
-            articleReplyDto.setResultCode("S-1");
-            articleReplyDto.setMsg(String.format("%d번 댓글이 수정되었습니다.", articleReplyDto.getId()));
+    public void modifyArticleReply(ArticleCommentDto articleCommentDto) {
+        if (this.boardMapper.updateArticleReply(articleCommentDto) > 0) {
+            articleCommentDto.setResultCode("S-1");
+            articleCommentDto.setMsg(String.format("%d번 댓글이 수정되었습니다.", articleCommentDto.getId()));
         }
     }
 
-    public ArticleReplyDTO getArticleDeleteReplyAvailableRs(int id, int connectedUserId) {
-        ArticleReplyDTO articleReplyDto = getArticleModifyReplyAvailable(id, connectedUserId);
-        String msg = articleReplyDto.getMsg().replace("수정", "삭제");
-        articleReplyDto.setMsg(msg);
-        return articleReplyDto;
+    public ArticleCommentDto getArticleDeleteReplyAvailableRs(int id, int connectedUserId) {
+        ArticleCommentDto articleCommentDto = getArticleModifyReplyAvailable(id, connectedUserId);
+        String msg = articleCommentDto.getMsg().replace("수정", "삭제");
+        articleCommentDto.setMsg(msg);
+        return articleCommentDto;
     }
+
     @Transactional
-    public void deleteArticleReply(ArticleReplyDTO articleReplyDto) {
-        if (this.boardMapper.deleteArticleReply(articleReplyDto) > 0) {
-            articleReplyDto.setResultCode("S-1");
-            articleReplyDto.setMsg(String.format("%d번 댓글이 삭제되었습니다.", articleReplyDto.getId()));
+    public void deleteArticleReply(ArticleCommentDto articleCommentDto) {
+        if (this.boardMapper.deleteArticleReply(articleCommentDto) > 0) {
+            articleCommentDto.setResultCode("S-1");
+            articleCommentDto.setMsg(String.format("%d번 댓글이 삭제되었습니다.", articleCommentDto.getId()));
         }
     }
+
     public int articleViewCount(int id) {
         return this.boardMapper.updateViewCount(id);
+    }
+
+    public int articleCommentCount(int id) {
+        return this.boardMapper.updateCommentCount(id);
+    }
+
+    public int articleLikeCount(int id) {
+        return this.boardMapper.updateLikeCount(id);
     }
 
     public ArticleLikeDto getArticleLikeAvailable(int id, int connectedUserId) {
@@ -227,6 +260,7 @@ public class BoardService {
     public int getLikePoint(int id) {
         return boardMapper.selectLikePoint(id);
     }
+
     public int getLikePointByUserId(int id, int connectedUserId) {
         return boardMapper.selectLikePointByUserId(id, connectedUserId);
     }
@@ -259,5 +293,6 @@ public class BoardService {
     public List<ArticleListDto> getForPrintRcmdArticles() {
         return this.boardMapper.selectRcmdArticles();
     }
+
 
 }

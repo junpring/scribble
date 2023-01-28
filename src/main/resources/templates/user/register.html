@@ -12,9 +12,11 @@
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/user/resources/scripts/register.js}"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script th:if="${userEntity != null}">
+        location.href = '/';
+    </script>
 </head>
 <body style="overflow-y: hidden;">
-
 <form id="register-form" class="register-form" method="post">
     <a class="logo-container" th:href="@{/}">
         <!--        <img alt="Coupang" class="logo" th:src="@{/resources/images/logo.png}">-->
@@ -32,23 +34,21 @@
         <span hidden>비밀번호</span>
         <input class="input" maxlength="50" name="password" placeholder="비밀번호" type="password">
     </label>
+
     <span class="warning password"></span>
 
-    </label>
     <label class="input-container">
         <span hidden>비밀번호 확인</span>
         <input class="input" maxlength="50" name="passwordCheck" placeholder="비밀번호 확인" type="password">
     </label>
     <span class="warning password-check"></span>
 
-    </label>
     <label class="input-container">
         <span hidden>이름</span>
-        <input class="input" maxlength="11" name="nickname" placeholder="닉네임" type="text">
+        <input class="input" maxlength="8" name="nickname" placeholder="닉네임" type="text">
     </label>
     <span class="warning nickname"></span>
 
-    </label>
     <label class="input-container">
         <span hidden>휴대폰 번호</span>
         <input class="input" maxlength="11" name="contact" placeholder="휴대폰 번호" type="text">
@@ -71,7 +71,10 @@
         <span hidden>상세주소</span>
         <input class="input" maxlength="100" name="addressSecondary" placeholder="상세주소" type="text">
     </label>
+
+
     <input class="button register" type="submit" value="회원가입">
+
     <label class="autosign-container">
         <input class="checkbox" id="check_all" type="checkbox">
         <span class="checker">
@@ -96,7 +99,6 @@
         <span class="text">[필수] 개인정보 수집 및 이용에 동의합니다.</span>
     </label>
 
-
     <div class="line"></div>
 
     <span class="have-id">이미 계정이 있으신가요? <a th:href="@{/user/login}">로그인</a></span>
@@ -106,5 +108,9 @@
 <div id="address-search" class="address-search">
     <div class="container"></div>
 </div>
+<div class="loader-container">
+    <div class="loader"></div>
+</div>
+
 </body>
 </html>

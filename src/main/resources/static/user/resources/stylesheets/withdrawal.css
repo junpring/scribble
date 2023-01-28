@@ -1,0 +1,90 @@
+@charset "UTF-8";
+
+body > .withdrawal-form {
+    background-color: rgb(254, 254, 254);
+    padding: 8rem;
+    user-select: none;
+}
+
+body > .withdrawal-form > .withdrawal-wrap {
+    border: 0.0625rem solid rgb(203, 203, 203);
+    border-radius: 0.6rem;
+    margin-top: 0.6rem;
+    padding: 1.2rem 1.4rem;
+    width: 44vh;
+}
+
+body > .withdrawal-form > .withdrawal-wrap > h1 {
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+body > .withdrawal-form > .withdrawal-wrap > .current-password-check {
+    margin: 2rem 0 0.3rem 0.325rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+
+body > .withdrawal-form > .withdrawal-wrap > .input-container {
+    align-items: stretch;
+    border: 0.0625rem solid rgb(203, 203, 203);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    border-radius: 0.45rem;
+    background-color: #f9f9f9;
+}
+
+body > .withdrawal-form > .withdrawal-wrap > .input-container:focus-within {
+    border: 0.0625rem solid var(--color-purple--);
+    background-color: #ffffff;
+}
+
+
+body > .withdrawal-form > .withdrawal-wrap > .input-container > .input {
+    width: 44vh;
+    padding: 0 1rem;
+    height: 2.3rem;
+}
+
+
+body > .withdrawal-form > .withdrawal-wrap > .rules {
+    margin: 2rem 0 0.2rem 0.325rem;
+}
+
+body > .withdrawal-form > .withdrawal-wrap > .rules > p {
+    font-size: 0.74rem;
+    font-weight: 500;
+    margin: 0;
+}
+body > .withdrawal-form > .withdrawal-wrap > .rules > p:first-child {
+    margin-bottom: 0.1rem
+}
+
+body > .withdrawal-form > .withdrawal-wrap > .rules > p >  .caution {
+    color: #f86161;
+}
+
+
+body > .withdrawal-form > .withdrawal-wrap > .button {
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    padding: 0.70rem 0;
+    width: 100%;
+    text-align: center;
+    user-select: none;
+}
+
+body > .withdrawal-form > .withdrawal-wrap > .button.withdrawal {
+    background-color: var(--color-purple--);
+    color: rgb(255, 255, 255);
+    opacity: 85%;
+    transition: 200ms;
+}
+body > .withdrawal-form > .withdrawal-wrap > .button.withdrawal:hover {
+    opacity: 100%;
+}

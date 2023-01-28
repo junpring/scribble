@@ -34,7 +34,6 @@ body > .footer > .footer-nav > span {
 /*back to top*/
 
 .back-to-top {
-    margin-bottom: 30%;
     position: fixed;
     bottom: 3em;
     right: 3em;
@@ -42,7 +41,7 @@ body > .footer > .footer-nav > span {
     border: 2px solid var(--color-purple--);
     color: var(--color-purple--);
     padding: 1em;
-    /*text-transform: uppercase;*/
+    text-transform: uppercase;
     cursor: pointer;
     font-weight: 700;
     /*box-shadow: 0 0 1em 0 rgba(0, 0, 0, .25);*/
@@ -50,12 +49,12 @@ body > .footer > .footer-nav > span {
     display: inline-block;
     opacity: 0;
     text-decoration: none;
-    font-size: .75em;
+    font-size: 0.75em;
 }
 
 .back-to-top:hover {
     background-color: var(--color-purple--);
-    padding: 1em 2em;
+    padding: 1em 3em;
     color:white;
 }
 

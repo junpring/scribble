@@ -9,26 +9,66 @@
     <link rel="stylesheet" th:href="@{/board/resources/stylesheets/article.css}">
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/resources/scripts/common.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 </head>
 <body>
 <th:block th:replace="~{fragments/header.html :: header}"></th:block>
+
+<style>
+    .pagination {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pagination > li {
+        margin: 0.5rem;
+    }
+
+    body > .section > h1 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        margin-bottom: 2.4rem;
+    }
+
+    body > .section > h1 > span {
+        font-weight: 300;
+    }
+
+    body > .section > .state {
+        font-weight: 400;
+        margin-bottom: 0.8rem;
+    }
+
+    body > .section > .result-none {
+        font-size: 1.4rem;
+        text-align: center;
+        margin-top: 8rem;
+    }
+
+    body > .section > .result-none > p {
+        font-weight: 500;
+        font-size: 1.8rem;
+    }
+
+</style>
+
 <section class="section">
-    <span style="font-size: 1.2rem; font-weight: 700;" th:text="${params.keyword}"></span>
-    <span style="font-size: 1.2rem;"> 검색결과</span>
+    <h1>
+        <strong th:text="${params.keyword}"></strong>
+        <span>검색결과</span>
+    </h1>
 
-    <div th:text="'전체 '+ '(' + ${articlesResponse.paginationVo.totalRecordCount} + ')'"></div>
+    <div class="state" th:text="'전체 '+ '(' + ${articlesResponse.paginationVo.totalRecordCount} + ')'"></div>
 
-<form>
-    <label class="label">
-        <select class="category" name="boardCode">
-            <option>전체</option>
-            <option th:each="key : ${boardCodes.keySet()}"
-                    th:value="${key}"
-                    th:text="${boardCodes.get(key)}">
-            </option>
-        </select>
-    </label>
-</form>
+    <!--
+        <aside class="aside">
+            <a th:href="@{/ (boardCode='')}" class="category">전체 보기</a>
+            <a th:each="boardCode : ${boardEntities}" th:text="${boardCode.getName()}" th:href="@{/ (category=${boardCode.code})}" class="category" style="margin-left: 1rem"></a>
+        </aside>
+    -->
 
     <table class="table">
         <thead>
@@ -47,12 +87,19 @@
         <tr class="article" th:each="article : ${articlesResponse.list}">
             <td th:text="*{article.getId()}"></td>
             <td class="title">
-                <a th:href="@{/board/detail (id=*{article.getId()})}" style="font-weight: 700"
-                   th:text="'[' + *{article.extra.boardCodeName} + '] '"></a>
+                <a class="category" th:href="@{/board/detail (id=*{article.getId()})}"
+                   th:text="'[' + *{article.extra.boardCodeName} + ']'"></a>
                 <a th:href="@{/board/detail (id=*{article.getId()})}"
                    th:text="*{article.title}"></a>
+                <a th:href="@{/board/detail (id=*{article.getId()})}"
+                   class="content" th:utext="*{article.content}"></a>
             </td>
-            <td th:text="*{article.extra.userWriter}"></td>
+            <td th:if="${article.extra.userLevel < 10}"
+                th:text="${article.extra.userWriter}"></td>
+            <td th:if="${article.extra.userLevel > 10}"
+                th:text="${article.extra.userLevelText}"></td>
+
+
             <td class="write-at" th:text="*{#dates.format(article.getWrittenAt(), 'yy.MM.dd HH:mm')}"></td>
             <td>
                 <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col1">
@@ -63,7 +110,7 @@
             <td>
                 <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col2">
                     <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글수">
-                    <span th:text="*{article.replyCount}" class="count"></span>
+                    <span th:text="*{article.commentCount}" class="count"></span>
                 </a>
             </td>
             <td>
@@ -76,23 +123,13 @@
         </tr>
         </tbody>
     </table>
-    <div style="font-size: 1rem; text-align: center" th:if="${articlesResponse.list.size() == 0}">:( 표시할
-        게시글이 없습니다.
+
+    <div class="result-none" th:if="${articlesResponse.list.size() == 0}">
+        <p>검색결과가 없습니다!</p>
+        검색할 단어를 변경하거나, 단어의 철자가 정확한지 확인해 보세요.
     </div>
-    <style>
-        .ul {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-        }
 
-        .ul > li {
-            margin: 0.5rem;
-        }
-
-    </style>
-    <ul class="ul">
+    <ul class="pagination">
         <li>
             <a th:if="${params.paginationVo.existPrevPage}"
                th:href="@{/board/search (page=${params.paginationVo.minPage}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
@@ -132,5 +169,6 @@
         </li>
     </ul>
 </section>
+<th:block th:replace="~{fragments/footer.html :: footer}"></th:block>
 </body>
 </html>

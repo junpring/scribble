@@ -16,13 +16,11 @@ ClassicEditor
 // config.disableNativeSpellChecker = false;
 
 
-
-
-
 const mainForm = window.document.getElementById('main');
 const titleInput = mainForm['title'];
 const categorySelect = mainForm['boardId'];
 const cancelButton = window.document.getElementById('cancel-button');
+const loader = document.querySelector('.loader-container');
 
 cancelButton.onclick = () => {
     if (confirm('정말로 취소할까요? 수정하신 정보가 모두 유실됩니다.')) {
@@ -32,9 +30,10 @@ cancelButton.onclick = () => {
 
 mainForm.onsubmit = (e) => {
     if (!titleInput.value) {
-        alert("글 제목을 입력해주세요.");
+        alert('글 제목을 입력해주세요.');
         titleInput.focus();
         e.preventDefault();
     }
-
+    loader.classList.add('visible');
+    alert('수정되었습니다.');
 };

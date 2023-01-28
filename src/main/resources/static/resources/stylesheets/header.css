@@ -5,6 +5,39 @@ body > .header {
     z-index: 999;
     background-color: #ffffff;
 }
+
+
+body > .header > .top-bar {
+    width: 100%;
+    align-items: center;
+    background-color: rgb(240, 239, 239, 40%);
+    display: flex;
+    flex-direction: column;
+    font-size: 0.75rem;
+    justify-content: flex-start;
+    padding: 0.5rem 0;
+}
+
+body > .header > .top-bar > .list {
+    width: var(--content-max-width);
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+body > .header > .top-bar > .list > .spring {
+    flex: 1;
+}
+
+body > .header > .top-bar > .list > .item + .item {
+    margin-left: 0.75rem;
+}
+body > .header > .top-bar > .list > .item > #favorite {
+    cursor: pointer;
+}
+
+
 body > .header > .nav {
     width: var(--content-max-width);
     display: flex;
@@ -25,7 +58,7 @@ body > .header > .nav > .nav-bar > a:first-child {
 }
 
 body > .header > .nav > .nav-bar > .logo > li {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 700;
     padding-left: 0.3rem;
 }
@@ -36,94 +69,8 @@ body > .header > .nav > .nav-bar > a > li {
 }
 
 
-body > .header > .nav > .nav-button {
-    line-height: 1.4rem;
-    position: absolute;
-    right: 0;
-}
-
-body > .header > .nav > .nav-button > a {
-    margin-left: 0.625rem;
-    width: 5rem;
-    height: 2.5rem;
-    font-weight: 700;
-    padding: 0.4rem 0.4rem 0.4rem 0.4rem;
-}
-
-body > .header > .nav > .nav-button > .write {
-    border: none;
-    background-color: var(--color-purple--);
-    color: #ffffff;
-    position: relative;
-}
-
-body > .header > .nav > .nav-button > .write:hover {
-    background-color: #ffffff;
-    border: 1px solid
-    var(--color-purple--);
-    transition: 100ms;
-}
-
-body > .header > .nav > .nav-button > .write:hover > .icon {
-    opacity: 100;
-    color: var(--color-purple--);
-}
-body > .header > .nav > .nav-button > .write > .icon {
-    opacity: 0;
-    overflow: hidden;
-    position: absolute;
-    left: 1.2rem;
-    top: 0.4rem;
-    font-size: 1.2rem;
-    text-align: center;
-}
-
-body > .header > .nav > .nav-button > .login {
-    border: 1px solid #dbdbdb;
-    background-color: #ffffff;
-    color: #252222;
-    transition-duration: 100ms;
-}
-body > .header > .nav > .nav-button > .login:hover {
-    border: 1px solid var(--color-purple--);
-    background-color: var(--color-purple--);
-    color: #ffffff;
-}
-
-body > .header > .nav > .nav-button > .register {
-    border: 1px solid #dbdbdb;
-    background-color: #ffffff;
-    color: #252222;
-    transition-duration: 100ms;
-}
-body > .header > .nav > .nav-button > .nickname {
-    border: 1px solid #dbdbdb;
-    background-color: #ffffff;
-    color: #252222;
-}
-
-body > .header > .nav > .nav-button > .register:hover {
-    border: 1px solid var(--color-purple--);
-    background-color: var(--color-purple--);
-    color: #ffffff;
-}
-
-body > .header > .nav > .nav-button > .logout {
-    border: 1px solid #dbdbdb;
-    background-color: #ffffff;
-    color: #252222;
-    transition-duration: 100ms;
-}
-body > .header > .nav > .nav-button > .logout:hover {
-    border: 1px solid var(--color-red--);
-    background-color: var(--color-red--);
-    color: #ffffff;
-}
-
 
 /*search*/
-
-
 .search > .search-form {
     align-items: center;
     display: flex;
@@ -141,7 +88,10 @@ body > .header > .nav > .nav-button > .logout:hover {
 
 .search > .search-form > .select-container > .search-select {
     font-size: 0.9rem;
-    border: none;
+    /*border: none;*/
+    border-radius: 0.7rem;
+    border:1px solid rgb(217, 217, 217);
+    color: rgb(133, 133, 133);
     cursor: pointer;
 }
 
@@ -179,4 +129,57 @@ body > .header > .nav > .nav-button > .logout:hover {
 .search > .search-form > .search-button > .icon {
     color: var(--color-purple--);
     font-size: 1rem;
+}
+
+
+
+
+
+
+/*------------*/
+body > .header > .nav  > .my {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    position: absolute;
+    right: 0;
+    top: 1.2rem;
+}
+
+body > .header > .nav > .my > .item + .item {
+    margin-left: 1.25rem;
+}
+
+body > .header > .nav > .my > .item > .link {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    font-weight: 400;
+}
+
+
+body > .header > .nav > .my > .item > .link > .icon {
+    color: rgb(85, 85, 85);
+    font-size: 1.5rem;
+    margin-bottom: 0.425rem;
+}
+
+body > .header > .nav > .my > .item > .link > .count {
+    top: -0.625rem;
+    right: 0.325rem;
+    height: 1.25rem;
+    align-items: center;
+    background-color: var(--color-purple--);
+    border-radius: 10rem;
+    color: rgb(255, 255, 255);
+    display: flex;
+    flex-direction: row;
+    font-size: 0.7rem;
+    font-weight: 600;
+    justify-content: center;
+    padding: 0 0.375rem;
+    position: absolute;
 }

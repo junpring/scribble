@@ -27,6 +27,9 @@ public interface IUserMapper {
     UserEntity selectUser(UserEntity userEntity);
     UserEntity selectUserEmail(
             @Param(value = "email")String email);
+    UserEntity selectUserEmailEqualContact(
+            @Param(value = "email")String email,
+            @Param(value = "contact")String contact);
     SessionEntity selectSessionKey(
             @Param(value = "key") String key);
     // session key가 같으면 (세션 업데이트시간, 세션 만료될시간, 세션 만료된 여부) 업데이트.
@@ -37,8 +40,10 @@ public interface IUserMapper {
     UserEntity selectUserById(@Param(value = "id") int id);
 
     int updateUser(UserEntity userEntity);
+    int updateUserNickname(UserEntity userEntity);
     int updateUserEmailVerifyCode(UserEmailVerifyCodeEntity userEmailVerifyCodeEntity);
     int updateSession(SessionEntity sessionEntity);
+    int updateSession2(SessionEntity sessionEntity);
 
     // 세션 만료된 여부
     int updateSessionExpired(

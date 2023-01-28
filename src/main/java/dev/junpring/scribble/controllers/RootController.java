@@ -4,13 +4,11 @@ import dev.junpring.scribble.dtos.ArticleListDto;
 import dev.junpring.scribble.entities.board.ArticleEntity;
 import dev.junpring.scribble.entities.board.BoardEntity;
 import dev.junpring.scribble.services.BoardService;
-import dev.junpring.scribble.vos.board.article.ArticleListVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.HashMap;

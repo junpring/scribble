@@ -15,15 +15,6 @@
     <script defer th:src="@{/resources/libraries/ckeditor/ckeditor.js}"></script>
     <script defer th:src="@{/board/resources/scripts/modify.js}"></script>
     <script defer th:src="@{/resources/scripts/common.js}"></script>
-
-<!--    <script th:if="${loginVo.getResult().name().equals('NOT_FOUND')}">-->
-<!--        alert("로그인 후 글 수정을 할 수 있습니다. \n로그인 페이지로 이동합니다.");-->
-<!--        location.href = '/user/login'-->
-<!--    </script>-->
-<!--    <script th:if="${loginVo.getResult().name().equals('NOT_FOUND')}">-->
-<!--        alert("허용되지않은 접근입니다.");-->
-<!--        history.back();-->
-<!--    </script>-->
 </head>
 <body>
 <th:block th:replace="~{fragments/header.html :: header}"></th:block>
@@ -40,8 +31,9 @@
         <input id="cancel-button" class="button white" type="button" value="돌아가기">
         <input class="button purple" type="submit" value="수정하기">
     </div>
-
 </form>
-
+<div class="loader-container">
+    <div class="loader"></div>
+</div>
 </body>
 </html>

@@ -1,0 +1,640 @@
+/*reply-wrap*/
+body > .container > .article-comments {
+    width: var(--content-max-width);
+    position: relative;
+    margin-bottom: 3rem;
+}
+
+body > .container > .article-comments > .comment-write-wrap {
+    margin-bottom: 4rem;
+}
+
+body > .container > .article-comments > .comment-write-wrap > form > label > .content {
+    width: 100%;
+    height: 5rem;
+    border: 1px solid #94969b;
+    border-radius: 0.3rem;
+    font-family: 'Pretendard', sans-serif;
+    resize: none;
+    margin-bottom: 0.4rem;
+}
+
+body > .container > .article-comments > .comment-write-wrap > form > input {
+    padding: 0.4rem 4%;
+    background-color: var(--color-purple--);
+    border-radius: 0.25rem;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    position: absolute;
+    right: 0;
+}
+body > .container > .article-comments > .comment-write-wrap > form > input:hover {
+    filter: brightness(120%);
+}
+
+
+
+/*comment-area*/
+
+
+body > .container > .article-comments > .comments-count-b {
+    padding: 1.2rem 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+body > .container > .article-comments i {
+    margin-top: 0.09rem;
+}
+
+body > .container > .article-comments > .comment-wrap > .result-none {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 1rem;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area {
+    padding: 1rem;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .comment-writer {
+    color: var(--color-purple--);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-right: 0.2rem;
+    margin-top: 0.6rem;
+}
+body > .container > .article-comments > .comment-wrap > .comment-area > .article-writer {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #e71b1b;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info {
+    display: flex;
+    color: #94969b;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .comment_content {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .written_at {
+    margin-left: 0.3rem;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .rpy-button {
+    margin-left: 0.6rem;
+    cursor: pointer;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .btn > .btn-wrap > .rpy-button {
+    cursor: pointer;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area[data-write-mode="Y"] > .wrap-info > .rpy-button.write-mode-inline {
+    display: inline-block;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area[data-write-mode="Y"] > .wrap-info > .rpy-button.write-mode-none {
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .rpy-button.write-mode-inline {
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .btn {
+    font-size: 0.8rem;
+    position: absolute;
+    right: 0;
+}
+
+
+/* reply btn more */
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .btn > .more {
+    margin-right: 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area[data-more-mode="Y"] > .wrap-info > .btn > .btn-wrap {
+    display: inline-block;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .btn > .btn-wrap {
+    width: 6rem;
+    right: 0.8rem;
+    color: #000000;
+    border: 1px solid #dbdbdb;
+    font-size: 0.8rem;
+    background-color: #ffffff;
+    position: absolute;
+    padding: 0.2rem;
+    display: none;
+
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .btn > .btn-wrap > a {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding: 0.2rem;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .wrap-info > .btn > .btn-wrap > a:hover {
+    color: #f86161;
+}
+
+/*subReply - more*/
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area > .wrap-info > .btn > .more {
+    margin-right: 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    user-select: none;
+}
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-more-mode="Y"] > .wrap-info > .btn > .btn-wrap {
+    display: inline-block;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap >  .comment-area > .wrap-info > .btn > .btn-wrap {
+    width: 6rem;
+    right: 0.8rem;
+    color: #000000;
+    border: 1px solid #dbdbdb;
+    font-size: 0.8rem;
+    background-color: #ffffff;
+    position: absolute;
+    padding: 0.2rem;
+    display: none;
+}
+body > .container > .article-comments > .comment-wrap > .reply-wrap >  .comment-area > .wrap-info > .btn > .btn-wrap > a {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding: 0.2rem;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap >  .comment-area > .wrap-info > .btn > .btn-wrap > a:hover {
+    color: #f86161;
+}
+
+/*comment - subReply*/
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area {
+    padding: 1rem 1rem 1rem 1.4rem;
+    border-bottom: 1px solid #dbdbdb;
+    background-color: #f8f8f8;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area > .comment-writer {
+    color: var(--color-purple--);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-right: 0.2rem;
+    margin-top: 0.6rem;
+}
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area > .article-writer {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #e71b1b;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area > .wrap-info {
+    display: flex;
+    color: #94969b;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area > .comment_content {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area > .wrap-info > .written_at {
+    margin-left: 0.3rem;
+}
+
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area > .wrap-info > .btn {
+    font-size: 0.8rem;
+    position: absolute;
+    right: 0;
+}
+
+
+.modify-mode-block > form > textarea {
+    font-family: 'Pretendard', sans-serif;
+    resize: none;
+    width: 100%;
+    height: 5rem;
+    margin-bottom: 0.4rem;
+}
+
+
+/*comment modify delete */
+.container > .article-comments > .comment-wrap > .comment-area .loading-delete-msg {
+    display: none;
+    font-weight: bold;
+    color: #f86161;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area .loading-none {
+    cursor: pointer;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area[data-loading="Y"] .loading-none {
+    cursor: pointer;
+    display: none;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area[data-loading="Y"][data-loading-delete="Y"] .loading-delete-msg {
+    display: inline;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area[data-loading="Y"][data-loading-delete="Y"] .modify-button {
+    display: none;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area[data-modify-mode="Y"] .modify-mode-none {
+    display: none;
+}
+.container > .article-comments > .comment-wrap > .comment-area .modify-mode-block {
+    display: none;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area[data-modify-mode="Y"] .modify-mode-block {
+    display: block;
+    animation: fade-in 0.5s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+
+.container > .article-comments > .comment-wrap > .comment-area[data-modify-mode="Y"] .modify-mode-inline {
+    display: inline;
+}
+
+.modify-button {
+    cursor: pointer;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area .loading-modify-msg {
+    font-weight: bold;
+    color: #f86161;
+    display: none;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area[data-loading="Y"][data-loading-modify="Y"] .loading-modify-msg {
+    display: inline;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area[data-loading="Y"][data-loading-modify="Y"] .modify-mode-inline {
+    display: none;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area .loading-modify-inline {
+    padding: 0.4rem 4%;
+    background-color: var(--color-purple--);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+    transition-duration: 200ms;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area .loading-modify-inline:hover {
+    filter: brightness(120%);
+}
+
+.container > .article-comments > .comment-wrap > .comment-area .modify-mode-inline {
+    display: none;
+    width: 6rem;
+    margin-bottom: 1rem;
+    margin-left: 0.5rem;
+    padding: 0.4rem 0.042%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 0.0625rem solid rgb(239, 239, 239);
+    border-radius: 0.25rem;
+    text-align: center;
+    transition-duration: 200ms;
+}
+
+.container > .article-comments > .comment-wrap > .comment-area .modify-mode-inline:hover {
+    background-color: var(--color-red--);
+    color: #ffffff;
+}
+
+
+
+
+
+/*reply modify delete */
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .loading-delete-msg {
+    display: none;
+    font-weight: bold;
+    color: #f86161;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .loading-none {
+    cursor: pointer;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-loading="Y"] .loading-none {
+    cursor: pointer;
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-loading="Y"][data-loading-delete="Y"] .loading-delete-msg {
+    display: inline;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-loading="Y"][data-loading-delete="Y"] .modify-button {
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-modify-mode="Y"] .modify-mode-none {
+    display: none;
+}
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .modify-mode-block {
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-modify-mode="Y"] .modify-mode-block {
+    display: block;
+    animation: fade-in 0.5s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-modify-mode="Y"] .modify-mode-inline {
+    display: inline;
+}
+
+.modify-button {
+    cursor: pointer;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .loading-modify-msg {
+    font-weight: bold;
+    color: #f86161;
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-loading="Y"][data-loading-modify="Y"] .loading-modify-msg {
+    display: inline;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area[data-loading="Y"][data-loading-modify="Y"] .modify-mode-inline {
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .loading-modify-inline {
+    padding: 0.4rem 4%;
+    background-color: var(--color-purple--);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+    transition-duration: 200ms;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .loading-modify-inline:hover {
+    filter: brightness(120%);
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .modify-mode-inline {
+    display: none;
+    width: 6rem;
+    margin-bottom: 1rem;
+    margin-left: 0.5rem;
+    padding: 0.4rem 0.042%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 0.0625rem solid rgb(239, 239, 239);
+    border-radius: 0.25rem;
+    text-align: center;
+    background-color: #ffffff;
+    transition-duration: 200ms;
+}
+
+body > .container > .article-comments > .comment-wrap > .reply-wrap > .comment-area .modify-mode-inline:hover {
+    background-color: var(--color-red--);
+    color: #ffffff;
+}
+
+
+
+
+
+/* reply form */
+
+body > .container > .article-comments > .comment-wrap > .comment-area > .reply-form {
+    display: none;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > form > label > textarea {
+    font-family: 'Pretendard', sans-serif;
+    resize: none;
+    width: 100%;
+    height: 5rem;
+    margin-bottom: 0.4rem;
+    margin-top: 1rem;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area > form > .submit {
+    padding: 0.4rem 4%;
+    background-color: var(--color-purple--);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+body > .container > .article-comments > .comment-wrap > .comment-area > form > .submit:hover {
+    filter: brightness(120%);
+}
+
+/* reply - data - mode*/
+body > .container > .article-comments > .comment-wrap > .comment-area[data-write-mode="Y"] .reply-form {
+    display: block;
+}
+
+body > .container > .article-comments > .comment-wrap > .comment-area[data-write-mode="N"] .reply-form {
+    display: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+body > .modal {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 80%);
+    position: fixed;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1;
+}
+
+body > .modal.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+body > .modal > .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30rem;
+    height: 15rem;
+    transform: translate(-50%, -50%);
+    padding: 0.7rem 1.4rem;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+}
+
+body > .modal > .modal-content > .close-button {
+    position: absolute;
+    font-size: 1.2rem;
+    right: 1rem;
+    cursor: pointer;
+}
+
+body > .modal > .modal-content > form {
+    margin-top: 2rem;
+}
+
+body > .modal > .modal-content > form > .writer {
+    margin-bottom: 1rem;
+}
+
+body > .modal > .modal-content > form > .writer > p {
+    margin: 0;
+    padding-bottom: 0.4rem;
+    font-weight: 500;
+}
+
+body > .modal > .modal-content > form > .writer > input {
+    border: 1px solid black;
+    width: 100%;
+    height: 1.6rem;
+    border-radius: 0.2rem;
+    font-family: 'Pretendard', sans-serif;
+    resize: none;
+    padding: 0.4rem;
+}
+
+body > .modal > .modal-content > form > p {
+    margin: 0;
+    padding-bottom: 0.4rem;
+    font-weight: 500;
+}
+
+body > .modal > .modal-content > form > textarea {
+    border: 1px solid black;
+    width: 98.8%;
+    height: 4rem;
+    border-radius: 0.2rem;
+    font-family: 'Pretendard', sans-serif;
+    resize: none;
+}
+
+body > .modal > .modal-content > form > .btn {
+    position: absolute;
+    right: 1.4rem;
+    display: flex;
+    margin-top: 1rem;
+}
+
+
+body > .modal > .modal-content > form > .btn input:first-child {
+    padding: 0.4rem 4%;
+    width: 4rem;
+    background-color: var(--color-purple--);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-right: 0.4rem;
+}
+
+body > .modal > .modal-content > form > .btn input:last-child {
+    width: 4rem;
+    padding: 0.4rem 4%;
+    background-color: var(--color-purple--);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+}

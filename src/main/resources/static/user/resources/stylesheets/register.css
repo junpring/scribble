@@ -1,6 +1,5 @@
 body {
     background-color: rgb(254, 254, 254);
-    padding: 4.5rem;
 }
 
 body > .register-form {
@@ -8,7 +7,10 @@ body > .register-form {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 1rem;
+    top: 11vh;
+    /*transform: translate(-50%, -50%);*/
+    /*left: 50%;*/
+    position: absolute;
 }
 
 body > .register-form > .logo-container {
@@ -45,24 +47,13 @@ body > .register-form > .input-container {
     flex-direction: row;
     justify-content: flex-start;
     border-radius: 0.45rem;
+    background-color: #f9f9f9;
 }
 
 body > .register-form > .input-container:focus-within {
     border: 0.0625rem solid var(--color-purple--);
+    background-color: #ffffff;
 }
-
-/*body > .register-form > .input-container > .icon {*/
-/*    width: 3rem;*/
-
-/*    align-items: center;*/
-/*    background-color: rgb(249, 249, 249);*/
-/*    border-right: 0.0625rem solid rgb(203, 203, 203);*/
-/*    color: rgb(203, 203, 203);*/
-/*    font-size: 1.125rem;*/
-/*    display: flex;*/
-/*    flex-direction: row;*/
-/*    justify-content: center;*/
-/*}*/
 
 body > .register-form > .input-container > .input {
     width: 20rem;
@@ -85,10 +76,7 @@ body > .register-form > .input-container > .email-verified-button {
 
 
 body > .register-form > .warning {
-    color: red;
-    /*position: relative;*/
-    /*top: -0.355rem;*/
-    /*left: 0.3rem;*/
+    color: var(--color-red--);
     font-size: 0.825rem;
     margin: 0.4rem;
 }
@@ -135,7 +123,7 @@ body > .register-form > .autosign-container > .checker {
     border: 0.0625rem solid rgb(203, 203, 203);
     position: relative;
 }
-
+/*메모*/
 body > .register-form > .autosign-container > .checker > .icon {
     top: calc(50% + 0.25rem);
     left: 50%;

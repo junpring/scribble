@@ -1,0 +1,132 @@
+@charset "UTF-8";
+
+body {
+    background-color: rgb(254, 254, 254);
+    padding: 12rem;
+}
+
+body > .email-find-form {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+body > .email-find-form > .logo-container {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    font-size: 1.7rem;
+}
+
+
+body > .email-find-form > .input-container {
+    align-items: stretch;
+    border: 0.0625rem solid rgb(203, 203, 203);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-bottom: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+body > .email-find-form > .input-container:focus-within {
+    border: 0.0625rem solid var(--color-purple--);
+}
+body > .email-find-form > .input-container > .input {
+    width: 24rem;
+    padding: 0 1rem;
+    height: 2.7rem;
+}
+body > .email-find-form > .button-flex {
+    display: flex;
+    justify-content: space-between;
+}
+body > .email-find-form > .button-flex > .button {
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    text-align: center;
+    user-select: none;
+    width: 11.7rem;
+    height: 2.4rem;
+}
+
+body > .email-find-form > .button-flex > .button.forgot {
+    background-color: var(--color-purple--);
+    color: #ffffff;
+}
+
+body > .email-find-form > .button-flex > .button.forgot:hover {
+    filter: brightness(93%);
+}
+
+body > .email-find-form > .button-flex > .button.forgot:active {
+    filter: brightness(90%);
+}
+
+body > .email-find-form > .button-flex > .button.cancel {
+    background-color: #f86161;
+    color: #ffffff;
+}
+
+/*email-result-none*/
+body > .email-find-form > .email-result > .result-none {
+    background-color: #f8f8f8;
+    border: 1px solid #f86161;
+    border-radius: 0.4rem;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    color: #f86161;
+    display: none;
+}
+
+body > .email-find-form > .email-result > .result-none  > i {
+    font-size: 1rem;
+    padding-top: 0.104rem;
+}
+body > .email-find-form > .email-result > .result-none > .result-info{
+    margin-left: 0.75rem;
+}
+
+body > .email-find-form > .email-result > .result-none > .result-info > h2 {
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+}
+body > .email-find-form > .email-result > .result-none > .result-info > span {
+    font-weight: 400;
+}
+
+/*email-result-inline*/
+body > .email-find-form > .email-result > .result-inline {
+    background-color: #f8f8f8;
+    border: 1px solid var(--color-purple--);
+    border-radius: 0.4rem;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    color: var(--color-purple--);
+    display: none;
+}
+
+body > .email-find-form > .email-result > .result-inline > i {
+    font-size: 1rem;
+    padding-top: 0.104rem;
+}
+body > .email-find-form > .email-result > .result-inline > .result-info{
+    margin-left: 0.75rem;
+}
+
+body > .email-find-form > .email-result > .result-inline > .result-info > h2 {
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+}
+body > .email-find-form > .email-result > .result-inline > .result-info > div {
+    width: 18rem;
+    display: flex;
+    justify-content: space-between;
+}

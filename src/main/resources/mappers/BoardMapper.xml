@@ -29,12 +29,19 @@
     </sql>
 
 
-    <delete id="deleteArticleList">
+    <delete id="deleteArticleList1">
         DELETE
         FROM `scribble_board`.`articles`
         WHERE id = #{id}
         LIMIT 1
     </delete>
+
+    <update id="deleteArticleList">
+        UPDATE `scribble_board`.`articles`
+        SET deleted_flag = true
+        WHERE id = #{id}
+        LIMIT 1
+    </update>
 
     <insert id="insertArticleList"
             useGeneratedKeys="true"
@@ -72,20 +79,26 @@
                `A`.`content`                AS `content`,
                `A`.`board_code`             AS `boardCode`,
                `A`.`user_id`                AS `userId`,
-               `A`.`reply_count`            AS `replyCount`,
+               `A`.`comment_count`          AS `commentCount`,
                `A`.`view`                   AS `view`,
                `A`.`written_at`             AS `writtenAt`,
+               `A`.`deleted_flag`           AS `isDeleted`,
                `B`.`name`                   AS `extra__boardCodeName`,
                `U`.`nickname`               AS `extra__userWriter`,
+               `UL`.`text`                  AS `extra__userLevelText`,
+               `U`.`level`                  AS `extra__userLevel`,
                IFNULL(SUM(`AL`.`point`), 0) AS `extra__like`
         FROM `scribble_board`.`articles` AS `A`
                  LEFT JOIN `scribble_board`.`boards` AS `B`
                            ON `A`.`board_code` = b.`code`
                  LEFT JOIN `scribble_member`.`user` AS `U`
                            ON `A`.`user_id` = `U`.`id`
+                 LEFT JOIN `scribble_member`.`user_levels` AS `UL`
+                           ON `U`.level = `UL`.level
                  LEFT JOIN `scribble_board`.`article_like` AS `AL`
                            ON `A`.`id` = `AL`.`article_id`
         WHERE `A`.`id` = #{id}
+        LIMIT 1
     </select>
 
     <select id="selectArticlesCount"
@@ -97,6 +110,16 @@
         ON `A`.`board_code` = `B`.`code`
         WHERE `A`.`view` >= 0
         <include refid="search"/>
+    </select>
+
+    <select id="selectUserArticlesCount"
+            parameterType="dev.junpring.scribble.dtos.SearchDto"
+            resultType="_int">
+        SELECT COUNT(*)
+        FROM `scribble_board`.`articles` AS `A`
+        LEFT JOIN `scribble_member`.`user` AS `U`
+        ON `A`.`user_id` = `U`.`id`
+        WHERE U.id = #{userId}
     </select>
 
     <select id="selectArticlesBoardListCount"
@@ -120,12 +143,14 @@
                `A`.`title`                         AS `title`,
                `A`.`content`                       AS `content`,
                (SELECT COUNT(*)
-                FROM `scribble_board`.`reply` AS `R`
-                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+                FROM `scribble_board`.`comment` AS `C`
+                WHERE `A`.`id` = `C`.`article_id`) AS `commentCount`,
                `A`.`view`                          AS `view`,
                `A`.`written_at`                    AS `writtenAt`,
                `U`.`nickname`                      AS `extra__userWriter`,
                `U`.`email`                         AS `extra__userEmail`,
+               `UL`.`text`                         AS `extra__userLevelText`,
+               `U`.`level`                         AS `extra__userLevel`,
                IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
         FROM `scribble_board`.`articles` AS `A`
                  LEFT JOIN `scribble_board`.`boards` AS `B`
@@ -134,30 +159,33 @@
                            ON `A`.`id` = `AL`.`article_id`
                  LEFT JOIN `scribble_member`.`user` AS `U`
                            ON `A`.`user_id` = `U`.`id`
+                 LEFT JOIN `scribble_member`.`user_levels` AS `UL`
+                           ON `U`.level = `UL`.level
         WHERE `A`.`board_code` = #{boardCode}
         GROUP BY `id`
         ORDER BY `id` DESC
         LIMIT #{paginationVo.limitStart}, #{recordSize}
     </select>
 
-    <select id="selectFindArticlesForList"
+    <select id="selectUserArticlesForList"
             resultType="dev.junpring.scribble.dtos.ArticleListDto"
             resultMap="article">
         SELECT `B`.`id`                            AS `boardId`,
                `B`.`name`                          AS `extra__boardCodeName`,
                `B`.`code`                          AS `extra__boardCode`,
                `A`.`id`                            AS `id`,
-               `A`.`board_code`                    AS `boardCode`,
                `A`.`user_id`                       AS `userId`,
                `A`.`title`                         AS `title`,
                `A`.`content`                       AS `content`,
                (SELECT COUNT(*)
-                FROM `scribble_board`.`reply` AS `R`
-                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+                FROM `scribble_board`.`comment` AS `C`
+                WHERE `A`.`id` = `C`.`article_id`) AS `commentCount`,
                `A`.`view`                          AS `view`,
                `A`.`written_at`                    AS `writtenAt`,
                `U`.`nickname`                      AS `extra__userWriter`,
                `U`.`email`                         AS `extra__userEmail`,
+               `UL`.`text`                         AS `extra__userLevelText`,
+               `U`.`level`                         AS `extra__userLevel`,
                IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
         FROM `scribble_board`.`articles` AS `A`
                  LEFT JOIN `scribble_board`.`boards` AS `B`
@@ -166,13 +194,53 @@
                            ON `A`.`id` = `AL`.`article_id`
                  LEFT JOIN `scribble_member`.`user` AS `U`
                            ON `A`.`user_id` = `U`.`id`
+                 LEFT JOIN `scribble_member`.`user_levels` AS `UL`
+                           ON `U`.level = `UL`.level
+        WHERE A.user_id = #{userId}
+        GROUP BY `id`
+        ORDER BY `id` DESC
+        LIMIT #{paginationVo.limitStart}, #{recordSize}
+    </select>
+
+
+    <select id="selectFindArticlesForList"
+            resultType="dev.junpring.scribble.dtos.ArticleListDto"
+            resultMap="article">
+        SELECT `B`.`id` AS `boardId`,
+        `B`.`name` AS `extra__boardCodeName`,
+        `B`.`code` AS `extra__boardCode`,
+        `A`.`id` AS `id`,
+        `A`.`board_code` AS `boardCode`,
+        `A`.`user_id` AS `userId`,
+        `A`.`title` AS `title`,
+        `A`.`content` AS `content`,
+        (SELECT COUNT(*)
+        FROM `scribble_board`.`comment` AS `C`
+        WHERE `A`.`id` = `C`.`article_id`) AS `commentCount`,
+        `A`.`view` AS `view`,
+        `A`.`written_at` AS `writtenAt`,
+        `U`.`nickname` AS `extra__userWriter`,
+        `U`.`email` AS `extra__userEmail`,
+        `UL`.`text` AS `extra__userLevelText`,
+        `U`.`level` AS `extra__userLevel`,
+        IFNULL(SUM(`AL`.`point`), 0) AS `extra__like`
+        FROM `scribble_board`.`articles` AS `A`
+        LEFT JOIN `scribble_board`.`boards` AS `B`
+        ON `A`.`board_code` = `B`.`code`
+        LEFT JOIN `scribble_board`.`article_like` AS `AL`
+        ON `A`.`id` = `AL`.`article_id`
+        LEFT JOIN `scribble_member`.`user` AS `U`
+        ON `A`.`user_id` = `U`.`id`
+        LEFT JOIN `scribble_member`.`user_levels` AS `UL`
+        ON `U`.level = `UL`.level
         WHERE `A`.`view` >= 0
         <include refid="search"/>
         GROUP BY `id`
         ORDER BY `id` DESC
         LIMIT #{paginationVo.limitStart}, #{recordSize}
     </select>
-<!--             WHERE A.board_code = #{boardCode}-->
+    <!--    #         GROUP BY `id`-->
+
 
     <select id="selectHomeArticleList"
             parameterType="dev.junpring.scribble.entities.board.BoardEntity"
@@ -186,8 +254,8 @@
                `A`.`title`                         AS `title`,
                `A`.`content`                       AS `content`,
                (SELECT COUNT(*)
-                FROM `scribble_board`.`reply` AS `R`
-                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+                FROM `scribble_board`.`comment` AS `C`
+                WHERE `A`.`id` = `C`.`article_id`) AS `commentCount`,
                `A`.`view`                          AS `view`,
                `A`.`written_at`                    AS `writtenAt`,
                IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
@@ -258,9 +326,28 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateCommentCount">
+        UPDATE `scribble_board`.`articles`
+        SET comment_count =
+                (
+                    (SELECT COUNT(*)
+                     FROM `scribble_board`.`comment` AS `C`
+                     WHERE #{id} = `C`.`article_id`))
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateLikeCount">
+        UPDATE `scribble_board`.`articles`
+        SET like_count =
+                (SELECT IFNULL(SUM(`AL`.`point`), 0)
+                 FROM `scribble_board`.`article_like` AS `AL`
+                 WHERE #{id} = `AL`.`article_id`)
+        WHERE id = #{id}
+    </update>
+
     <delete id="deleteCommentList">
         DELETE
-        FROM `scribble_board`.`reply`
+        FROM `scribble_board`.`comment`
         WHERE id = #{id}
         LIMIT 1
     </delete>
@@ -269,49 +356,62 @@
             useGeneratedKeys="true"
             keyColumn="id"
             keyProperty="id"
-            parameterType="dev.junpring.scribble.dtos.ArticleReplyDTO">
-        INSERT INTO `scribble_board`.`reply`
-        SET `id`         = #{id},
-            `content`    = #{content},
-            `user_id`    = #{userId},
-            `article_id` = #{articleId}
+            parameterType="dev.junpring.scribble.dtos.ArticleCommentDto">
+        INSERT INTO `scribble_board`.`comment`
+        SET `id`           = #{id},
+            `content`      = #{content},
+            `user_id`      = #{userId},
+            `article_id`   = #{articleId},
+            `reply_id`     = #{replyId},
+            `deleted_flag` = #{isDeleted}
     </insert>
 
     <select id="selectForPrintArticleRepliesFrom" resultMap="articleReply">
-        SELECT `AR`.`id`         AS `id`,
-               `AR`.`written_at` AS `writtenAt`,
-               `AR`.`content`    AS `content`,
-               `AR`.`user_id`    AS `userId`,
-               `U`.`nickname`    AS `extra__userWriter`,
-               `U`.`email`       AS `extra__userEmail`
-        FROM `scribble_board`.`reply` AS `AR`
+        SELECT `AC`.`id`           AS `id`,
+               `AC`.`user_id`      AS `userId`,
+               `AC`.`article_id`   AS `articleId`,
+               `AC`.`reply_id`     AS `replyId`,
+               `AC`.`content`      AS `content`,
+               `AC`.`written_at`   AS `writtenAt`,
+               `AC`.`modified_at`  AS `modifiedAt`,
+               `AC`.`deleted_flag` AS `isDeleted`,
+               `U`.`nickname`      AS `extra__userWriter`,
+               `U`.`email`         AS `extra__userEmail`
+        FROM `scribble_board`.`comment` AS `AC`
                  INNER JOIN `scribble_member`.`user` AS `U`
-                            ON `AR`.`user_id` = `U`.`id`
-        WHERE `AR`.`article_id` = #{articleId}
-        ORDER BY `AR`.`id` DESC
+                            ON `AC`.`user_id` = `U`.`id`
+        WHERE `AC`.`article_id` = #{articleId}
     </select>
 
     <select id="selectArticleReply" resultMap="articleReply">
-        SELECT `AR`.`id`         AS `id`,
-               `AR`.`written_at` AS `writtenAt`,
-               `AR`.`content`    AS `content`,
-               `AR`.`user_id`    AS `userId`
-        FROM `scribble_board`.`reply` AS `AR`
-        WHERE `AR`.`id` = #{id}
+        SELECT `AC`.`id`           AS `id`,
+               `AC`.`written_at`   AS `writtenAt`,
+               `AC`.`content`      AS `content`,
+               `AC`.`user_id`      AS `userId`,
+               `AC`.`deleted_flag` AS `isDeleted`
+        FROM `scribble_board`.`comment` AS `AC`
+        WHERE `AC`.`id` = #{id}
     </select>
 
     <update id="updateArticleReply"
-            parameterType="dev.junpring.scribble.dtos.ArticleReplyDTO">
-        UPDATE scribble_board.reply
+            parameterType="dev.junpring.scribble.dtos.ArticleCommentDto">
+        UPDATE scribble_board.comment
         <set>
             <if test="content != null">content = #{content}</if>
         </set>
         WHERE id = #{id}
     </update>
 
+    <update id="updateDeletedReply"
+            parameterType="dev.junpring.scribble.dtos.ArticleCommentDto">
+        UPDATE scribble_board.comment
+        SET deleted_flag = #{isDeleted}
+        WHERE user_id = #{userId}
+    </update>
+
     <delete id="deleteArticleReply">
         DELETE
-        FROM `scribble_board`.`reply`
+        FROM `scribble_board`.`comment`
         WHERE id = #{id}
         LIMIT 1
     </delete>
@@ -355,8 +455,8 @@
                `A`.`title`                         AS `title`,
                `A`.`content`                       AS `content`,
                (SELECT COUNT(*)
-                FROM `scribble_board`.`reply` AS `R`
-                WHERE `A`.`id` = `R`.`article_id`) AS `replyCount`,
+                FROM `scribble_board`.`comment` AS `C`
+                WHERE `A`.`id` = `C`.`article_id`) AS `commentCount`,
                `A`.`view`                          AS `view`,
                `A`.`written_at`                    AS `writtenAt`,
                `U`.`nickname`                      AS `extra__userWriter`,
@@ -370,11 +470,15 @@
                  LEFT JOIN `scribble_member`.`user` AS `U`
                            ON `A`.`user_id` = `U`.`id`
         WHERE `A`.`view` >= 50
-#           AND A.written_at >= DATE_FORMAT(sysdate(7),'%Y-%m-%d')
+          AND `written_at` >= date_add(NOW(), interval -1 WEEK)
+          AND `A`.`like_count` >= 2
         GROUP BY `A`.`id`
-        ORDER BY `A`.`id` DESC
-        LIMIT 10
+        ORDER BY `A`.`id`
+        DESC LIMIT 10
     </select>
+
+
+    <!--    AND A.written_at >= DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s')-->
 
     <resultMap type="dev.junpring.scribble.entities.board.ArticleEntity"
                id="article">
@@ -383,26 +487,31 @@
         <result property="content" column="content"/>
         <result property="boardCode" column="boardCode"/>
         <result property="userId" column="userId"/>
-        <result property="replyCount" column="replyCount"/>
+        <result property="commentCount" column="commentCount"/>
         <result property="view" column="view"/>
         <result property="writtenAt" column="writtenAt"/>
-        <result property="view" column="view"/>
+        <result property="isDeleted" column="isDeleted"/>
         <association property="extra" javaType="map">
             <result property="boardCodeName" column="extra__boardCodeName"/>
             <result property="boardCode" column="extra__boardCode"/>
             <result property="userWriter" column="extra__userWriter"/>
             <result property="likePoint" column="extra__like"/>
             <result property="userEmail" column="extra__userEmail"/>
+            <result property="userLevelText" column="extra__userLevelText"/>
+            <result property="userLevel" column="extra__userLevel"/>
         </association>
     </resultMap>
 
-    <resultMap type="dev.junpring.scribble.dtos.ArticleReplyDTO"
+    <resultMap type="dev.junpring.scribble.dtos.ArticleCommentDto"
                id="articleReply">
         <result property="id" column="id"/>
-        <result property="writtenAt" column="writtenAt"/>
-        <result property="content" column="content"/>
         <result property="userId" column="userId"/>
         <result property="articleId" column="articleId"/>
+        <result property="replyId" column="replyId"/>
+        <result property="content" column="content"/>
+        <result property="writtenAt" column="writtenAt"/>
+        <result property="modifiedAt" column="modifiedAt"/>
+        <result property="isDeleted" column="isDeleted"/>
         <association property="extra" javaType="map">
             <result property="userWriter" column="extra__userWriter"/>
             <result property="userEmail" column="extra__userEmail"/>

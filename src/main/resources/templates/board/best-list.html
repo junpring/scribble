@@ -11,15 +11,18 @@
     <link rel="stylesheet" th:href="@{/board/resources/stylesheets/article.css}">
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/resources/scripts/common.js}"></script>
-<!--    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_FOUND')}">-->
-<!--        alert('해당 갤러리는 존재하지 않습니다.');-->
-<!--        window.history.back();-->
-<!--    </script>-->
-<!--    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_ALLOWED')}">-->
-<!--        alert('NOT_ALLOWED! 권한이 없습니다.');-->
-<!--        window.history.back();-->
-<!--    </script>-->
-<!--    <title th:text="${boardIdVo.getName()}"></title>-->
+
+    <!--
+    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_FOUND')}">
+        alert('해당 갤러리는 존재하지 않습니다.');
+        window.history.back();
+    </script>
+    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_ALLOWED')}">
+        alert('NOT_ALLOWED! 권한이 없습니다.');
+        window.history.back();
+    </script> -->
+
+    <title>실시간 베스트</title>
 </head>
 
 <body>
@@ -48,11 +51,12 @@
         <tr class="article" th:each="rcmd : ${getForPrintRcmdArticlesRs}">
             <td th:text="*{rcmd.getId()}"></td>
             <td class="title">
-                <a th:href="@{/board/detail (id=*{rcmd.getId()})}" style="font-weight: 700"
-                   th:text="'[' + *{rcmd.extra.boardCodeName} + '] '"></a>
+                <a class="category" th:href="@{/board/detail (id=*{rcmd.getId()})}"
+                   th:text="'[' + *{rcmd.extra.boardCodeName} + ']'"></a>
                 <a th:href="@{/board/detail (id=*{rcmd.getId()})}"
-                   th:text="*{rcmd.title}">
-                </a>
+                   th:text="*{rcmd.title}"></a>
+                <a th:href="@{/board/detail (id=*{rcmd.getId()})}"
+                   class="content" th:utext="*{rcmd.content}"></a>
             </td>
             <td th:text="*{rcmd.extra.userWriter}"></td>
             <td class="write-at" th:text="*{#dates.format(rcmd.getWrittenAt(), 'yy.MM.dd HH:mm')}"></td>
@@ -65,7 +69,7 @@
             <td>
                 <a th:href="@{/board/detail (id=${rcmd.getId()})}" class="cell col2">
                     <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글수">
-                    <span th:text="*{rcmd.replyCount}" class="count"></span>
+                    <span th:text="*{rcmd.commentCount}" class="count"></span>
                 </a>
             </td>
             <td>
@@ -82,5 +86,6 @@
         게시글이 없습니다.
     </div>
 </section>
+<th:block th:replace="~{fragments/footer.html :: footer}"></th:block>
 </body>
 </html>

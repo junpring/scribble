@@ -11,9 +11,10 @@
 
     <insert id="insertSession"
             parameterType="dev.junpring.scribble.entities.member.SessionEntity">
-        INSERT INTO `scribble_member`.`sessions`(`created_at`, `updated_at`, `expires_at`, `expired_flag`, `user_id`,
+        INSERT INTO `scribble_member`.`sessions`(`created_at`, `updated_at`, `expires_at`, `expired_flag`,
+                                                 `keep_logged_in_flag`, `user_id`,
                                                  `key`, `ua`)
-        VALUES (#{createdAt}, #{updatedAt}, #{expiresAt}, #{isExpired}, #{userId}, #{key}, #{ua})
+        VALUES (#{createdAt}, #{updatedAt}, #{expiresAt}, #{isExpired}, #{isKeepLoggedIn}, #{userId}, #{key}, #{ua})
     </insert>
     <insert id="insertUser"
             parameterType="dev.junpring.scribble.entities.member.UserEntity"
@@ -25,7 +26,7 @@
          `password`,
          `nickname`,
          `contact`,
-         `level`,
+         level,
          `address_postal`,
          `address_primary`,
          `address_secondary`,
@@ -74,7 +75,7 @@
                `password`            AS `password`,
                `nickname`            AS `nickname`,
                `contact`             AS `contact`,
-               `level`               AS `level`,
+               level                 AS `level`,
                `address_postal`      AS `addressPostal`,
                `address_primary`     AS `addressPrimary`,
                `address_secondary`   AS `addressSecondary`,
@@ -96,7 +97,7 @@
                `password`            AS `password`,
                `nickname`            AS `nickname`,
                `contact`             AS `contact`,
-               `level`               AS `level`,
+               level                 AS `level`,
                `address_postal`      AS `addressPostal`,
                `address_primary`     AS `addressPrimary`,
                `address_secondary`   AS `addressSecondary`,
@@ -110,16 +111,39 @@
         LIMIT 1
     </select>
 
+    <select id="selectUserEmailEqualContact"
+            resultType="dev.junpring.scribble.entities.member.UserEntity">
+        SELECT `id`                  AS `id`,
+               `email`               AS `email`,
+               `password`            AS `password`,
+               `nickname`            AS `nickname`,
+               `contact`             AS `contact`,
+               level                 AS `level`,
+               `address_postal`      AS `addressPostal`,
+               `address_primary`     AS `addressPrimary`,
+               `address_secondary`   AS `addressSecondary`,
+               `email_verified_flag` AS `isEmailVerified`,
+               `registered_at`       AS `registeredAt`,
+               `modified_at`         AS `modifiedAt`,
+               `deleted_flag`        AS `isDeleted`,
+               `suspended_flag`      AS `isSuspended`
+        FROM `scribble_member`.`user`
+        WHERE `email` = #{email}
+          AND `contact` = #{contact}
+        LIMIT 1
+    </select>
+
     <select id="selectSessionKey"
             resultType="dev.junpring.scribble.entities.member.SessionEntity">
-        SELECT `id`           AS `id`,
-               `created_at`   AS `createdAt`,
-               `updated_at`   AS `updatedAt`,
-               `expires_at`   AS `expiresAt`,
-               `expired_flag` AS `isExpired`,
-               `user_id`      AS `userId`,
-               `key`          AS `key`,
-               `ua`           AS `ua`
+        SELECT `id`                  AS `id`,
+               `created_at`          AS `createdAt`,
+               `updated_at`          AS `updatedAt`,
+               `expires_at`          AS `expiresAt`,
+               `expired_flag`        AS `isExpired`,
+               `keep_logged_in_flag` AS `isKeepLoggedIn`,
+               `user_id`             AS `userId`,
+               `key`                 AS `key`,
+               `ua`                  AS `ua`
         FROM `scribble_member`.`sessions`
         WHERE `key` = #{key}
           AND `expires_at` > NOW()
@@ -144,24 +168,29 @@
 
     <select id="selectUserById"
             resultType="dev.junpring.scribble.entities.member.UserEntity">
-        SELECT `id`                  AS `id`,
-               `email`               AS `email`,
-               `password`            AS `password`,
-               `nickname`            AS `nickname`,
-               `contact`             AS `contact`,
-               `level`               AS `level`,
-               `address_postal`      AS `addressPostal`,
-               `address_primary`     AS `addressPrimary`,
-               `address_secondary`   AS `addressSecondary`,
-               `email_verified_flag` AS `isEmailVerified`,
-               `registered_at`       AS `registeredAt`,
-               `modified_at`         AS `modifiedAt`,
-               `deleted_flag`        AS `isDeleted`,
-               `suspended_flag`      AS `isSuspended`
-        FROM `scribble_member`.`user`
+        SELECT `U`.`id`                  AS `id`,
+               `U`.`email`               AS `email`,
+               `U`.`password`            AS `password`,
+               `U`.`nickname`            AS `nickname`,
+               `U`.`contact`             AS `contact`,
+               `U`.`level`               AS `level`,
+               `L`.`text`                AS `levelText`,
+               `U`.`address_postal`      AS `addressPostal`,
+               `U`.`address_primary`     AS `addressPrimary`,
+               `U`.`address_secondary`   AS `addressSecondary`,
+               `U`.`email_verified_flag` AS `isEmailVerified`,
+               `U`.`registered_at`       AS `registeredAt`,
+               `U`.`modified_at`         AS `modifiedAt`,
+               `U`.`modifyExpires_at`    AS `modifyExpiresAt`,
+               `U`.`deleted_flag`        AS `isDeleted`,
+               `U`.`suspended_flag`      AS `isSuspended`
+        FROM `scribble_member`.`user` AS `U`
+                 LEFT JOIN `scribble_member`.`user_levels` AS `L`
+                           ON `L`.level = `U`.level
         WHERE `id` = #{id}
         LIMIT 1
     </select>
+
     <update id="updateUser"
             parameterType="dev.junpring.scribble.entities.member.UserEntity">
         UPDATE `scribble_member`.`user`
@@ -182,6 +211,27 @@
         LIMIT 1
     </update>
 
+    <update id="updateUserNickname"
+            parameterType="dev.junpring.scribble.entities.member.UserEntity">
+        UPDATE `scribble_member`.`user`
+        SET `email`               = #{email},
+            `password`            = #{password},
+            `nickname`            = #{nickname},
+            `contact`             = #{contact},
+            `level`               = #{level},
+            `address_postal`      = #{addressPostal},
+            `address_primary`     = #{addressPrimary},
+            `address_secondary`   = #{addressSecondary},
+            `email_verified_flag` = #{isEmailVerified},
+            `registered_at`       = #{registeredAt},
+            `modified_at`         = #{modifiedAt},
+            `modifyExpires_at`    = #{modifyExpiresAt},
+            `deleted_flag`        = #{isDeleted},
+            `suspended_flag`      = #{isSuspended}
+        WHERE `id` = #{id}
+          AND NOW() > `user`.`modifyExpires_at`
+        LIMIT 1
+    </update>
     <update id="updateUserEmailVerifyCode"
             parameterType="dev.junpring.scribble.entities.member.UserEmailVerifyCodeEntity">
         UPDATE `scribble_member`.`user_email_verify_code`
@@ -205,6 +255,16 @@
         LIMIT 1
     </update>
 
+    <update id="updateSession2"
+            parameterType="dev.junpring.scribble.entities.member.SessionEntity">
+        UPDATE `scribble_member`.`sessions`
+        SET `updated_at`   = #{updatedAt},
+            `expires_at`   = #{expiresAt},
+            `expired_flag` = #{isExpired}
+        WHERE `key` = #{key}
+        LIMIT 1
+    </update>
+
     <update id="updateSessionExpired">
         UPDATE `scribble_member`.`sessions`
         SET `expired_flag` = TRUE
@@ -212,6 +272,8 @@
           AND `expires_at` > NOW()
           AND expired_flag = FALSE
     </update>
+    <!--    AND keep_logged_in_flag = FALSE;-->
+
     <!--updateSessionExpired
     3. expired_flag를 true로 set
     2. user_email과 @Param(value = "email") String email)로 받은 값과 같은 값을

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script th:inline="javascript">
+        let param = [(${paramJson})];
+
+        $(function () {
+            window.document.body.querySelectorAll('[rel=testSelect]').forEach(select => {
+                select.addEventListener('change', () => {
+                    const testIndex = select.dataset.oid;
+                    const testStatusIndex = select.value;
+                    console.log(`${testIndex} 주문의 배송 상태를 ${testStatusIndex}로 변경.`);
+                    const xhr = new XMLHttpRequest();
+                    const formData = new FormData();
+                    formData.append('testIndex', testIndex);
+                    formData.append('testStatusIndex', testStatusIndex);
+                    xhr.open('POST', './test2');
+                    xhr.onreadystatechange = () => {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                const response = JSON.parse(xhr.responseText);
+                                switch (response['result']) {
+                                    case 'NOT_FOUND':
+                                        alert('더 이상 존재하지 않는 주문건입니다. 페이지를 다시 불러와주세요.');
+                                        break;
+                                    case 'SUCCESS':
+                                        const orderStatusText = select.options[select.selectedIndex].text;
+                                        select.parentNode.parentNode.parentNode.querySelector('[rel=orderStatus]').innerText = orderStatusText;
+                                        // parentNode : ''>
+                                        break;
+                                    default:
+                                        alert('알 수 없는 이유로 배송상태 변경에 실패하였습니다. 잠시 후 다시 시도')
+                                }
+                            } else {
+                                alert('알 수 없는 이유로 배송상태 변경에 실패하였습니다. 잠시 후 다시 시도');
+                            }
+                        }
+                    };
+                    xhr.send(formData);
+                });
+            });
+
+            // testSelect.change(function () {
+            //     $.ajax({
+            //         url: './test2',
+            //         type: 'POST',
+            //         data: {
+            //             'boardCode': param.boardCode
+            //         },
+            //         dataType: 'json',
+            //         success: function (data) {
+            //             alert('성공!');
+            //             // $('.title').html(''); // 기존 댓글 목록 삭제
+            //             for (let i = 0; i < data.length; i++) {
+            //                 // alert(data[i].title);
+            //                 $('.title').html("<div>" + data[i].title + "</div>");
+            //             }
+            //             // let $rBox = $(".reply-box");
+            //             // let $rCountA = $('.reply-count-a');
+            //             // let $rCountB = $('.reply-count-b');
+            //
+            //             // if (data == '') { // 조회할 댓글이 없는 경우
+            //             //     $rBox.html("<h3 class='reply-empty'>등록된 댓글이 없습니다.</h3>");
+            //             //     $rCountA.html(0);
+            //             //     $rCountB.html('댓글 ' + 0 + '개');
+            //             // } else {
+            //             //     $rBox.html(''); // 기존 댓글 목록 삭제
+            //             //     // $.each(data, function (i) {
+            //             //     //     ArticleReply__drawReply(data[i]);
+            //             //     //     $rCount.html('댓글 ' + data.length + '개');
+            //             //     // });
+            //             //     for (let i = 0; i < data.length; i++) {
+            //             //         $rCountA.html(data.length);
+            //             //         $rCountB.text('댓글 ' + data.length + '개');
+            //             //         let articleReply = data[i];
+            //             //         ArticleReply__drawReply(articleReply);
+            //             //
+            //             //     }
+            //             // }
+            //         },
+            //         error: function () {
+            //             alert('알 수 없는 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
+            //             console.log("ajax 통신 실패");
+            //         }
+            //     });
+            // });
+        });
+    </script>
+</head>
+<body>
+<table style="border: 1px solid blue; text-align: center">
+    <thead>
+        <tr>
+            <th>번호</th>
+            <th>code</th>
+            <th>제목</th>
+            <th>내용</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="article : ${articleEntities}" th:data-oid="${article.id}">
+            <td th:text="${article.id}"></td>
+            <td class="title" th:text="${article.boardCode}"></td>
+            <td th:text="${article.title}"></td>
+            <td th:text="${article.content}"></td>
+        </tr>
+    </tbody>
+    <form action="">
+        <select id="test-select" name="test-cate" rel="testSelect">
+            <option value="free">free</option>
+            <option value="love">love</option>
+            <option value="realestate">realestate</option>
+        </select>
+<!--        <input type="submit">-->
+    </form>
+    
+</table>
+</body>
+</html>

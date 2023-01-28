@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>스크리블 | 회원 탈퇴</title>
+    <link th:href="@{/resources/stylesheets/common.css}" rel="stylesheet">
+    <link th:href="@{/user/resources/stylesheets/withdrawal.css}" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
+    <script defer th:src="@{/resources/scripts/common.js}"></script>
+
+</head>
+<body>
+<th:block th:replace="~{fragments/header.html :: header}"></th:block>
+<form class="withdrawal-form" id="withdrawal-form" method="post">
+    <section class="withdrawal-wrap">
+        <h1>회원 탈퇴</h1>
+        <div class="current-password-check">계정 비밀번호</div>
+
+        <label class="input-container">
+            <span hidden>닉네임</span>
+            <input class="input" maxlength="128" name="password" type="password" placeholder="계정 비밀번호">
+        </label>
+
+        <div class="rules">
+            <p>※ 탈퇴 후 개인 정보 등 데이터가 삭제되며, 복구할 수 없습니다.</p>
+            <p>※ 작성한 게시물은 삭제되지 않으며, (알 수 없음)으로 닉네임이 표시됩니다.</p>
+        </div>
+        <input class="button withdrawal" type="submit" value="회원 탈퇴">
+    </section>
+</form>
+<th:block th:replace="~{fragments/footer.html :: footer}"></th:block>
+<script>
+    const withdrawalForm = window.document.getElementById('withdrawal-form');
+    const withdrawalPasswordInput = withdrawalForm['password'];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        withdrawalForm.onsubmit = (e) => {
+            e.preventDefault();
+
+            if (!confirm('정말로 회원 탈퇴하시겠습니까 \n탈퇴 후 개인 정보 등 데이터가 삭제되며, 복구할 수 없습니다.')) {
+                return false;
+            }
+
+            const xhr = new XMLHttpRequest();
+            const formData = new FormData(withdrawalForm);
+            xhr.open('POST', 'withdrawal');
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        const response = JSON.parse(xhr.responseText);
+                        switch (response['result']) {
+                            case 'FAILURE':
+                                e.preventDefault();
+                                withdrawalPasswordInput.focus();
+                                withdrawalPasswordInput.select();
+                                alert('현재 비밀번호가 일치하지 않습니다.');
+                                break;
+                            case 'SUCCESS':
+                                alert('회원 탈퇴가 정상적으로 처리되었습니다.');
+                                location.href = '/user/logout';
+                                break;
+                            default :
+                                alert('알 수 없는 이유로 회원 탈퇴에 실패하였습니다.\n 잠시 후 다시 시도해주세요.');
+                                break;
+                        }
+                    } else {
+                        alert('회원 탈퇴 도중 오류가 발생하였습니다.\n 잠시 후 다시 시도해주세요.');
+                    }
+                }
+            };
+            xhr.send(formData);
+        }
+    });
+</script>
+</body>
+</html>
+
+

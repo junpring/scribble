@@ -1,6 +1,9 @@
 const loginForm = window.document.getElementById('login-form');
 const emailInput = loginForm['email'];
 const passwordInput = loginForm['password'];
+const rememberMe = loginForm['remember-me'];
+
+
 
 loginForm.onsubmit = (e) => {
     e.preventDefault();

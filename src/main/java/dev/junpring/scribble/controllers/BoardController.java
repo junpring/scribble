@@ -1,8 +1,8 @@
 package dev.junpring.scribble.controllers;
 
+import dev.junpring.scribble.dtos.ArticleCommentDto;
 import dev.junpring.scribble.dtos.ArticleLikeDto;
 import dev.junpring.scribble.dtos.ArticleListDto;
-import dev.junpring.scribble.dtos.ArticleReplyDTO;
 import dev.junpring.scribble.dtos.SearchDto;
 import dev.junpring.scribble.entities.board.*;
 import dev.junpring.scribble.entities.member.UserEntity;
@@ -16,7 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -73,21 +72,11 @@ public class BoardController {
             Model model
     ) {
         PagingResponse<ArticleListDto> articlesResponse = this.boardServices.getFindArticlesForList(params);
-
-        System.out.println(params.getBoardCode());
-        model.addAttribute("articlesResponse", articlesResponse);
-
-
-        HashMap<String, String> boardCodes = new HashMap<>();
         List<BoardEntity> boardEntities = this.boardServices.getBoardList();
-        for (BoardEntity boardEntity : boardEntities) {
-            boardCodes.put(boardEntity.getCode(), boardEntity.getName());
-        }
-
-        model.addAttribute("boardCodes", boardCodes);
+        model.addAttribute("boardEntities", boardEntities);
+        model.addAttribute("articlesResponse", articlesResponse);
         return "board/search";
     }
-
 
     @RequestMapping(value = "delete", method = RequestMethod.GET)
     public String getDelete(
@@ -142,6 +131,12 @@ public class BoardController {
         this.boardServices.modifyArticle(articleListVo);
         modelAndView.addObject("articleVo", articleListVo);
         modelAndView.setViewName("redirect:/board/detail?id=" + id);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return modelAndView;
     }
 
@@ -171,13 +166,9 @@ public class BoardController {
 
         this.boardServices.writeArticle(articleWriteVo);
         if (articleWriteVo.getResult() == ArticleWriteResult.SUCCESS) {
-            articleWriteVo.setMsg(String.format("%d번 게시글이 생성되었습니다.", articleWriteVo.getId()));
-            model.addAttribute("alertMsg", articleWriteVo.getMsg());
-            model.addAttribute("locationReplace", "./detail?id=" + articleWriteVo.getId());
             model.addAttribute("articleWriteVo", articleWriteVo);
-            return "common/redirect";
         }
-        return "common/redirect";
+        return "redirect:/board/detail?id=" + articleWriteVo.getId();
     }
 
     @RequestMapping(value = "download-image", method = RequestMethod.GET)
@@ -241,87 +232,77 @@ public class BoardController {
             HttpServletResponse response
 
     ) {
-        int userId = (int)request.getAttribute("connectedUserId");
-
+        int userId = (int) request.getAttribute("connectedUserId");
         articleListDto.setId(id);
         this.boardServices.getArticle(articleListDto);
+        this.boardServices.articleCommentCount(articleListDto.getId());
+        this.boardServices.articleLikeCount(articleListDto.getId());
 
-//      쿠키 value 해싱 해야됨.
+        // 쿠키 value 해싱 해야됨.
         Cookie[] cookies = request.getCookies();
-        // 비교하기 위해 새로운 쿠키
         Cookie viewCookie = null;
 
         // 쿠키가 있을 경우
         if (cookies != null && cookies.length > 0) {
             for (int i = 0; i < cookies.length; i++) {
-                // Cookie의 name이 cookie + id와 일치하는 쿠키를 viewCookie에 넣어줌
-                if (cookies[i].getName().equals("cookie" + id)) {
-//                    System.out.println("처음 쿠키가 생성한 뒤 들어옴.");
+                if (cookies[i].getName().equals("visited" + id)) {
                     viewCookie = cookies[i];
                 }
             }
         }
-
-        // 만일 viewCookie가 null일 경우 쿠키를 생성해서 조회수 증가 로직을 처리함.
         if (viewCookie == null) {
             System.out.println("----------------");
             System.out.println("cookie 없음");
-
-            // 쿠키 생성(이름, 값)
-            Cookie newCookie = new Cookie("cookie" + id, "|" + id + "|");
-            // 쿠키 추가
+            Cookie newCookie = new Cookie("visited" + id, "|" + id + "|");
             response.addCookie(newCookie);
-
             // 쿠키를 추가 시키고 조회수 증가시킴
-            int result = this.boardServices.articleViewCount(articleListDto.getId());
-
-            if (result > 0) {
-                System.out.println("조회수 증가");
-            } else {
-                System.out.println("조회수 증가 에러");
-            }
+            this.boardServices.articleViewCount(articleListDto.getId());
         }
-        // viewCookie가 null이 아닐경우 쿠키가 있으므로 조회수 증가 로직을 처리하지 않음.
         else {
             System.out.println("----------------");
             System.out.println("cookie 있음");
-            // 쿠키 값 받아옴.
             String value = viewCookie.getValue();
             System.out.println("cookie 값 : " + value);
         }
 
-        List<ArticleReplyDTO> articleReplyDtos = this.boardServices.getForPrintArticleReplies(articleListDto.getId());
+        List<ArticleCommentDto> articleCommentDtos = this.boardServices.getForPrintArticleReplies(articleListDto.getId());
         int likePointByUserId = this.boardServices.getLikePointByUserId(id, userId);
 
-        model.addAttribute("articleReplyDtos", articleReplyDtos);
+        model.addAttribute("articleCommentDtos", articleCommentDtos);
         model.addAttribute("articleListDto", articleListDto);
         model.addAttribute("likePointByUserId", likePointByUserId);
-
 
         List<ArticleListDto> getForPrintRcmdArticlesRs = this.boardServices.getForPrintRcmdArticles();
         model.addAttribute("getForPrintRcmdArticlesRs", getForPrintRcmdArticlesRs);
 
+
+        if ((articleListDto.getResultCode()).startsWith("F-")) {
+            model.addAttribute("alertMsg", articleListDto.getMsg());
+            model.addAttribute("historyBack", true);
+            return "common/redirect";
+        }
         return "board/detail";
     }
 
-    @RequestMapping(value = "getForPrintArticleRepliesRs", method = RequestMethod.GET)
+    @RequestMapping(value = "getForPrintArticleCommentsRs", method = RequestMethod.GET)
     @ResponseBody
-    public List<ArticleReplyDTO> getForPrintArticleRepliesRs(
-            @RequestParam(value = "id", required = true) int id,
-            ArticleReplyDTO articleReplyDTO
+    public List<ArticleCommentDto> getForPrintArticleRepliesRs(
+            @RequestParam(value = "id", required = true) int id
     ) {
-        List<ArticleReplyDTO> articleReplies = this.boardServices.getForPrintArticleReplies(id);
+        List<ArticleCommentDto> commentDtoList = this.boardServices.getForPrintArticleReplies(id);
+        /*
         articleReplyDTO.setMsg(String.format("총 %d개의 댓글이 있습니다.", articleReplies.size()));
         articleReplyDTO.setResultCode("S-1");
-
-        return articleReplies;
+        */
+        return commentDtoList;
     }
+
 
     @RequestMapping(value = "postWriteReply", method = RequestMethod.POST)
     @ResponseBody
-    public ArticleReplyDTO postWriteReply(
+    public ArticleCommentDto postWriteReply(
             @RequestAttribute(value = "connectedUserId", required = false) int userId,
-            ArticleReplyDTO articleReplyDTO
+            ArticleCommentDto articleReplyDTO
     ) {
         articleReplyDTO.setUserId(userId);
         this.boardServices.writeReply(articleReplyDTO);
@@ -330,48 +311,48 @@ public class BoardController {
 
     @RequestMapping(value = "postModifyReply", method = RequestMethod.POST)
     @ResponseBody
-    public ArticleReplyDTO postModifyReply(
+    public ArticleCommentDto postModifyReply(
             @RequestParam(value = "id") int id,
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            ArticleReplyDTO articleReplyDto
+            ArticleCommentDto articleCommentDto
     ) {
         int userId = userEntity.getId();
 
-        ArticleReplyDTO articleModifyReplyAvailableRs = this.boardServices.getArticleModifyReplyAvailable(id, userId);
+        ArticleCommentDto articleModifyReplyAvailableRs = this.boardServices.getArticleModifyReplyAvailable(id, userId);
 
         if ((articleModifyReplyAvailableRs.getResultCode()).startsWith("F-")) {
             return articleModifyReplyAvailableRs;
         }
-        this.boardServices.modifyArticleReply(articleReplyDto);
+        this.boardServices.modifyArticleReply(articleCommentDto);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return articleReplyDto;
+        return articleCommentDto;
     }
 
     @RequestMapping(value = "postDeleteReply", method = RequestMethod.POST)
     @ResponseBody
-    public ArticleReplyDTO postDeleteReply(
+    public ArticleCommentDto postDeleteReply(
             int id,
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            ArticleReplyDTO articleReplyDto
+            ArticleCommentDto articleCommentDto
     ) {
         int userId = userEntity.getId();
 
-        ArticleReplyDTO articleDeleteReplyAvailableRs = this.boardServices.getArticleDeleteReplyAvailableRs(id, userId);
+        ArticleCommentDto articleDeleteReplyAvailableRs = this.boardServices.getArticleDeleteReplyAvailableRs(id, userId);
 
         if ((articleDeleteReplyAvailableRs.getResultCode()).startsWith("F-")) {
             return articleDeleteReplyAvailableRs;
         }
-        this.boardServices.deleteArticleReply(articleReplyDto);
+        this.boardServices.deleteArticleReply(articleCommentDto);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return articleReplyDto;
+        return articleCommentDto;
     }
 
     @RequestMapping(value = "postInsertLike", method = RequestMethod.POST)

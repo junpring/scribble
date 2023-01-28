@@ -23,8 +23,8 @@ a:link, a:visited {
 }
 
 body {
-    width: 100%;
-    min-height: 100%;
+    width: 100vw;
+    height: 100vh;
     align-items: center;
     box-sizing: border-box;
     display: flex;
@@ -34,6 +34,11 @@ body {
     margin: unset;
     position: absolute;
     overflow-x: hidden;
+    -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+    display: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -64,3 +69,113 @@ ol, ul {
     padding-inline: unset;
 }
 
+/* loader */
+.loader-container {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 15%);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1;
+}
+.loader-container.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+@media (max-width: 700px) {
+    .loader-container {
+        /*width: 50%;*/
+    }
+
+    .loader-container:nth-child(2n-1) {
+        /*background-color: inherit;*/
+    }
+
+    .loader-container:nth-child(4n), .loader-container:nth-child(4n-3) {
+        /*background-color: rgba(0, 0, 0, 0.05);*/
+        /*background-color: #6167b2;*/
+    }
+
+}
+
+@media (max-width: 420px) {
+    .box {
+        width: 100%;
+    }
+
+    .box:nth-child(4n), .box:nth-child(4n-3) {
+        background-color: inherit;
+    }
+
+    .box:nth-child(2n-1) {
+        background-color: rgba(0, 0, 0, 0.05);
+        /*background-color: #6167b2;*/
+    }
+
+}
+
+.loader {
+    position: relative;
+    width: 0.8rem;
+    height: 0.8rem;
+    top: 50%;
+    top: -webkit-calc(50% - 6px);
+    top: calc(50% - 6px);
+    left: 46%;
+    left: -webkit-calc(50% - 6px);
+    left: calc(50% - 6px);
+    border-radius: 12px;
+    background-color: rgba(97, 103, 173);
+    -webkit-transform-origin: 50% 50%;
+    transform-origin: 50% 50%;
+    -webkit-animation: loader 1s ease-in-out infinite;
+    animation: loader 1s ease-in-out infinite;
+}
+
+.loader:before {
+    content: "";
+    position: absolute;
+    background-color: rgba(97, 103, 173, 40%);
+    top: 0px;
+    left: -25px;
+    height: 12px;
+    width: 12px;
+    border-radius: 12px;
+}
+
+.loader:after {
+    content: "";
+    position: absolute;
+    background-color: rgba(97, 103, 173, 40%);
+    top: 0px;
+    left: 25px;
+    height: 12px;
+    width: 12px;
+    border-radius: 12px;
+}
+
+
+@-webkit-keyframes loader {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    50% {
+        -webkit-transform: rotate(180deg);
+    }
+    100% {
+        -webkit-transform: rotate(180deg);
+    }
+}
+
+@keyframes loader {
+    0% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(180deg);
+    }
+    100% {
+        transform: rotate(180deg);
+    }
+}
