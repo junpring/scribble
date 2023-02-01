@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SearchDto{
+public class ArticleSearchDto {
     private String boardCode;
     private int userId;
     private int page;             // 현재 페이지 번호
@@ -16,9 +16,9 @@ public class SearchDto{
     private String searchType;    // 검색 유형
     private PaginationVo paginationVo;    // 페이지네이션 정보
 
-    public SearchDto() {
+    public ArticleSearchDto() {
         this.page = 1;
-        this.recordSize = 15;
+        this.recordSize = 10;
         this.pageSize = 10;
     }
 }

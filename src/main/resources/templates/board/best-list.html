@@ -33,7 +33,7 @@
 
         <a class="board-name"
            th:href="@{/board/list/best}">실시간 베스트</a>
-   </div>
+    </div>
     <table class="table">
         <thead>
         <tr>
@@ -51,29 +51,29 @@
         <tr class="article" th:each="rcmd : ${getForPrintRcmdArticlesRs}">
             <td th:text="*{rcmd.getId()}"></td>
             <td class="title">
-                <a class="category" th:href="@{/board/detail (id=*{rcmd.getId()})}"
+                <a class="category" th:href="@{/board/detail/{id}(id=*{rcmd.getId()})}"
                    th:text="'[' + *{rcmd.extra.boardCodeName} + ']'"></a>
-                <a th:href="@{/board/detail (id=*{rcmd.getId()})}"
+                <a th:href="@{/board/detail/{id}(id=*{rcmd.getId()})}"
                    th:text="*{rcmd.title}"></a>
-                <a th:href="@{/board/detail (id=*{rcmd.getId()})}"
+                <a th:href="@{/board/detail/{id}(id=*{rcmd.getId()})}"
                    class="content" th:utext="*{rcmd.content}"></a>
             </td>
             <td th:text="*{rcmd.extra.userWriter}"></td>
             <td class="write-at" th:text="*{#dates.format(rcmd.getWrittenAt(), 'yy.MM.dd HH:mm')}"></td>
             <td>
-                <a th:href="@{/board/detail (id=${rcmd.getId()})}" class="cell col1">
+                <a th:href="@{/board/detail/{id}(id=${rcmd.getId()})}" class="cell col1">
                     <img class="icon" th:src="@{/resources/images/like-purple.png}" alt="좋아요">
                     <span th:text="*{rcmd.extra.likePoint}" class="count"></span>
                 </a>
             </td>
             <td>
-                <a th:href="@{/board/detail (id=${rcmd.getId()})}" class="cell col2">
+                <a th:href="@{/board/detail/{id}(id=${rcmd.getId()})}" class="cell col2">
                     <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글수">
                     <span th:text="*{rcmd.commentCount}" class="count"></span>
                 </a>
             </td>
             <td>
-                <a th:href="@{/board/detail (id=${rcmd.getId()})}" class="cell col3">
+                <a th:href="@{/board/detail/{id}(id=${rcmd.getId()})}" class="cell col3">
                     <img class="icon" th:src="@{/resources/images/view-purple.png}" alt="조회수">
                     <span th:text="*{rcmd.view}" class="count"></span>
                 </a>

@@ -87,11 +87,11 @@
         <tr class="article" th:each="article : ${articlesResponse.list}">
             <td th:text="*{article.getId()}"></td>
             <td class="title">
-                <a class="category" th:href="@{/board/detail (id=*{article.getId()})}"
+                <a class="category" th:href="@{/board/detail/{id}(id=*{article.getId()})}"
                    th:text="'[' + *{article.extra.boardCodeName} + ']'"></a>
-                <a th:href="@{/board/detail (id=*{article.getId()})}"
+                <a th:href="@{/board/detail/{id} (id=*{article.getId()})}"
                    th:text="*{article.title}"></a>
-                <a th:href="@{/board/detail (id=*{article.getId()})}"
+                <a th:href="@{/board/detail/{id} (id=*{article.getId()})}"
                    class="content" th:utext="*{article.content}"></a>
             </td>
             <td th:if="${article.extra.userLevel < 10}"
@@ -102,19 +102,19 @@
 
             <td class="write-at" th:text="*{#dates.format(article.getWrittenAt(), 'yy.MM.dd HH:mm')}"></td>
             <td>
-                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col1">
+                <a th:href="@{/board/detail/{id} (id=${article.getId()})}" class="cell col1">
                     <img class="icon" th:src="@{/resources/images/like-purple.png}" alt="좋아요">
                     <span th:text="*{article.extra.likePoint}" class="count"></span>
                 </a>
             </td>
             <td>
-                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col2">
+                <a th:href="@{/board/detail/{id} (id=${article.getId()})}" class="cell col2">
                     <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글수">
                     <span th:text="*{article.commentCount}" class="count"></span>
                 </a>
             </td>
             <td>
-                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col3">
+                <a th:href="@{/board/detail/{id} (id=${article.getId()})}" class="cell col3">
                     <img class="icon" th:src="@{/resources/images/view-purple.png}" alt="조회수">
                     <span th:text="*{article.view}" class="count"></span>
                 </a>
@@ -146,7 +146,7 @@
         <li class="a"
             th:each="page : ${#numbers.sequence(articlesResponse.paginationVo.startPage, articlesResponse.paginationVo.endPage)}">
 
-            <a th:href="@{/board/search (page=${page}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}"
+            <a th:href="@{/board/search (page=${page}, recordSize=${params.recordSize},pageSize=${params.pageSize}, searchType=${params.searchType}, keyword=${params.keyword})}"
                th:text="${page}"
                th:if="${page != params.page}"
                th:style="${articlesResponse.list.size()} == 0 ? 'display:none': ''"></a>
@@ -157,13 +157,13 @@
 
         <li>
             <a th:if="${params.paginationVo.existNextPage}"
-               th:href="@{/board/search (page=${params.paginationVo.endPage + 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+               th:href="@{/board/search (page=${params.paginationVo.endPage + 1}, recordSize=${params.recordSize}, pageSize=${params.pageSize},searchType=${params.searchType}, keyword=${params.keyword})}">
                 <span>&rsaquo;</span>
             </a>
         </li>
         <li>
             <a th:if="${params.paginationVo.existNextPage}"
-               th:href="@{/board/search (page=${params.paginationVo.totalPageCount}, recordSize=${params.recordSize},pageSize=${params.pageSize}, keyword=${params.keyword}, searchType=${params.searchType})}">
+               th:href="@{/board/search (page=${params.paginationVo.totalPageCount}, recordSize=${params.recordSize},pageSize=${params.pageSize}, searchType=${params.searchType}, keyword=${params.keyword})}">
                 <span>&raquo;</span>
             </a>
         </li>

@@ -90,7 +90,7 @@
                IFNULL(SUM(`AL`.`point`), 0) AS `extra__like`
         FROM `scribble_board`.`articles` AS `A`
                  LEFT JOIN `scribble_board`.`boards` AS `B`
-                           ON `A`.`board_code` = b.`code`
+                           ON `A`.`board_code` = `B`.`code`
                  LEFT JOIN `scribble_member`.`user` AS `U`
                            ON `A`.`user_id` = `U`.`id`
                  LEFT JOIN `scribble_member`.`user_levels` AS `UL`
@@ -102,7 +102,7 @@
     </select>
 
     <select id="selectArticlesCount"
-            parameterType="dev.junpring.scribble.dtos.SearchDto"
+            parameterType="dev.junpring.scribble.dtos.ArticleSearchDto"
             resultType="_int">
         SELECT COUNT(*)
         FROM `scribble_board`.`articles` AS `A`
@@ -113,17 +113,17 @@
     </select>
 
     <select id="selectUserArticlesCount"
-            parameterType="dev.junpring.scribble.dtos.SearchDto"
+            parameterType="dev.junpring.scribble.dtos.ArticleSearchDto"
             resultType="_int">
         SELECT COUNT(*)
         FROM `scribble_board`.`articles` AS `A`
-        LEFT JOIN `scribble_member`.`user` AS `U`
-        ON `A`.`user_id` = `U`.`id`
+                 LEFT JOIN `scribble_member`.`user` AS `U`
+                           ON `A`.`user_id` = `U`.`id`
         WHERE U.id = #{userId}
     </select>
 
     <select id="selectArticlesBoardListCount"
-            parameterType="dev.junpring.scribble.dtos.SearchDto"
+            parameterType="dev.junpring.scribble.dtos.ArticleSearchDto"
             resultType="_int">
         SELECT COUNT(*)
         FROM `scribble_board`.`articles` AS `A`
@@ -206,41 +206,39 @@
     <select id="selectFindArticlesForList"
             resultType="dev.junpring.scribble.dtos.ArticleListDto"
             resultMap="article">
-        SELECT `B`.`id` AS `boardId`,
-        `B`.`name` AS `extra__boardCodeName`,
-        `B`.`code` AS `extra__boardCode`,
-        `A`.`id` AS `id`,
-        `A`.`board_code` AS `boardCode`,
-        `A`.`user_id` AS `userId`,
-        `A`.`title` AS `title`,
-        `A`.`content` AS `content`,
-        (SELECT COUNT(*)
-        FROM `scribble_board`.`comment` AS `C`
-        WHERE `A`.`id` = `C`.`article_id`) AS `commentCount`,
-        `A`.`view` AS `view`,
-        `A`.`written_at` AS `writtenAt`,
-        `U`.`nickname` AS `extra__userWriter`,
-        `U`.`email` AS `extra__userEmail`,
-        `UL`.`text` AS `extra__userLevelText`,
-        `U`.`level` AS `extra__userLevel`,
-        IFNULL(SUM(`AL`.`point`), 0) AS `extra__like`
+        SELECT `B`.`id`                            AS `boardId`,
+               `B`.`name`                          AS `extra__boardCodeName`,
+               `B`.`code`                          AS `extra__boardCode`,
+               `A`.`id`                            AS `id`,
+               `A`.`board_code`                    AS `boardCode`,
+               `A`.`user_id`                       AS `userId`,
+               `A`.`title`                         AS `title`,
+               `A`.`content`                       AS `content`,
+               (SELECT COUNT(*)
+                FROM `scribble_board`.`comment` AS `C`
+                WHERE `A`.`id` = `C`.`article_id`) AS `commentCount`,
+               `A`.`view`                          AS `view`,
+               `A`.`written_at`                    AS `writtenAt`,
+               `U`.`nickname`                      AS `extra__userWriter`,
+               `U`.`email`                         AS `extra__userEmail`,
+               `UL`.`text`                         AS `extra__userLevelText`,
+               `U`.`level`                         AS `extra__userLevel`,
+               IFNULL(SUM(`AL`.`point`), 0)        AS `extra__like`
         FROM `scribble_board`.`articles` AS `A`
-        LEFT JOIN `scribble_board`.`boards` AS `B`
-        ON `A`.`board_code` = `B`.`code`
-        LEFT JOIN `scribble_board`.`article_like` AS `AL`
-        ON `A`.`id` = `AL`.`article_id`
-        LEFT JOIN `scribble_member`.`user` AS `U`
-        ON `A`.`user_id` = `U`.`id`
-        LEFT JOIN `scribble_member`.`user_levels` AS `UL`
-        ON `U`.level = `UL`.level
+                 LEFT JOIN `scribble_board`.`boards` AS `B`
+                           ON `A`.`board_code` = `B`.`code`
+                 LEFT JOIN `scribble_board`.`article_like` AS `AL`
+                           ON `A`.`id` = `AL`.`article_id`
+                 LEFT JOIN `scribble_member`.`user` AS `U`
+                           ON `A`.`user_id` = `U`.`id`
+                 LEFT JOIN `scribble_member`.`user_levels` AS `UL`
+                           ON `U`.level = `UL`.level
         WHERE `A`.`view` >= 0
         <include refid="search"/>
         GROUP BY `id`
         ORDER BY `id` DESC
         LIMIT #{paginationVo.limitStart}, #{recordSize}
     </select>
-    <!--    #         GROUP BY `id`-->
-
 
     <select id="selectHomeArticleList"
             parameterType="dev.junpring.scribble.entities.board.BoardEntity"
@@ -474,7 +472,8 @@
           AND `A`.`like_count` >= 2
         GROUP BY `A`.`id`
         ORDER BY `A`.`id`
-        DESC LIMIT 10
+                DESC
+        LIMIT 10
     </select>
 
 

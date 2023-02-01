@@ -6,17 +6,12 @@ ClassicEditor
     })
 
     .then(editor => {
-        // editor.enterMode = ClassicEditor.ENTER_BR;
         editor.editing.view.change(writer => {
             writer.setStyle('min-height', '20rem', editor.editing.view.document.getRoot());
             writer.setStyle('min-height', '70vh', editor.editing.view.document.getRoot());
         });
     })
 
-ClassicEditor.editorConfig = function( config ) {
-    // 설정값들을 이 사이에 입력하면 됩니다.
-    config.enterMode = ClassicEditor.ENTER_BR;
-};
 
 const mainForm = window.document.getElementById('main');
 const titleInput = mainForm['title'];

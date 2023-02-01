@@ -15,9 +15,6 @@
 </head>
 <body>
 <th:block th:replace="~{fragments/header.html :: header}"></th:block>
-
-<!--/*@thymesVar id="get" type="dev.junpring.scribble.entities.board.BoardEntity"*/-->
-
 <section class="section">
     <div class="table">
         <div class="top-posts">
@@ -29,17 +26,17 @@
         <div class="row" th:each="rcmd: ${getForPrintRcmdArticlesRs}">
             <a th:href="@{/board/list/{code}(code= *{rcmd.extra.boardCode})}" class="cell col1"
                th:text="${rcmd.extra.boardCodeName}"></a>
-            <a th:href="@{/board/detail(id=${rcmd.id})}" class="cell col2"
+            <a th:href="@{/board/detail/{id}(id=${rcmd.id})}" class="cell col2"
                th:text="${rcmd.title}"></a>
             <a class="cell col3">
                 <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="좋아요">
                 <span class="link count" th:text="${rcmd.extra.likePoint}"></span>
             </a>
-            <a th:href="@{/board/detail(id=${rcmd.id})}" class="cell col4">
+            <a th:href="@{/board/detail/{id}(id=${rcmd.id})}" class="cell col4">
                 <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
                 <span class="comment count" th:text="${rcmd.commentCount}"></span>
             </a>
-            <a th:href="@{/board/detail(id=${rcmd.id})}" class="cell col5">
+            <a th:href="@{/board/detail/{id}(id=${rcmd.id})}" class="cell col5">
                 <img class="icon" th:src="@{../resources/images/view-purple.png}" alt="조회수">
                 <span class="view count" th:text="${rcmd.view < 1000 ?  rcmd.view : (#numbers.formatInteger(rcmd.view, 0, 'COMMA'))}"></span>
             </a>
@@ -79,7 +76,7 @@
             </div>
 
             <div class="row" th:each="article : ${articles.get(board.getCode())}">
-                <a th:href="@{/board/detail (id=${article.id})}"
+                <a th:href="@{/board/detail/{id}(id=${article.id})}"
                    th:text="*{article.getTitle()}" class="cell col2">제목</a>
 
                 <a href="#" class="cell col3">
@@ -87,12 +84,12 @@
                     <span class="link count" th:text="*{article.extra.likePoint}"></span>
                 </a>
 
-                <a th:href="@{/board/detail (id=${article.id})}" class="cell col4">
+                <a th:href="@{/board/detail/{id}(id=${article.id})}" class="cell col4">
                     <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
                     <span class="comment count" th:text="*{article.commentCount}"></span>
                 </a>
 
-                <a th:href="@{/board/detail (id=${article.id})}" class="cell col5">
+                <a th:href="@{/board/detail/{id}(id=${article.id})}" class="cell col5">
                     <img class="icon" th:src="@{../resources/images/view-purple.png}" alt="조회수">
                     <span class="view count" th:text="*{article.getView()}">22</span>
                 </a>

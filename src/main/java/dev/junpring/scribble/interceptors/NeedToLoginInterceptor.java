@@ -23,7 +23,6 @@ public class NeedToLoginInterceptor implements HandlerInterceptor {
                 response.setContentType("application/json; charset=UTF-8");
                 response.getWriter().append("{\"resultCode\":\"F-A\",\"msg\":\"로그인 후 이용해주세요.\"}");
             }
-
             return false;
         }
         return true;

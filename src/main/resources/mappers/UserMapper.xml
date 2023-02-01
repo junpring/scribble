@@ -26,7 +26,7 @@
          `password`,
          `nickname`,
          `contact`,
-         level,
+         `level`,
          `address_postal`,
          `address_primary`,
          `address_secondary`,

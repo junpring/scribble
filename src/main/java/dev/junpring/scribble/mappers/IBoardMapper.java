@@ -2,7 +2,7 @@ package dev.junpring.scribble.mappers;
 
 import dev.junpring.scribble.dtos.ArticleCommentDto;
 import dev.junpring.scribble.dtos.ArticleListDto;
-import dev.junpring.scribble.dtos.SearchDto;
+import dev.junpring.scribble.dtos.ArticleSearchDto;
 import dev.junpring.scribble.entities.board.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -21,16 +21,16 @@ public interface IBoardMapper {
 
     ArticleEntity selectForPrintArticle(@Param(value = "id") int id);
 
-    int selectArticlesBoardListCount(SearchDto params);
+    int selectArticlesBoardListCount(ArticleSearchDto params);
 
-    int selectArticlesCount(SearchDto params);
-    int selectUserArticlesCount(SearchDto params);
+    int selectArticlesCount(ArticleSearchDto params);
+    int selectUserArticlesCount(ArticleSearchDto params);
 
-    List<ArticleListDto> selectArticlesForBoardList(SearchDto params);
+    List<ArticleListDto> selectArticlesForBoardList(ArticleSearchDto params);
 
-    List<ArticleListDto> selectUserArticlesForList(SearchDto params);
+    List<ArticleListDto> selectUserArticlesForList(ArticleSearchDto params);
 
-    List<ArticleListDto> selectFindArticlesForList(SearchDto params);
+    List<ArticleListDto> selectFindArticlesForList(ArticleSearchDto params);
 
     List<ArticleEntity> selectHomeArticleList(BoardEntity _);
 

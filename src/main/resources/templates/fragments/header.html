@@ -7,9 +7,6 @@
             <li class="item">
                 <a id="favorite" class="link">즐겨찾기</a>
             </li>
-<!--            <li class="item">-->
-<!--                <a class="link" href="#">입점신청</a>-->
-<!--            </li>-->
             <li class="spring"></li>
             <li class="item" th:if="${userEntity == null}">
                 <a class="link" th:href="@{/user/login}">로그인</a>
@@ -30,8 +27,6 @@
         </ul>
     </div>
 
-
-
     <!-- navigation -->
     <nav id="nav" class="nav">
         <ul class="nav-bar">
@@ -49,7 +44,6 @@
             </a>
         </ul>
 
-
         <div class="search">
             <form th:action="@{/board/search}" class="search-form" method="get">
                 <input type="hidden" name="page" value="1">
@@ -65,11 +59,10 @@
                 </label>
                 <label class="keyword-input-container">
                     <span hidden>검색어</span>
-                    <input class="keyword-input" maxlength="50" name="keyword" placeholder="내용을 검색해보세요." type="search"
-                           th:value="${paramKeyword}">
+                    <input class="keyword-input" maxlength="50" name="keyword" placeholder="내용을 검색해보세요." type="search" th:value="${paramKeyword}">
                 </label>
 
-                <button class="search-button">
+                <button class="search-button" onclick="">
                     <i class="icon fa-solid fa-magnifying-glass"></i>
                 </button>
             </form>

@@ -1,8 +1,7 @@
 package dev.junpring.scribble.vos.board;
 
-import dev.junpring.scribble.dtos.SearchDto;
+import dev.junpring.scribble.dtos.ArticleSearchDto;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class PaginationVo {
@@ -17,14 +16,14 @@ public class PaginationVo {
     // 추가
     private int minPage; // 최소 페이지 ex)1
 
-    public PaginationVo(int totalRecordCount, SearchDto params) {
+    public PaginationVo(int totalRecordCount, ArticleSearchDto params) {
         if (totalRecordCount > 0) {
             this.totalRecordCount = totalRecordCount;
             this.calculation(params);
         }
     }
 
-    private void calculation(SearchDto params) {
+    private void calculation(ArticleSearchDto params) {
 
         // 전체 페이지 수 계산
         totalPageCount = ((totalRecordCount - 1) / params.getRecordSize()) + 1;

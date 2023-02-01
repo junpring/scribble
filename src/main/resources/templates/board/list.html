@@ -9,16 +9,16 @@
     <link rel="stylesheet" th:href="@{/board/resources/stylesheets/article.css}">
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script defer th:src="@{/resources/scripts/common.js}"></script>
-<!--
-    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_FOUND')}">
-        alert('해당 갤러리는 존재하지 않습니다.');
-        window.history.back();
-    </script>
-    <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_ALLOWED')}">
-        alert('NOT_ALLOWED! 권한이 없습니다.');
-        window.history.back();
-    </script>
-    -->
+    <!--
+        <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_FOUND')}">
+            alert('해당 갤러리는 존재하지 않습니다.');
+            window.history.back();
+        </script>
+        <script th:if="${boardIdVo != null && boardIdVo.getResult().name().equals('NOT_ALLOWED')}">
+            alert('NOT_ALLOWED! 권한이 없습니다.');
+            window.history.back();
+        </script>
+        -->
     <title th:text="'스크리블 | ' + ${boardIdVo.getName()}"></title>
 </head>
 
@@ -69,29 +69,30 @@
         <tr class="article" th:each="article : ${articlesResponse.list}">
             <td th:text="*{article.getId()}"></td>
             <td class="title">
-                <a class="category" th:href="@{/board/detail (id=*{article.getId()})}"
+                <a class="category" th:href="@{/board/detail/{id}(id=*{article.getId()})}"
                    th:text="'[' + *{article.extra.boardCodeName} + ']'"></a>
-                <a th:href="@{/board/detail (id=*{article.getId()})}"
+                <a th:href="@{/board/detail/{id}(id=*{article.getId()})}"
                    th:text="*{article.getTitle()}"></a>
-                <a th:href="@{/board/detail (id=*{article.getId()})}" class="content" th:utext="*{article.getContent()}"></a>
+                <a th:href="@{/board/detail/{id}(id=*{article.getId()})}" class="content"
+                   th:utext="*{article.getContent()}"></a>
             </td>
             <td th:if="*{article.extra.userLevel < 10}" th:text="*{article.extra.userWriter}"></td>
             <td th:if="*{article.extra.userLevel > 10}" th:text="*{article.extra.userLevelText}"></td>
             <td class="write-at" th:text="*{#dates.format(article.getWrittenAt(), 'yy.MM.dd HH:mm')}"></td>
             <td>
-                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col1">
+                <a th:href="@{/board/detail/{id}(id=${article.getId()})}" class="cell col1">
                     <img class="icon" th:src="@{/resources/images/like-purple.png}" alt="좋아요">
                     <span th:text="*{article.extra.likePoint}" class="count"></span>
                 </a>
             </td>
             <td>
-                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col2">
+                <a th:href="@{/board/detail/{id} (id=${article.getId()})}" class="cell col2">
                     <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글수">
                     <span th:text="*{article.commentCount}" class="count"></span>
                 </a>
             </td>
             <td>
-                <a th:href="@{/board/detail (id=${article.getId()})}" class="cell col3">
+                <a th:href="@{/board/detail/{id} (id=${article.getId()})}" class="cell col3">
                     <img class="icon" th:src="@{/resources/images/view-purple.png}" alt="조회수">
                     <span th:text="*{article.view}" class="count"></span>
                 </a>

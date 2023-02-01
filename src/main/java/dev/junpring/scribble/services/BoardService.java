@@ -3,7 +3,7 @@ package dev.junpring.scribble.services;
 import dev.junpring.scribble.dtos.ArticleCommentDto;
 import dev.junpring.scribble.dtos.ArticleLikeDto;
 import dev.junpring.scribble.dtos.ArticleListDto;
-import dev.junpring.scribble.dtos.SearchDto;
+import dev.junpring.scribble.dtos.ArticleSearchDto;
 import dev.junpring.scribble.entities.board.*;
 import dev.junpring.scribble.enums.board.*;
 import dev.junpring.scribble.mappers.IBoardMapper;
@@ -119,7 +119,7 @@ public class BoardService {
         */
     }
 
-    public PagingResponse<ArticleListDto> getArticlesForBoardList(SearchDto params) {
+    public PagingResponse<ArticleListDto> getArticlesForBoardList(ArticleSearchDto params) {
         int count = this.boardMapper.selectArticlesBoardListCount(params);
         PaginationVo paginationVo = new PaginationVo(count, params);
         params.setPaginationVo(paginationVo);
@@ -129,7 +129,7 @@ public class BoardService {
         return new PagingResponse<>(list, paginationVo);
     }
 
-    public PagingResponse<ArticleListDto> getUserArticlesForBoardList(SearchDto params) {
+    public PagingResponse<ArticleListDto> getUserArticlesForBoardList(ArticleSearchDto params) {
         int count = this.boardMapper.selectUserArticlesCount(params);
         PaginationVo paginationVo = new PaginationVo(count, params);
         params.setPaginationVo(paginationVo);
@@ -139,7 +139,7 @@ public class BoardService {
         return new PagingResponse<>(list, paginationVo);
     }
 
-    public PagingResponse<ArticleListDto> getFindArticlesForList(final SearchDto params) {
+    public PagingResponse<ArticleListDto> getFindArticlesForList(ArticleSearchDto params) {
         int count = this.boardMapper.selectArticlesCount(params);
         PaginationVo paginationVo = new PaginationVo(count, params);
         params.setPaginationVo(paginationVo);

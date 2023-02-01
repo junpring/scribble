@@ -18,10 +18,10 @@ public class BeforeActionInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-//        log.info("request.getRequestURI() : " + request.getRequestURI());
-//        if (request.getRequestURI().equals("/resources/stylesheets/common.css")){
-//            return false;
-//        }
+/*        log.info("request.getRequestURI() : " + request.getRequestURI());
+        if (request.getRequestURI().equals("/resources/stylesheets/common.css")){
+            return false;
+*/
         Map<String, Object> param = new HashMap<>();
 
         Enumeration<String> parameterNames = request.getParameterNames();

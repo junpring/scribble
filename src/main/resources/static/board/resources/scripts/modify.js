@@ -6,14 +6,12 @@ ClassicEditor
     })
 
     .then(editor => {
-
         editor.editing.view.change(writer => {
             writer.setStyle('min-height', '20rem', editor.editing.view.document.getRoot());
             writer.setStyle('min-height', '70vh', editor.editing.view.document.getRoot());
 
         });
     });
-// config.disableNativeSpellChecker = false;
 
 
 const mainForm = window.document.getElementById('main');

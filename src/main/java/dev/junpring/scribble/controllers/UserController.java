@@ -1,7 +1,7 @@
 package dev.junpring.scribble.controllers;
 
 import dev.junpring.scribble.dtos.ArticleListDto;
-import dev.junpring.scribble.dtos.SearchDto;
+import dev.junpring.scribble.dtos.ArticleSearchDto;
 import dev.junpring.scribble.entities.board.PagingResponse;
 import dev.junpring.scribble.entities.member.UserEntity;
 import dev.junpring.scribble.enums.member.user.LoginResult;
@@ -33,9 +33,6 @@ public class UserController {
         this.userService = userService;
         this.boardService = boardService;
     }
-
-
-
 
     @RequestMapping(value = "check-email", method = RequestMethod.POST)
     @ResponseBody
@@ -262,7 +259,7 @@ public class UserController {
     public String getMyArticle(
             @RequestAttribute(value = "userEntity", required = false)
             UserEntity userEntity,
-            @ModelAttribute("params") final SearchDto params,
+            @ModelAttribute("params") final ArticleSearchDto params,
             Model model
     ){
         params.setUserId(userEntity.getId());

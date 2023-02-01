@@ -14,10 +14,9 @@
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard-dynamic-subset.css"/>
     <script src="https://kit.fontawesome.com/c5c7df7a64.js" crossorigin="anonymous"></script>
     <script th:src="@{/board/resources/scripts/detail.js}" defer></script>
-    <script th:src="@{../resources/scripts/common.js}" defer></script>
+    <script th:src="@{/resources/scripts/common.js}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script th:inline="javascript">
-        let param = [(${paramJson})];
         let id = [[${articleListDto.id}]];
         let articleUserId = [[${articleListDto.userId}]];
         let connectedUserId = [[${userEntityId}]];
@@ -37,10 +36,10 @@
                 return;
             }
             $.ajax({
-                url: './postWriteReply',
+                url: '/board/postWriteReply',
                 type: 'POST',
                 data: {
-                    'articleId': param.id,
+                    'articleId': id,
                     'content': content
                 },
                 dataType: 'json',
@@ -73,11 +72,11 @@
                 return;
             }
             $.ajax({
-                url: './postWriteReply',
+                url: '/board/postWriteReply',
                 type: 'POST',
                 data: {
                     'replyId': replyId,
-                    'articleId': param.id,
+                    'articleId': id,
                     'content': content
                 },
                 dataType: 'json',
@@ -163,7 +162,7 @@
             cArea.attr('data-loading-modify', 'Y');
 
             $.ajax({
-                url: './postModifyReply',
+                url: '/board/postModifyReply',
                 type: 'POST',
                 data: {
                     'id': replyId,
@@ -203,7 +202,7 @@
             cArea.attr('data-loading-delete', 'Y');
             clearInterval(ArticleReplyInterval);
             $.ajax({
-                url: './postDeleteReply',
+                url: '/board/postDeleteReply',
                 type: 'POST',
                 data: {
                     'id': replyId
@@ -233,10 +232,10 @@
     <script th:inline="javascript">
         function ArticleReply__loadList() {
             $.ajax({
-                url: './getForPrintArticleCommentsRs',
+                url: '/board/getForPrintArticleCommentsRs',
                 type: 'GET',
                 data: {
-                    'id': param.id,
+                    'id': id,
                 },
                 dataType: 'json',
                 success: function (data) {
@@ -436,7 +435,7 @@
 
         function callInsertLike() {
             $.ajax({
-                url: './postInsertLike',
+                url: '/board/postInsertLike',
                 type: 'POST',
                 data: {
                     'id': id
@@ -461,7 +460,7 @@
 
         function callDoCancelLike() {
             $.ajax({
-                url: './postDeleteLike',
+                url: '/board/postDeleteLike',
                 type: 'POST',
                 data: {
                     'id': id
@@ -520,7 +519,7 @@
                     <ul class="url-link">
                         <li><a class="url-link-copy">링크복사</a></li>
                         <li th:if="${userEntity != null && articleListDto.getUserId() == userEntity.getId()}">
-                            <a class="modify-button" th:href="@{/board/modify (id=${articleListDto.getId()})}">수정</a>
+                            <a class="modify-button" th:href="@{/board/modify/{id}(id=${articleListDto.getId()})}">수정</a>
                         </li>
                         <li th:if="${userEntity != null && articleListDto.getUserId() == userEntity.getId()}">
                             <a id="delete" class="delete-button"
@@ -537,18 +536,18 @@
         <span th:utext="${articleListDto.content}"></span>
         <div class="article-info">
             <a class="btn do-like" onclick="callInsertLike();">
-                <img class="icon" th:src="@{../resources/images/like-purple.png}" alt="공감">
+                <img class="icon" th:src="@{/resources/images/like-purple.png}" alt="공감">
                 <span class="article--like-point"
                       th:text="${articleListDto.extra.likePoint}"></span>
             </a>
             <a class="btn cancel-like" onclick="callDoCancelLike();">
-                <img class="icon" th:src="@{../resources/images/like-on.png}" alt="공감">
+                <img class="icon" th:src="@{/resources/images/like-on.png}" alt="공감">
                 <span class="article--like-point"
                       th:text="${articleListDto.extra.likePoint}"></span>
             </a>
 
             <a class="btn cmt">
-                <img class="icon" th:src="@{../resources/images/comment-purple.png}" alt="댓글">
+                <img class="icon" th:src="@{/resources/images/comment-purple.png}" alt="댓글">
                 <span class="comments-count-a count"></span>
             </a>
         </div>

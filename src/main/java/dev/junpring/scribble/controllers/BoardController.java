@@ -1,11 +1,9 @@
 package dev.junpring.scribble.controllers;
 
-import dev.junpring.scribble.dtos.ArticleCommentDto;
-import dev.junpring.scribble.dtos.ArticleLikeDto;
-import dev.junpring.scribble.dtos.ArticleListDto;
-import dev.junpring.scribble.dtos.SearchDto;
+import dev.junpring.scribble.dtos.*;
 import dev.junpring.scribble.entities.board.*;
 import dev.junpring.scribble.entities.member.UserEntity;
+import dev.junpring.scribble.enums.board.ArticleListResult;
 import dev.junpring.scribble.enums.board.ArticleWriteResult;
 import dev.junpring.scribble.utills.CryptoUtil;
 import dev.junpring.scribble.vos.board.article.ArticleWriteVo;
@@ -53,7 +51,7 @@ public class BoardController {
     @RequestMapping(value = "/list/{boardCode}", method = RequestMethod.GET)
     public String getBoard(
             @PathVariable(name = "boardCode", required = false) String boardCode,
-            @ModelAttribute("params") final SearchDto params,
+            @ModelAttribute("params") final ArticleSearchDto params,
             BoardIdVo boardIdVo,
             Model model
     ) {
@@ -66,13 +64,14 @@ public class BoardController {
         return "board/list";
     }
 
-    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    @RequestMapping(value = "search", method = RequestMethod.GET)
     public String getSearch(
-            @ModelAttribute("params") final SearchDto params,
+            @ModelAttribute("params") final ArticleSearchDto params,
             Model model
     ) {
         PagingResponse<ArticleListDto> articlesResponse = this.boardServices.getFindArticlesForList(params);
         List<BoardEntity> boardEntities = this.boardServices.getBoardList();
+
         model.addAttribute("boardEntities", boardEntities);
         model.addAttribute("articlesResponse", articlesResponse);
         return "board/search";
@@ -98,9 +97,9 @@ public class BoardController {
         return "common/redirect";
     }
 
-    @RequestMapping(value = "modify", method = RequestMethod.GET)
+    @RequestMapping(value = "modify/{id}", method = RequestMethod.GET)
     public String getModify(
-            @RequestParam(value = "id", required = true) int id,
+            @PathVariable(value = "id", required = true) int id,
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
             ArticleListVo articleListVo,
             Model model
@@ -110,7 +109,8 @@ public class BoardController {
         articleListVo.setUserId(userId);
         this.boardServices.getForPrintArticle(articleListVo, userId);
 
-        if ((articleListVo.getResultCode()).startsWith("F-")) {
+        if ("F-1".equals(articleListVo.getResultCode()) ||
+                ArticleListResult.FAILURE.equals(articleListVo.getResult())) {
             model.addAttribute("alertMsg", articleListVo.getMsg());
             model.addAttribute("historyBack", true);
             return "common/redirect";
@@ -119,24 +119,17 @@ public class BoardController {
         return "board/modify";
     }
 
-    @RequestMapping(value = "modify", method = RequestMethod.POST)
+    @RequestMapping(value = "modify/{id}", method = RequestMethod.POST)
     public ModelAndView postModify(
+            @PathVariable(value = "id", required = true) int id,
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
-            @RequestParam(value = "id", required = true) int id,
             ArticleListVo articleListVo,
             ModelAndView modelAndView
     ) {
         articleListVo.setId(id);
         articleListVo.setUserId(userEntity.getId());
         this.boardServices.modifyArticle(articleListVo);
-        modelAndView.addObject("articleVo", articleListVo);
-        modelAndView.setViewName("redirect:/board/detail?id=" + id);
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        modelAndView.setViewName("redirect:/board/detail/" + id);
         return modelAndView;
     }
 
@@ -168,7 +161,7 @@ public class BoardController {
         if (articleWriteVo.getResult() == ArticleWriteResult.SUCCESS) {
             model.addAttribute("articleWriteVo", articleWriteVo);
         }
-        return "redirect:/board/detail?id=" + articleWriteVo.getId();
+        return "redirect:/board/detail/" + articleWriteVo.getId();
     }
 
     @RequestMapping(value = "download-image", method = RequestMethod.GET)
@@ -207,7 +200,7 @@ public class BoardController {
                     new SimpleDateFormat("yyyyMMddHHmmssSSS").format(createAt),
                     image.getOriginalFilename(), // 이미지의 파일이름과 확장자
                     Math.random());
-            id = CryptoUtil.hashSha512(id); // 해싱
+            id = CryptoUtil.hashSha512(id);
             imageEntities[i] = new ImageEntity(id, createAt,
                     image.getOriginalFilename(),
                     image.getContentType(),
@@ -217,15 +210,16 @@ public class BoardController {
         JSONObject responseJson = new JSONObject();
         JSONArray urlJson = new JSONArray();
         for (ImageEntity imageEntity : imageEntities) {
-            urlJson.put(String.format("http://127.0.0.1:8080/board/download-image?id=%s", imageEntity.getId()));
+            urlJson.put(String.format("https://junpring.dev/board/download-image?id=%s", imageEntity.getId()));
         }
+
         responseJson.put("url", urlJson);
-        return responseJson.toString();
+        return String.valueOf(responseJson);
     }
 
-    @RequestMapping(value = "detail", method = RequestMethod.GET)
+    @RequestMapping(value = "detail/{id}", method = RequestMethod.GET)
     public String getDetail(
-            @RequestParam(value = "id") int id,
+            @PathVariable(value = "id", required = true) int id,
             ArticleListDto articleListDto,
             Model model,
             HttpServletRequest request,
@@ -238,7 +232,7 @@ public class BoardController {
         this.boardServices.articleCommentCount(articleListDto.getId());
         this.boardServices.articleLikeCount(articleListDto.getId());
 
-        // 쿠키 value 해싱 해야됨.
+        // 쿠키 value 해싱
         Cookie[] cookies = request.getCookies();
         Cookie viewCookie = null;
 
@@ -257,8 +251,7 @@ public class BoardController {
             response.addCookie(newCookie);
             // 쿠키를 추가 시키고 조회수 증가시킴
             this.boardServices.articleViewCount(articleListDto.getId());
-        }
-        else {
+        } else {
             System.out.println("----------------");
             System.out.println("cookie 있음");
             String value = viewCookie.getValue();
@@ -287,14 +280,9 @@ public class BoardController {
     @RequestMapping(value = "getForPrintArticleCommentsRs", method = RequestMethod.GET)
     @ResponseBody
     public List<ArticleCommentDto> getForPrintArticleRepliesRs(
-            @RequestParam(value = "id", required = true) int id
+            @RequestParam(value = "id", required = false) int id
     ) {
-        List<ArticleCommentDto> commentDtoList = this.boardServices.getForPrintArticleReplies(id);
-        /*
-        articleReplyDTO.setMsg(String.format("총 %d개의 댓글이 있습니다.", articleReplies.size()));
-        articleReplyDTO.setResultCode("S-1");
-        */
-        return commentDtoList;
+        return this.boardServices.getForPrintArticleReplies(id);
     }
 
 
@@ -324,41 +312,29 @@ public class BoardController {
             return articleModifyReplyAvailableRs;
         }
         this.boardServices.modifyArticleReply(articleCommentDto);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return articleCommentDto;
     }
 
     @RequestMapping(value = "postDeleteReply", method = RequestMethod.POST)
     @ResponseBody
     public ArticleCommentDto postDeleteReply(
-            int id,
+            @RequestParam(value = "id") int id,
             @RequestAttribute(value = "userEntity", required = false) UserEntity userEntity,
             ArticleCommentDto articleCommentDto
     ) {
         int userId = userEntity.getId();
-
         ArticleCommentDto articleDeleteReplyAvailableRs = this.boardServices.getArticleDeleteReplyAvailableRs(id, userId);
-
         if ((articleDeleteReplyAvailableRs.getResultCode()).startsWith("F-")) {
             return articleDeleteReplyAvailableRs;
         }
         this.boardServices.deleteArticleReply(articleCommentDto);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return articleCommentDto;
     }
 
     @RequestMapping(value = "postInsertLike", method = RequestMethod.POST)
     @ResponseBody
     public ArticleLikeDto postInsertLike(
-            @RequestParam(value = "id") int id,
+            @RequestParam(value = "id", required = true) int id,
             @RequestAttribute(value = "connectedUserId", required = false) int userId
     ) {
         ArticleLikeDto articleLikeDto = new ArticleLikeDto();
@@ -382,7 +358,7 @@ public class BoardController {
     @RequestMapping(value = "postDeleteLike", method = RequestMethod.POST)
     @ResponseBody
     public ArticleLikeDto postDeleteLike(
-            @RequestParam(value = "id") int id,
+            @RequestParam(value = "id", required = true) int id,
             @RequestAttribute(value = "connectedUserId", required = false) int userId
     ) {
         ArticleLikeDto articleLikeDto = new ArticleLikeDto();

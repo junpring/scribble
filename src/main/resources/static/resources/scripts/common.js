@@ -94,9 +94,6 @@ searchButton.addEventListener('click', function (e) {
 const favorite = window.document.getElementById('favorite');
 
 // cross browsing
-function tete() {
-
-}
     favorite.addEventListener('click', function(e) {
         let bookmarkURL = window.location.href;
         let bookmarkTitle = document.title;
